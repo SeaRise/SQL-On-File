@@ -1,4 +1,4 @@
-package com.searise.sof.plan;
+package com.searise.sof.plan.logic;
 
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.expression.Expression;
@@ -6,12 +6,12 @@ import com.searise.sof.expression.Expression;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Filter implements LogicalPlan {
+public class Project implements LogicalPlan {
     public final LogicalPlan child;
-    public final List<Expression> conditions;
-    public Filter(LogicalPlan child, List<Expression> conditions) {
+    public final List<Expression> projectList;
+    public Project(LogicalPlan child, List<Expression> projectList) {
         this.child = child;
-        this.conditions = conditions;
+        this.projectList = projectList;
     }
 
     @Override
@@ -21,6 +21,6 @@ public class Filter implements LogicalPlan {
 
     @Override
     public String toString() {
-        return String.format("Filter [%s]", conditions.stream().map(Object::toString).collect(Collectors.joining()));
+        return String.format("Project [%s]", projectList.stream().map(Object::toString).collect(Collectors.joining(", ")));
     }
 }

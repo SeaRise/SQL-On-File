@@ -10,4 +10,8 @@ public class Literal implements Expression {
         this.dataType = dateType;
         this.value = value;
     }
+
+    public String toString() {
+        return value.toString();
+    }
 }

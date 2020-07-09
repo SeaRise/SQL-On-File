@@ -1,4 +1,4 @@
-package com.searise.sof.plan;
+package com.searise.sof.plan.logic;
 
 import com.google.common.collect.ImmutableList;
 

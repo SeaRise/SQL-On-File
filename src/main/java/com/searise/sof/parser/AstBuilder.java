@@ -6,10 +6,7 @@ import com.searise.sof.expression.Attribute;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.Literal;
 import com.searise.sof.expression.ScalarFunction;
-import com.searise.sof.plan.Filter;
-import com.searise.sof.plan.LogicalPlan;
-import com.searise.sof.plan.Project;
-import com.searise.sof.plan.Relation;
+import com.searise.sof.plan.logic.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,7 +20,7 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
 
     @SuppressWarnings("unchecked")
     public <V> V typedVisit(ParseTree ctx) {
-        return (V) ctx.accept(this);
+        return (V) Preconditions.checkNotNull(ctx.accept(this));
     }
 
     @Override
@@ -33,15 +30,31 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
 
     @Override
     public LogicalPlan visitSelectStatement(SqlBaseParser.SelectStatementContext ctx) {
-        LogicalPlan child = Preconditions.checkNotNull(typedVisit(ctx.fromCluse()));
+        LogicalPlan child = typedVisit(ctx.fromCluse());
         if (Objects.nonNull(ctx.whereCluse())) {
-            Expression condition = Preconditions.checkNotNull(typedVisit(ctx.whereCluse().expression()));
+            Expression condition = typedVisit(ctx.whereCluse().expression());
             child = new Filter(child, ImmutableList.of(condition));
         }
 
         List<Expression> projectList = ctx.selectClause().expression().stream().
-                map(expr -> Preconditions.<Expression>checkNotNull(typedVisit(expr))).collect(Collectors.toList());
+                map(this::<Expression>typedVisit).collect(Collectors.toList());
         return new Project(child, ImmutableList.copyOf(projectList));
+    }
+
+    @Override
+    public LogicalPlan visitFromCluse(SqlBaseParser.FromCluseContext ctx) {
+        if (Objects.nonNull(ctx.selectStatement())) {
+            String subqueryName = ctx.identifier().getText();
+            Preconditions.checkArgument(StringUtils.isNotBlank(subqueryName));
+            return new SubqueryAlias(subqueryName, typedVisit(ctx.selectStatement()));
+        }
+
+        Preconditions.checkArgument(Objects.nonNull(ctx.tableIdentifier()) && ctx.tableIdentifier().size() > 0);
+        LogicalPlan plan = typedVisit(ctx.tableIdentifier(0));
+        for (int i = 1; i < ctx.tableIdentifier().size(); i++) {
+            plan = new InnerJoin(plan, typedVisit(ctx.tableIdentifier(i)));
+        }
+        return plan;
     }
 
     @Override
@@ -51,8 +64,8 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
 
     @Override
     public Expression visitComparison(SqlBaseParser.ComparisonContext ctx) {
-        Expression left = Preconditions.checkNotNull(typedVisit(ctx.left));
-        Expression right = Preconditions.checkNotNull(typedVisit(ctx.right));
+        Expression left = typedVisit(ctx.left);
+        Expression right = typedVisit(ctx.right);
         String op = ctx.comparisonOperator().getText();
         return new ScalarFunction(op, ImmutableList.of(left, right));
     }
@@ -110,5 +123,13 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
     @Override
     public Relation visitTableAlias(SqlBaseParser.TableAliasContext ctx) {
         return new Relation(ctx.tableName.getText(), ctx.alias.getText());
+    }
+
+    @Override
+    public Expression visitLogicalBinary(SqlBaseParser.LogicalBinaryContext ctx) {
+        Expression left = typedVisit(ctx.left);
+        Expression right = typedVisit(ctx.right);
+        String op = ctx.opt.getText();
+        return new ScalarFunction(op, ImmutableList.of(left, right));
     }
 }

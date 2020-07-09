@@ -15,4 +15,8 @@ public class Attribute implements Expression {
         this.db = Optional.of(db);
         this.table = table;
     }
+
+    public String toString() {
+        return "'" + db.map(s -> s + "." + table).orElse(table);
+    }
 }

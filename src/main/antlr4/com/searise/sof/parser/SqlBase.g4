@@ -18,14 +18,11 @@ selectClause
 
 fromCluse
     : FROM tableIdentifier (',' tableIdentifier)*
+    | FROM '(' selectStatement ')' identifier
     ;
 
 whereCluse
     : WHERE expression
-    ;
-
-expressionStruct
-    : '('expression (',' expression)*')'
     ;
 
 expression
@@ -58,10 +55,6 @@ constant
     | booleanValue      #booleanLiteral
     ;
 
-dataType
-    : IDENTIFIER
-    ;
-
 columnIdentifier
     : tableIdentifier '.' identifier    #columnWithTable
     | identifier                        #columnWithoutTable
@@ -78,10 +71,6 @@ identifier
 
 comparisonOperator
     : EQ | NEQ | NEQJ | LT | LTE | GT | GTE 
-    ;
-
-predicateOperator
-    : OR | AND | NOT
     ;
 
 booleanValue

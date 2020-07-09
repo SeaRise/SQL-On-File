@@ -1,6 +1,6 @@
 package com.searise.sof.parser;
 
-import com.searise.sof.plan.LogicalPlan;
+import com.searise.sof.plan.logic.LogicalPlan;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Interval;
 
