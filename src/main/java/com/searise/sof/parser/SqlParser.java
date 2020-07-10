@@ -7,11 +7,11 @@ import org.antlr.v4.runtime.misc.Interval;
 public class SqlParser {
     public LogicalPlan parsePlan(String sql) {
         SqlBaseLexer lexer = new SqlBaseLexer(new UpperCaseCharStream(CharStreams.fromString(sql)));
-        BaseErrorListener baseErrorListener = new BaseErrorListener();
-        lexer.addErrorListener(baseErrorListener);
+        ParseErrorListener parseErrorListener = new ParseErrorListener();
+        lexer.addErrorListener(parseErrorListener);
 
         SqlBaseParser parser = new SqlBaseParser(new CommonTokenStream(lexer));
-        parser.addErrorListener(baseErrorListener);
+        parser.addErrorListener(parseErrorListener);
         SqlBaseParser.SingleStatementContext singleStatementContext = parser.singleStatement();
         AstBuilder visitor = new AstBuilder();
         return visitor.typedVisit(singleStatementContext);

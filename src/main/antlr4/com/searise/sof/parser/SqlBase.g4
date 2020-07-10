@@ -17,8 +17,24 @@ selectClause
     ;    
 
 fromCluse
-    : FROM tableIdentifier (',' tableIdentifier)*
-    | FROM '(' selectStatement ')' identifier
+    : FROM unresolvedRelation
+    ;
+
+unresolvedRelation
+    : relationPrimary joinRelation*
+    ;
+
+relationPrimary
+    : tableIdentifier (',' tableIdentifier)*
+    | '(' selectStatement ')' identifier
+    ;
+
+joinRelation
+    : JOIN right=unresolvedRelation joinCriteria?
+    ;
+
+joinCriteria
+    : ON booleanExpression
     ;
 
 whereCluse
@@ -86,6 +102,7 @@ number
 SELECT: 'SELECT';
 FROM  : 'FROM';
 WHERE : 'WHERE';
+JOIN : 'JOIN';
 INSERT: 'INSERT';
 INTO  : 'INTO';
 VALUES: 'VALUES';

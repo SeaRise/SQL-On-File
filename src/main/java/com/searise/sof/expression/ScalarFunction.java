@@ -16,4 +16,18 @@ public class ScalarFunction implements Expression {
     public String toString() {
         return String.format("%s(%s)", funcName, params.stream().map(Object::toString).collect(Collectors.joining(", ")));
     }
+
+    @Override
+    public Expression copyWithNewChildren(List<Expression> children) {
+        return new ScalarFunction(funcName, children);
+    }
+
+    @Override
+    public List<Expression> children() {
+        return params;
+    }
+
+    public boolean resolved() {
+        return false;
+    }
 }

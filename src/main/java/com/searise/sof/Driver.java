@@ -18,5 +18,6 @@ public class Driver {
         LogicalPlan analyzePlan = new Analyzer(catalog).analyse(parsePlan);
         PhysicalPlan physicalPlan = new Optimizer().optimize(analyzePlan);
         Executor executor = new Builder().build(physicalPlan);
+        executor.execute();
     }
 }

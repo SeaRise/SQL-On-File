@@ -2,7 +2,7 @@ package com.searise.sof.parser;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.expression.Attribute;
+import com.searise.sof.expression.UnresolvedAttribute;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.Literal;
 import com.searise.sof.expression.ScalarFunction;
@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.searise.sof.type.DataType.*;
@@ -33,16 +34,37 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
         LogicalPlan child = typedVisit(ctx.fromCluse());
         if (Objects.nonNull(ctx.whereCluse())) {
             Expression condition = typedVisit(ctx.whereCluse().expression());
-            child = new Filter(child, ImmutableList.of(condition));
+            child = new Filter(ImmutableList.of(condition), child);
         }
 
         List<Expression> projectList = ctx.selectClause().expression().stream().
                 map(this::<Expression>typedVisit).collect(Collectors.toList());
-        return new Project(child, ImmutableList.copyOf(projectList));
+        return new Project(ImmutableList.copyOf(projectList), child);
     }
 
     @Override
     public LogicalPlan visitFromCluse(SqlBaseParser.FromCluseContext ctx) {
+        return typedVisit(ctx.relation());
+    }
+
+    @Override
+    public LogicalPlan visitRelation(SqlBaseParser.RelationContext ctx) {
+        LogicalPlan relation = typedVisit(ctx.relationPrimary());
+        if (Objects.nonNull(ctx.joinRelation()) && !ctx.joinRelation().isEmpty()) {
+            for (SqlBaseParser.JoinRelationContext joinRelationContext : ctx.joinRelation()) {
+                LogicalPlan right = typedVisit(joinRelationContext.right);
+                List<Expression> conditions =
+                        Objects.isNull(joinRelationContext.joinCriteria()) ?
+                                ImmutableList.of() :
+                                ImmutableList.of(typedVisit(joinRelationContext.joinCriteria().booleanExpression()));
+                relation = new InnerJoin(relation, right, conditions);
+            }
+        }
+        return relation;
+    }
+
+    @Override
+    public LogicalPlan visitRelationPrimary(SqlBaseParser.RelationPrimaryContext ctx) {
         if (Objects.nonNull(ctx.selectStatement())) {
             String subqueryName = ctx.identifier().getText();
             Preconditions.checkArgument(StringUtils.isNotBlank(subqueryName));
@@ -106,23 +128,23 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
     }
 
     @Override
-    public Attribute visitColumnWithTable(SqlBaseParser.ColumnWithTableContext ctx) {
-        return new Attribute(ctx.tableIdentifier().getText(), ctx.identifier().getText());
+    public UnresolvedAttribute visitColumnWithTable(SqlBaseParser.ColumnWithTableContext ctx) {
+        return new UnresolvedAttribute(ctx.tableIdentifier().getText(), ctx.identifier().getText());
     }
 
     @Override
-    public Attribute visitColumnWithoutTable(SqlBaseParser.ColumnWithoutTableContext ctx) {
-        return new Attribute(ctx.identifier().getText());
+    public UnresolvedAttribute visitColumnWithoutTable(SqlBaseParser.ColumnWithoutTableContext ctx) {
+        return new UnresolvedAttribute(ctx.identifier().getText());
     }
 
     @Override
-    public Relation visitTableIdentifierDefault(SqlBaseParser.TableIdentifierDefaultContext ctx) {
-        return new Relation(ctx.tableName.getText());
+    public UnresolvedRelation visitTableIdentifierDefault(SqlBaseParser.TableIdentifierDefaultContext ctx) {
+        return new UnresolvedRelation(ctx.tableName.getText());
     }
 
     @Override
-    public Relation visitTableAlias(SqlBaseParser.TableAliasContext ctx) {
-        return new Relation(ctx.tableName.getText(), ctx.alias.getText());
+    public UnresolvedRelation visitTableAlias(SqlBaseParser.TableAliasContext ctx) {
+        return new UnresolvedRelation(ctx.tableName.getText(), Optional.of(ctx.alias.getText()));
     }
 
     @Override

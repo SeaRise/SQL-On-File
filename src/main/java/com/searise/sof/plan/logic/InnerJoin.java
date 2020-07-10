@@ -1,9 +1,12 @@
 package com.searise.sof.plan.logic;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.analyse.AnalysisHelper;
 import com.searise.sof.expression.Expression;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class InnerJoin implements LogicalPlan {
@@ -31,5 +34,16 @@ public class InnerJoin implements LogicalPlan {
         String condSql = conditions.isEmpty() ? "" : String.format(" on (%s)",
                 conditions.stream().map(Object::toString).collect(Collectors.joining(", ")));
         return "join" + condSql;
+    }
+
+    @Override
+    public LogicalPlan copyWithNewChildren(List<LogicalPlan> children) {
+        Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
+        return new InnerJoin(children.get(0), children.get(1), conditions);
+    }
+
+    @Override
+    public boolean resolved() {
+        return left.resolved() && right.resolved() && conditions.stream().allMatch(AnalysisHelper::resolved);
     }
 }

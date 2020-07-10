@@ -1,10 +1,14 @@
 package com.searise.sof.plan;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 public interface QueryPlan<T extends QueryPlan> {
-    List<T> children();
+    default List<T> children() {
+        return ImmutableList.of();
+    }
 
     default String visitToString() {
         return visitToString("");

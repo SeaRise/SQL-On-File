@@ -1,22 +1,11 @@
 package com.searise.sof.expression;
 
-import java.util.Optional;
-
-public class Attribute implements Expression {
-    public final Optional<String> db;
-    public final String table;
-
-    public Attribute(String table) {
-        this.db = Optional.empty();
-        this.table = table;
-    }
-
+public class Attribute extends UnresolvedAttribute {
     public Attribute(String db, String table) {
-        this.db = Optional.of(db);
-        this.table = table;
+        super(db, table);
     }
 
-    public String toString() {
-        return "'" + db.map(s -> s + "." + table).orElse(table);
+    public boolean resolved() {
+        return true;
     }
 }
