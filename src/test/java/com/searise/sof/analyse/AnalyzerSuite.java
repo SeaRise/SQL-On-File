@@ -30,6 +30,12 @@ public class AnalyzerSuite {
         testAnalyse("select -((((1+1)-2)/3)*4) from a",
                 "Project [(-((((1 + 1) / 2) - 3) * 4))]\n" +
                         "  Relation [a] (19:StringType,20:StringType,21:StringType,22:StringType)");
+
+        testAnalyse("select 1 as a, a as b from (select a, b from a) a",
+                "Project [1 as 28:IntegerType, 24:StringType as 29:StringType]\n" +
+                        "  SubqueryAlias [a]\n" +
+                        "    Project [24:StringType, 25:StringType]\n" +
+                        "      Relation [a] (24:StringType,25:StringType,26:StringType,27:StringType)");
     }
 
     private void testAnalyse(String sql, String expect) {

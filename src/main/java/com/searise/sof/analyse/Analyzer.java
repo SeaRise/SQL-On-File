@@ -1,8 +1,8 @@
 package com.searise.sof.analyse;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.catalog.Catalog;
+import com.searise.sof.common.Utils;
 import com.searise.sof.plan.logic.LogicalPlan;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class Analyzer {
                 applyingPlan = rule.apply(applyingPlan);
             }
             if (preApplyPlan == applyingPlan) {
-                Preconditions.checkArgument(applyingPlan.resolved(), "logical plan [%s] has not yet resolved");
+                Utils.checkArgument(applyingPlan.resolved(), "logical plan [%s] has not yet resolved");
                 return applyingPlan;
             }
             preApplyPlan = applyingPlan;

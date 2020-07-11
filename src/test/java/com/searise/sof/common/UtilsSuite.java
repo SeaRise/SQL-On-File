@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-public class UtilsTest {
+public class UtilsSuite {
     @Test
     public void testImmutableCollector() {
         List<Integer> origin  = Arrays.asList(1, 2, 3, 4, 5);

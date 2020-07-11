@@ -2,6 +2,7 @@ package com.searise.sof.common;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -16,6 +17,12 @@ public class Utils {
         ImmutableList.Builder<T> builder = ImmutableList.builder();
         stream.forEach(builder::add);
         return builder.build();
+    }
+
+    public static void checkArgument(boolean expression, @Nullable Object errorMessage) {
+        if (!expression) {
+            throw new SofException(String.valueOf(errorMessage));
+        }
     }
 
     public static List<String> split(String sqls) {
