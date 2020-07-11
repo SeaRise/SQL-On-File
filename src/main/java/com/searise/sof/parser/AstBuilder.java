@@ -21,7 +21,7 @@ import static com.searise.sof.type.DataType.*;
 public class AstBuilder extends SqlBaseBaseVisitor<Object> {
 
     @SuppressWarnings("unchecked")
-    public <V> V typedVisit(ParseTree ctx) {
+    <V> V typedVisit(ParseTree ctx) {
         return (V) Preconditions.checkNotNull(ctx.accept(this));
     }
 
