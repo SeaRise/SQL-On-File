@@ -8,24 +8,28 @@ import org.junit.Test;
 public class AnalyzerSuite {
     @Test
     public void test() {
-        testAnalyse("select 1 from a",
-                "Project [1]\n" +
-                        "  Relation [a]");
+        testAnalyse("select 1 as a, a as b from a",
+                "Project [1 as 4:IntegerType, 0:StringType as 5:StringType]\n" +
+                        "  Relation [a] (0:StringType,1:StringType,2:StringType,3:StringType)");
 
         testAnalyse("select 1 from a where !(not(true)) and (false or true) " +
                         "and 1 > 2 and 1 <  2 and '1' = '2' and '1 == 2' and 1 >= 2 " +
                         "and 1 !> 2 and 1 <= 2 and 1 !< 2 and 1 <> 2 and 1 != 2",
                 "Project [1]\n" +
                         "  Filter [((((((((((not (not (true))) and ((false) or (true))) and (1 > 2)) and (1 < 2)) and (1 = 2) = 1 == 2) and (1 >= 2)) and (1 <= 2)) and (1 <= 2)) and (1 >= 2)) and (not (1 = 2))) and (not (1 = 2))]\n" +
-                        "    Relation [a]");
+                        "    Relation [a] (6:StringType,7:StringType,8:StringType,9:StringType)");
 
         testAnalyse("select a.a from a",
-                "Project [0:StringType]\n" +
-                        "  Relation [a]");
+                "Project [11:StringType]\n" +
+                        "  Relation [a] (11:StringType,12:StringType,13:StringType,14:StringType)");
 
         testAnalyse("select b.a from a as b",
-                "Project [4:StringType]\n" +
-                        "  Relation [a, b]");
+                "Project [15:StringType]\n" +
+                        "  Relation [a, b] (15:StringType,16:StringType,17:StringType,18:StringType)");
+
+        testAnalyse("select -((((1+1)-2)/3)*4) from a",
+                "Project [(-((((1 + 1) / 2) - 3) * 4))]\n" +
+                        "  Relation [a] (19:StringType,20:StringType,21:StringType,22:StringType)");
     }
 
     private void testAnalyse(String sql, String expect) {

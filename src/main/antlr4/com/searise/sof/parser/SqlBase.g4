@@ -53,7 +53,8 @@ booleanExpression
 
 valueExpression
     : primaryExpression                                                               #valueExpressionDefault
-    | MINUS valueExpression                                                           #arithmeticUnary  
+    | primaryExpression 'AS' identifier                                               #alias
+    | MINUS valueExpression                                                           #arithmeticUnary
     | left=valueExpression opt=(ASTERISK | SLASH | PERCENT) right=valueExpression     #arithmeticBinary
     | left=valueExpression opt=(PLUS | MINUS ) right=valueExpression                  #arithmeticBinary
     | left=valueExpression comparisonOperator right=valueExpression                   #comparison

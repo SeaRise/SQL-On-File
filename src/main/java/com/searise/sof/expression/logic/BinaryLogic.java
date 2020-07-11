@@ -6,12 +6,12 @@ import com.searise.sof.type.DataType;
 
 import java.util.List;
 
-public abstract class LogicalBinary implements Expression {
+public abstract class BinaryLogic implements Expression {
     public final Expression left;
     public final Expression right;
     public final String op;
 
-    public LogicalBinary(Expression left, Expression right, String op) {
+    public BinaryLogic(Expression left, Expression right, String op) {
         this.left = left;
         this.right = right;
         this.op = op;

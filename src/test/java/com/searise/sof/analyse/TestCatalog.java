@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.CatalogTable;
 import com.searise.sof.catalog.StructField;
-import com.searise.sof.type.DataType;
 
 import static com.searise.sof.type.DataType.StringType;
 

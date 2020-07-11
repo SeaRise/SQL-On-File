@@ -12,8 +12,16 @@ public class ParserSuite {
                 "Project ['a.a]\n" +
                         "  UnresolvedRelation [a]");
 
+        testSql("select 1+1, 1-1, 1*1, 1/1, 1%1, -(5) from a",
+                "Project [+(1, 1), -(1, 1), *(1, 1), /(1, 1), %(1, 1), -(5)]\n" +
+                        "  UnresolvedRelation [a]");
+
         testSql("select b.a from a as b",
                 "Project ['b.a]\n" +
+                        "  UnresolvedRelation [a, b]");
+
+        testSql("select a as c from a as b",
+                "Project ['a as 'c]\n" +
                         "  UnresolvedRelation [a, b]");
 
         testSql("select a, b, c from b where 'a' = 'v' and a > 'c'",

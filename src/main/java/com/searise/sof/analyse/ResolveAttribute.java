@@ -1,10 +1,13 @@
 package com.searise.sof.analyse;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.common.ExprIdBuilder;
 import com.searise.sof.common.Utils;
-import com.searise.sof.expression.Attribute;
 import com.searise.sof.expression.Expression;
-import com.searise.sof.expression.UnresolvedAttribute;
+import com.searise.sof.expression.attribute.Alias;
+import com.searise.sof.expression.attribute.Attribute;
+import com.searise.sof.expression.attribute.AttributeBase;
+import com.searise.sof.expression.attribute.UnresolvedAttribute;
 import com.searise.sof.plan.logic.*;
 import org.apache.commons.lang3.StringUtils;
 
@@ -95,31 +98,41 @@ public class ResolveAttribute implements Rule {
 
         @Override
         public Expression apply(Expression expression) {
-            if (expression.getClass() == UnresolvedAttribute.class &&
-                    expression.children().stream().allMatch(AnalysisHelper::resolved) &&
+            if (expression.children().stream().allMatch(AnalysisHelper::resolved) &&
                     !expression.resolved()) {
-                UnresolvedAttribute unresolvedAttribute = (UnresolvedAttribute) expression;
-                if (childSchemas.size() == 1) {
-                    return withSchema(unresolvedAttribute, childSchemas.get(0));
+                if (expression.getClass() == UnresolvedAttribute.class) {
+                    return applyUnresolvedAttribute((UnresolvedAttribute) expression);
+                } else if (expression.getClass() == Alias.class) {
+                    Alias alias = (Alias) expression;
+                    AttributeBase aliasName = alias.attribute;
+                    return new Alias(new Attribute(aliasName.table, aliasName.name, ExprIdBuilder.newExprId(), alias.child.dataType()), alias.child);
                 } else {
-                    List<Attribute> combineList;
-                    if (unresolvedAttribute.table.isPresent()) {
-                        if (!childAliases.isPresent()) {
-                            return expression;
-                        }
-                        int index = childAliases.get().indexOf(unresolvedAttribute.table.get());
-                        if (!(index >= 0 && index < childAliases.get().size())) {
-                            return expression;
-                        }
-                        combineList = childSchemas.get(index);
-                    } else {
-                        combineList = Utils.toImmutableList(childSchemas.stream().
-                                flatMap((Function<List<Attribute>, Stream<Attribute>>) Collection::stream));
-                    }
-                    return withSchema(unresolvedAttribute, combineList);
+                    // just else
                 }
             }
             return expression;
+        }
+
+        private Expression applyUnresolvedAttribute(UnresolvedAttribute unresolvedAttribute) {
+            if (childSchemas.size() == 1) {
+                return withSchema(unresolvedAttribute, childSchemas.get(0));
+            } else {
+                List<Attribute> combineList;
+                if (unresolvedAttribute.table.isPresent()) {
+                    if (!childAliases.isPresent()) {
+                        return unresolvedAttribute;
+                    }
+                    int index = childAliases.get().indexOf(unresolvedAttribute.table.get());
+                    if (!(index >= 0 && index < childAliases.get().size())) {
+                        return unresolvedAttribute;
+                    }
+                    combineList = childSchemas.get(index);
+                } else {
+                    combineList = Utils.toImmutableList(childSchemas.stream().
+                            flatMap((Function<List<Attribute>, Stream<Attribute>>) Collection::stream));
+                }
+                return withSchema(unresolvedAttribute, combineList);
+            }
         }
 
         private Expression withSchema(UnresolvedAttribute unresolvedAttribute, List<Attribute> schema) {

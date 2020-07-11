@@ -6,7 +6,7 @@ import com.searise.sof.expression.Expression;
 import java.util.List;
 import java.util.Objects;
 
-public class Or extends LogicalBinary {
+public class Or extends BinaryLogic {
     public Or(Expression left, Expression right) {
         super(left, right, "or");
     }

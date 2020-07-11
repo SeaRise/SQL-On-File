@@ -2,7 +2,7 @@ package com.searise.sof.plan.logic;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.expression.Attribute;
+import com.searise.sof.expression.attribute.Attribute;
 
 import java.util.List;
 import java.util.Objects;

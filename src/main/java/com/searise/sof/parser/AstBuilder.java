@@ -6,7 +6,8 @@ import com.searise.sof.common.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.Literal;
 import com.searise.sof.expression.ScalarFunction;
-import com.searise.sof.expression.UnresolvedAttribute;
+import com.searise.sof.expression.attribute.Alias;
+import com.searise.sof.expression.attribute.UnresolvedAttribute;
 import com.searise.sof.plan.logic.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
@@ -133,8 +134,15 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
     }
 
     @Override
+    public Expression visitAlias(SqlBaseParser.AliasContext ctx) {
+        String name = ctx.identifier().getText();
+        Expression child = typedVisit(ctx.primaryExpression());
+        return new Alias(new UnresolvedAttribute(name), child);
+    }
+
+    @Override
     public UnresolvedAttribute visitColumnWithTable(SqlBaseParser.ColumnWithTableContext ctx) {
-        return new UnresolvedAttribute(ctx.tableIdentifier().getText(), ctx.identifier().getText());
+        return new UnresolvedAttribute(Optional.of(ctx.tableIdentifier().getText()), ctx.identifier().getText());
     }
 
     @Override
@@ -163,5 +171,19 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
     @Override
     public Expression visitLogicalNot(SqlBaseParser.LogicalNotContext ctx) {
         return new ScalarFunction("not", ImmutableList.of(typedVisit(ctx.booleanExpression())));
+    }
+
+    @Override
+    public Expression visitArithmeticUnary(SqlBaseParser.ArithmeticUnaryContext ctx) {
+        Expression child = typedVisit(ctx.valueExpression());
+        return new ScalarFunction(ctx.MINUS().getText(), ImmutableList.of(child));
+    }
+
+    @Override
+    public Expression visitArithmeticBinary(SqlBaseParser.ArithmeticBinaryContext ctx) {
+        Expression left = typedVisit(ctx.left);
+        Expression right = typedVisit(ctx.right);
+        String op = ctx.opt.getText();
+        return new ScalarFunction(op, ImmutableList.of(left, right));
     }
 }
