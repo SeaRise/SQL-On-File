@@ -170,7 +170,7 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
 
     @Override
     public Expression visitLogicalNot(SqlBaseParser.LogicalNotContext ctx) {
-        return new ScalarFunction("not", ImmutableList.of(typedVisit(ctx.booleanExpression())));
+        return new ScalarFunction(ctx.NOT().getText(), ImmutableList.of(typedVisit(ctx.booleanExpression())));
     }
 
     @Override
