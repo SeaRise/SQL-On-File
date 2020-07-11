@@ -1,7 +1,11 @@
 package com.searise.sof.plan.logic;
 
 import com.searise.sof.catalog.CatalogTable;
+import com.searise.sof.common.ExprIdBuilder;
+import com.searise.sof.common.Utils;
+import com.searise.sof.expression.Attribute;
 
+import java.util.List;
 import java.util.Optional;
 
 public class Relation extends UnresolvedRelation {
@@ -21,5 +25,11 @@ public class Relation extends UnresolvedRelation {
     @Override
     public boolean resolved() {
         return true;
+    }
+
+    @Override
+    public List<Attribute> schema() {
+        return Utils.toImmutableList(catalogTable.structType.stream().
+                map(structField -> new Attribute(tableName, structField.name, ExprIdBuilder.newExprId(), structField.dataType)));
     }
 }

@@ -3,6 +3,7 @@ package com.searise.sof.plan.logic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
+import com.searise.sof.expression.Attribute;
 import com.searise.sof.expression.Expression;
 
 import java.util.List;
@@ -20,6 +21,12 @@ public class Project implements LogicalPlan {
     @Override
     public List<LogicalPlan> children() {
         return ImmutableList.of(child);
+    }
+
+    @Override
+    public List<Attribute> schema() {
+        //tmp
+        return child.schema();
     }
 
     @Override

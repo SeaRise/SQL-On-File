@@ -2,10 +2,11 @@ package com.searise.sof.parser;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.expression.UnresolvedAttribute;
+import com.searise.sof.common.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.Literal;
 import com.searise.sof.expression.ScalarFunction;
+import com.searise.sof.expression.UnresolvedAttribute;
 import com.searise.sof.plan.logic.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.searise.sof.type.DataType.*;
 
@@ -37,18 +37,18 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
             child = new Filter(ImmutableList.of(condition), child);
         }
 
-        List<Expression> projectList = ctx.selectClause().expression().stream().
-                map(this::<Expression>typedVisit).collect(Collectors.toList());
-        return new Project(ImmutableList.copyOf(projectList), child);
+        List<Expression> projectList = Utils.toImmutableList(
+                ctx.selectClause().expression().stream().map(this::typedVisit));
+        return new Project(projectList, child);
     }
 
     @Override
     public LogicalPlan visitFromCluse(SqlBaseParser.FromCluseContext ctx) {
-        return typedVisit(ctx.relation());
+        return typedVisit(ctx.unresolvedRelation());
     }
 
     @Override
-    public LogicalPlan visitRelation(SqlBaseParser.RelationContext ctx) {
+    public LogicalPlan visitUnresolvedRelation(SqlBaseParser.UnresolvedRelationContext ctx) {
         LogicalPlan relation = typedVisit(ctx.relationPrimary());
         if (Objects.nonNull(ctx.joinRelation()) && !ctx.joinRelation().isEmpty()) {
             for (SqlBaseParser.JoinRelationContext joinRelationContext : ctx.joinRelation()) {
@@ -90,6 +90,11 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
         Expression right = typedVisit(ctx.right);
         String op = ctx.comparisonOperator().getText();
         return new ScalarFunction(op, ImmutableList.of(left, right));
+    }
+
+    @Override
+    public Expression visitParenthesizedExpression(SqlBaseParser.ParenthesizedExpressionContext ctx) {
+        return typedVisit(ctx.expression());
     }
 
     @Override
@@ -153,5 +158,10 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
         Expression right = typedVisit(ctx.right);
         String op = ctx.opt.getText();
         return new ScalarFunction(op, ImmutableList.of(left, right));
+    }
+
+    @Override
+    public Expression visitLogicalNot(SqlBaseParser.LogicalNotContext ctx) {
+        return new ScalarFunction("not", ImmutableList.of(typedVisit(ctx.booleanExpression())));
     }
 }

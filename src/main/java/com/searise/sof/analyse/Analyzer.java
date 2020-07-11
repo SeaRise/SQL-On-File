@@ -10,7 +10,11 @@ import java.util.List;
 public class Analyzer {
     private final List<Rule> rules;
     public Analyzer(Catalog catalog) {
-        rules = ImmutableList.of(new ResolveReferences(catalog));
+        rules = ImmutableList.of(
+                new ResolveReferences(catalog)
+                ,new ResolveScalarFunction()
+                ,new ResolveAttribute()
+        );
     }
 
     public LogicalPlan analyse(LogicalPlan parsePlan) {

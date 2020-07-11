@@ -3,6 +3,7 @@ package com.searise.sof.plan.logic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
+import com.searise.sof.expression.Attribute;
 import com.searise.sof.expression.Expression;
 
 import java.util.List;
@@ -45,5 +46,11 @@ public class InnerJoin implements LogicalPlan {
     @Override
     public boolean resolved() {
         return left.resolved() && right.resolved() && conditions.stream().allMatch(AnalysisHelper::resolved);
+    }
+
+    @Override
+    public List<Attribute> schema() {
+        ImmutableList.Builder<Attribute> schemaBuilder = ImmutableList.builder();
+        return schemaBuilder.addAll(left.schema()).addAll(right.schema()).build();
     }
 }

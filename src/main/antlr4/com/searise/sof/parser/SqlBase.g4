@@ -86,7 +86,7 @@ identifier
     ;
 
 comparisonOperator
-    : EQ | NEQ | NEQJ | LT | LTE | GT | GTE 
+    : EQ | NEQ | LT | LTE | GT | GTE
     ;
 
 booleanValue
@@ -122,15 +122,13 @@ AS    : 'AS';
 
 OR  : 'OR';
 AND : 'AND';
-NOT : 'NOT';
+NOT : 'NOT' | '!';
 
-// avoid conflict in C++
 TRUE_  : 'TRUE';
 FALSE_ : 'FALSE';
 
 EQ  : '=' | '==';
-NEQ : '<>';
-NEQJ: '!=';
+NEQ : '<>' | '!=';
 LT  : '<';
 LTE : '<=' | '!>';
 GT  : '>';

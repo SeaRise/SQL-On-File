@@ -3,21 +3,21 @@ package com.searise.sof.expression;
 import java.util.Optional;
 
 public class UnresolvedAttribute implements Expression {
-    public final Optional<String> db;
-    public final String table;
+    public final Optional<String> table;
+    public final String name;
 
-    public UnresolvedAttribute(String table) {
-        this.db = Optional.empty();
-        this.table = table;
+    public UnresolvedAttribute(String name) {
+        this.table = Optional.empty();
+        this.name = name;
     }
 
-    public UnresolvedAttribute(String db, String table) {
-        this.db = Optional.of(db);
-        this.table = table;
+    public UnresolvedAttribute(String table, String name) {
+        this.table = Optional.of(table);
+        this.name = name;
     }
 
     public String toString() {
-        return "'" + db.map(s -> s + "." + table).orElse(table);
+        return "'" + table.map(s -> s + "." + name).orElse(name);
     }
 
     public boolean resolved() {

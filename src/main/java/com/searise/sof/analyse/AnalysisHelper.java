@@ -18,15 +18,13 @@ public interface AnalysisHelper<T extends AnalysisHelper> {
         ImmutableList.Builder<T> afterApplyChildrenBuilder = ImmutableList.builder();
         List<T> children = afterApplyPlan.children();
         for (T child : children) {
-            afterApplyChildrenBuilder.add((T) applicable.apply(child));
+            afterApplyChildrenBuilder.add((T) child.transformDown(applicable));
         }
         List<T> afterApplyChildren = afterApplyChildrenBuilder.build();
 
         // only when children change should copyWithNewChildren
-        for (int i = 0; i < afterApplyChildren.size(); i++) {
-            if (afterApplyChildren.get(i) != children.get(i)) {
-                return (T) afterApplyPlan.copyWithNewChildren(afterApplyChildren);
-            }
+        if (!isEqualTo(children, afterApplyChildren)) {
+            return (T) afterApplyPlan.copyWithNewChildren(afterApplyChildren);
         }
         return afterApplyPlan;
     }
@@ -36,19 +34,29 @@ public interface AnalysisHelper<T extends AnalysisHelper> {
         ImmutableList.Builder<T> afterApplyChildrenBuilder = ImmutableList.builder();
         List<T> children = this.children();
         for (T child : children) {
-            afterApplyChildrenBuilder.add((T) applicable.apply(child));
+            afterApplyChildrenBuilder.add((T) child.transformUp(applicable));
         }
         List<T> afterApplyChildren = afterApplyChildrenBuilder.build();
 
         T beforeApply = (T) this;
         // only when children change should copyWithNewChildren
-        for (int i = 0; i < afterApplyChildren.size(); i++) {
-            if (afterApplyChildren.get(i) != children.get(i)) {
-                beforeApply = (T) beforeApply.copyWithNewChildren(afterApplyChildren);
-                break;
-            }
+        if (!isEqualTo(children, afterApplyChildren)) {
+            beforeApply = (T) beforeApply.copyWithNewChildren(afterApplyChildren);
         }
         return (T) applicable.apply(beforeApply);
+    }
+
+    static <T extends AnalysisHelper> boolean isEqualTo(List<T> before, List<T> after) {
+        if (Objects.isNull(before) || Objects.isNull(after) || before.size() != after.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < after.size(); i++) {
+            if (after.get(i) != before.get(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @SuppressWarnings("unchecked")

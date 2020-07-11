@@ -12,13 +12,20 @@ public class AnalyzerSuite {
                 "Project [1]\n" +
                         "  Relation [a]");
 
-//        testAnalyse("select a.a from a",
-//                "Project ['a.a]\n" +
-//                        "  Relation [a]");
-//
-//        testAnalyse("select b.a from a as b",
-//                "Project ['b.a]\n" +
-//                        "  Relation [a, b]");
+        testAnalyse("select 1 from a where !(not(true)) and (false or true) " +
+                        "and 1 > 2 and 1 <  2 and '1' = '2' and '1 == 2' and 1 >= 2 " +
+                        "and 1 !> 2 and 1 <= 2 and 1 !< 2 and 1 <> 2 and 1 != 2",
+                "Project [1]\n" +
+                        "  Filter [((((((((((not (not (true))) and ((false) or (true))) and (1 > 2)) and (1 < 2)) and (1 = 2) = 1 == 2) and (1 >= 2)) and (1 <= 2)) and (1 <= 2)) and (1 >= 2)) and (not (1 = 2))) and (not (1 = 2))]\n" +
+                        "    Relation [a]");
+
+        testAnalyse("select a.a from a",
+                "Project [0:StringType]\n" +
+                        "  Relation [a]");
+
+        testAnalyse("select b.a from a as b",
+                "Project [4:StringType]\n" +
+                        "  Relation [a, b]");
     }
 
     private void testAnalyse(String sql, String expect) {
