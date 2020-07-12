@@ -20,6 +20,10 @@ public class BoundReference implements Expression {
         return this;
     }
 
+    public int index() {
+        return index;
+    }
+
     public boolean resolved() {
         return true;
     }

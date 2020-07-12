@@ -1,6 +1,7 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
 
@@ -28,6 +29,14 @@ public class PhysicalNestedLoopJoin implements PhysicalPlan {
     @Override
     public List<PhysicalPlan> children() {
         return ImmutableList.of(stream, build);
+    }
+
+    @Override
+    public void resolveSchema() {
+        stream.resolveSchema();
+        build.resolveSchema();
+        List<BoundReference> childSchema = Utils.combine(stream.schema(), build.schema());
+        SchemaResolver.resolve(schema, Utils.toImmutableList(childSchema.stream().map(c -> c.exprId)));
     }
 
     @Override

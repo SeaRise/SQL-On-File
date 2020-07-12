@@ -17,6 +17,6 @@ public class ImplRelation implements ImplementationRule {
         Relation relation = (Relation) groupExpr.exprNode;
         List<BoundReference> schema = Utils.toImmutableList(relation.schema().stream().
                 map(attr -> new BoundReference(attr.dataType, attr.exprId)));
-        return new PhysicalScan(schema, relation.catalogTable.filePath, relation.catalogTable.separator);
+        return new PhysicalScan(schema, relation.schema(), relation.catalogTable.filePath, relation.catalogTable.separator);
     }
 }

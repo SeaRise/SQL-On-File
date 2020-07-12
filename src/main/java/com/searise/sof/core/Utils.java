@@ -19,6 +19,17 @@ public class Utils {
         return builder.build();
     }
 
+    public static <T> List<T> combine(List<T> left, List<T> right) {
+        if (left.isEmpty()) {
+            return right;
+        } else if (right.isEmpty()) {
+            return left;
+        } else {
+            ImmutableList.Builder<T> builder = ImmutableList.builder();
+            return builder.addAll(left).addAll(right).build();
+        }
+    }
+
     public static void checkArgument(boolean expression, @Nullable Object errorMessage) {
         if (!expression) {
             throw new SofException(String.valueOf(errorMessage));

@@ -3,18 +3,14 @@ package com.searise.sof.optimize;
 import com.searise.sof.core.Utils;
 import com.searise.sof.optimize.implementation.ImplementationRule;
 import com.searise.sof.optimize.preprocess.PreprocessRule;
-import com.searise.sof.optimize.transformation.ExprIter;
-import com.searise.sof.optimize.transformation.Pattern;
 import com.searise.sof.optimize.transformation.TransformationRule;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.searise.sof.optimize.Operand.getOperand;
-import static com.searise.sof.optimize.transformation.ExprIter.newExprIter;
 
 public class Optimizer {
     public static Optimizer newOptimizer() {
@@ -58,19 +54,6 @@ public class Optimizer {
     }
 
     private Group exploreGroup(Group group) {
-        while (!group.groupExpr().explored) {
-
-        }
-        GroupExpr groupExpr = group.groupExpr();
-        Operand operand = getOperand(groupExpr.exprNode);
-        List<TransformationRule> ruleBatch = transformationRuleMap.get(operand);
-        for (TransformationRule rule : ruleBatch) {
-            Pattern pattern = rule.pattern();
-            Optional<ExprIter> exprIter = newExprIter(group, pattern);
-            if (exprIter.isPresent()) {
-                rule.onTransform(group.groupExpr());
-            }
-        }
         return group;
     }
 
@@ -86,6 +69,7 @@ public class Optimizer {
     }
 
     private PhysicalPlan onPhaseAfterprocessing(PhysicalPlan physicalPlan) {
+        physicalPlan.resolveSchema();
         return physicalPlan;
     }
 }

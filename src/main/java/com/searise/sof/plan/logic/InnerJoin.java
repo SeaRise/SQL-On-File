@@ -3,6 +3,7 @@ package com.searise.sof.plan.logic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
+import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.Attribute;
 
@@ -50,7 +51,6 @@ public class InnerJoin implements LogicalPlan {
 
     @Override
     public List<Attribute> schema() {
-        ImmutableList.Builder<Attribute> schemaBuilder = ImmutableList.builder();
-        return schemaBuilder.addAll(left.schema()).addAll(right.schema()).build();
+        return Utils.combine(left.schema(), right.schema());
     }
 }

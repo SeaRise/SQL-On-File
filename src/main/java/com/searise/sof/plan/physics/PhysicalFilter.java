@@ -1,6 +1,7 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
 
@@ -26,6 +27,13 @@ public class PhysicalFilter implements PhysicalPlan {
     @Override
     public List<PhysicalPlan> children() {
         return ImmutableList.of(child);
+    }
+
+    @Override
+    public void resolveSchema() {
+        child.resolveSchema();
+        List<BoundReference> childSchema = child.schema();
+        SchemaResolver.resolve(schema, Utils.toImmutableList(childSchema.stream().map(c -> c.exprId)));
     }
 
     @Override
