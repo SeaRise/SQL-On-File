@@ -8,7 +8,7 @@ public class GroupExpr {
     public final LogicalPlan exprNode;
     public final List<Group> children;
     public final Group group;
-    private boolean explored = false;
+    public boolean explored = false;
 
     public GroupExpr(LogicalPlan exprNode, List<Group> children, Group group) {
         this.exprNode = exprNode;

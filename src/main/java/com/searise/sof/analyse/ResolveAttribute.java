@@ -1,8 +1,8 @@
 package com.searise.sof.analyse;
 
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.common.ExprIdBuilder;
-import com.searise.sof.common.Utils;
+import com.searise.sof.core.ExprIdBuilder;
+import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.Alias;
 import com.searise.sof.expression.attribute.Attribute;
@@ -91,6 +91,7 @@ public class ResolveAttribute implements Rule {
     private class AttributeApplicable implements Applicable<Expression> {
         private final List<List<Attribute>> childSchemas;
         private final Optional<List<String>> childAliases;
+
         public AttributeApplicable(List<List<Attribute>> childSchemas, Optional<List<String>> childAliases) {
             this.childSchemas = childSchemas;
             this.childAliases = childAliases;

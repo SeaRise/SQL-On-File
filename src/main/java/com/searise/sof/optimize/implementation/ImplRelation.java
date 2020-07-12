@@ -1,7 +1,7 @@
 package com.searise.sof.optimize.implementation;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.common.Utils;
+import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.BoundReference;
 import com.searise.sof.optimize.GroupExpr;
 import com.searise.sof.plan.logic.Relation;

@@ -4,5 +4,5 @@ public enum DataType {
     StringType,
     BooleanType,
     IntegerType,
-    FloatType
+    DoubleType
 }

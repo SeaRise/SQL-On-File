@@ -1,6 +1,6 @@
 package com.searise.sof.optimize;
 
-import com.searise.sof.common.SofException;
+import com.searise.sof.core.SofException;
 import com.searise.sof.plan.logic.*;
 
 public enum Operand {
@@ -10,6 +10,7 @@ public enum Operand {
     OperandRelation(Relation.class);
 
     private final Class<? extends LogicalPlan> planClass;
+
     Operand(Class<? extends LogicalPlan> planClass) {
         this.planClass = planClass;
     }

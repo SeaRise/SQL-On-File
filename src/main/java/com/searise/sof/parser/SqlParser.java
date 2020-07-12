@@ -19,6 +19,7 @@ public class SqlParser {
 
     private class UpperCaseCharStream implements CharStream {
         private final CodePointCharStream wrapped;
+
         UpperCaseCharStream(CodePointCharStream wrapped) {
             this.wrapped = wrapped;
         }

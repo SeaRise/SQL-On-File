@@ -1,6 +1,6 @@
 package com.searise.sof.expression.attribute;
 
-import com.searise.sof.common.ExprIdBuilder;
+import com.searise.sof.core.ExprIdBuilder;
 import com.searise.sof.type.DataType;
 
 import java.util.Optional;
@@ -8,6 +8,7 @@ import java.util.Optional;
 public class Attribute extends UnresolvedAttribute {
     public final long exprId;
     public final DataType dataType;
+
     public Attribute(Optional<String> table, String name, long exprId, DataType dataType) {
         super(table, name);
         this.exprId = exprId;

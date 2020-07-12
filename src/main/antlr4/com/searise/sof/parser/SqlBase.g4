@@ -96,7 +96,7 @@ booleanValue
 
 number
     : MINUS? INTEGER_LITERAL          #integerLiteral
-    | MINUS? FLOAT_LITERAL            #floatLiteral
+    | MINUS? DOUBLE_LITERAL            #doubleLiteral
     ;
 
 // key words
@@ -147,7 +147,7 @@ STRING
     | '"' ( ~('"'|'\\') | ('\\' .) )* '"'
     ;
 
-FLOAT_LITERAL
+DOUBLE_LITERAL
     : DIGIT+ '.' DIGIT+
     ; 
 

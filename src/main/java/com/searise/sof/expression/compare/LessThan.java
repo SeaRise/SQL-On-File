@@ -15,4 +15,9 @@ public class LessThan extends BinaryComparison {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
         return new LessThan(left, right);
     }
+
+    @Override
+    protected boolean handleCompareToResult(int result) {
+        return result < 0;
+    }
 }

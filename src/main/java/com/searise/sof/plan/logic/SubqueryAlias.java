@@ -10,6 +10,7 @@ import java.util.Objects;
 public class SubqueryAlias implements LogicalPlan {
     public final String name;
     public final LogicalPlan child;
+
     public SubqueryAlias(String name, LogicalPlan child) {
         this.name = name;
         this.child = child;

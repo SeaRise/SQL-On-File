@@ -2,6 +2,7 @@ package com.searise.sof.expression.attribute;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.Expression;
 
 import java.util.List;
@@ -34,5 +35,9 @@ public class Alias implements Expression {
 
     public boolean resolved() {
         return attribute.resolved() && child.resolved();
+    }
+
+    public Object eval(InternalRow input) {
+        return child.eval(input);
     }
 }

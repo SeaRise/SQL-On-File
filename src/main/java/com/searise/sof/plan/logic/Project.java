@@ -3,7 +3,7 @@ package com.searise.sof.plan.logic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
-import com.searise.sof.common.Utils;
+import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.Alias;
 import com.searise.sof.expression.attribute.Attribute;
@@ -16,6 +16,7 @@ public class Project implements LogicalPlan {
     public final LogicalPlan child;
     public final List<Expression> projectList;
     private List<Attribute> schema = ImmutableList.of();
+
     public Project(List<Expression> projectList, LogicalPlan child) {
         this.child = child;
         this.projectList = projectList;
@@ -46,7 +47,7 @@ public class Project implements LogicalPlan {
 
     @Override
     public List<Attribute> schema() {
-       return schema;
+        return schema;
     }
 
     @Override

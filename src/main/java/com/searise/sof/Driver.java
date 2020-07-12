@@ -3,7 +3,7 @@ package com.searise.sof;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.BuiltInCatalog;
 import com.searise.sof.catalog.Catalog;
-import com.searise.sof.common.Utils;
+import com.searise.sof.core.Utils;
 import com.searise.sof.execution.Builder;
 import com.searise.sof.execution.Executor;
 import com.searise.sof.parser.SqlParser;

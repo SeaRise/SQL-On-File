@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public class Filter implements LogicalPlan {
     public final LogicalPlan child;
     public final List<Expression> conditions;
+
     public Filter(List<Expression> conditions, LogicalPlan child) {
         this.child = child;
         this.conditions = conditions;

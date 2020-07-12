@@ -15,4 +15,9 @@ public class GreaterThan extends BinaryComparison {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
         return new GreaterThan(left, right);
     }
+
+    @Override
+    protected boolean handleCompareToResult(int result) {
+        return result > 0;
+    }
 }

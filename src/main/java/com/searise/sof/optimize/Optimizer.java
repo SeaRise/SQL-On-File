@@ -1,28 +1,39 @@
 package com.searise.sof.optimize;
 
-import com.searise.sof.common.SofException;
-import com.searise.sof.common.Utils;
+import com.searise.sof.core.Utils;
 import com.searise.sof.optimize.implementation.ImplementationRule;
 import com.searise.sof.optimize.preprocess.PreprocessRule;
+import com.searise.sof.optimize.transformation.ExprIter;
+import com.searise.sof.optimize.transformation.Pattern;
+import com.searise.sof.optimize.transformation.TransformationRule;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import static com.searise.sof.optimize.Operand.getOperand;
+import static com.searise.sof.optimize.transformation.ExprIter.newExprIter;
 
 public class Optimizer {
     public static Optimizer newOptimizer() {
         return new Optimizer(
-                PreprocessRule.preprocessRules,
-                ImplementationRule.implementationRuleMap
+                PreprocessRule.preprocessRules
+                , TransformationRule.transformationRuleMap
+                , ImplementationRule.implementationRuleMap
         );
     }
 
     private final List<PreprocessRule> preprocessRules;
-    private final Map<Operand, List<ImplementationRule>> implementationRuleMap;
-    public Optimizer(List<PreprocessRule> preprocessRules, Map<Operand, List<ImplementationRule>> implementationRuleMap) {
+    private final Map<Operand, List<TransformationRule>> transformationRuleMap;
+    private final Map<Operand, ImplementationRule> implementationRuleMap;
+
+    public Optimizer(List<PreprocessRule> preprocessRules,
+                     Map<Operand, List<TransformationRule>> transformationRuleMap,
+                     Map<Operand, ImplementationRule> implementationRuleMap) {
         this.preprocessRules = preprocessRules;
+        this.transformationRuleMap = transformationRuleMap;
         this.implementationRuleMap = implementationRuleMap;
     }
 
@@ -43,7 +54,24 @@ public class Optimizer {
     }
 
     private Group onPhaseExploration(Group rootGroup) {
-        return rootGroup;
+        return exploreGroup(rootGroup);
+    }
+
+    private Group exploreGroup(Group group) {
+        while (!group.groupExpr().explored) {
+
+        }
+        GroupExpr groupExpr = group.groupExpr();
+        Operand operand = getOperand(groupExpr.exprNode);
+        List<TransformationRule> ruleBatch = transformationRuleMap.get(operand);
+        for (TransformationRule rule : ruleBatch) {
+            Pattern pattern = rule.pattern();
+            Optional<ExprIter> exprIter = newExprIter(group, pattern);
+            if (exprIter.isPresent()) {
+                rule.onTransform(group.groupExpr());
+            }
+        }
+        return group;
     }
 
     private PhysicalPlan onPhaseImplementation(Group rootGroup) {
@@ -51,14 +79,10 @@ public class Optimizer {
     }
 
     private PhysicalPlan implGroup(Group group) {
-        Iterator<GroupExpr> iterator = group.iterator();
-        if (iterator.hasNext()) {
-            GroupExpr groupExpr = iterator.next();
-            List<PhysicalPlan> children = Utils.toImmutableList(groupExpr.children.stream().map(this::implGroup));
-            ImplementationRule implRule = implementationRuleMap.get(Operand.getOperand(groupExpr.exprNode)).get(0);
-            return implRule.onImplement(groupExpr, children);
-        }
-        throw new SofException("has no physical plan impl");
+        GroupExpr groupExpr = group.groupExpr();
+        List<PhysicalPlan> children = Utils.toImmutableList(groupExpr.children.stream().map(this::implGroup));
+        ImplementationRule implRule = implementationRuleMap.get(getOperand(groupExpr.exprNode));
+        return implRule.onImplement(groupExpr, children);
     }
 
     private PhysicalPlan onPhaseAfterprocessing(PhysicalPlan physicalPlan) {

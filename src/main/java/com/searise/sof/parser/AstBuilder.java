@@ -2,7 +2,7 @@ package com.searise.sof.parser;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.common.Utils;
+import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.Literal;
 import com.searise.sof.expression.ScalarFunction;
@@ -127,10 +127,10 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
     }
 
     @Override
-    public Literal visitFloatLiteral(SqlBaseParser.FloatLiteralContext ctx) {
-        float value = Float.valueOf(ctx.FLOAT_LITERAL().getText());
+    public Literal visitDoubleLiteral(SqlBaseParser.DoubleLiteralContext ctx) {
+        double value = Double.valueOf(ctx.DOUBLE_LITERAL().getText());
         value = Objects.isNull(ctx.MINUS()) ? value : -value;
-        return new Literal(FloatType, value);
+        return new Literal(DoubleType, value);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.searise.sof.plan.logic;
 
-import com.searise.sof.common.SofException;
+import com.searise.sof.core.SofException;
 import com.searise.sof.expression.attribute.Attribute;
 
 import java.util.List;

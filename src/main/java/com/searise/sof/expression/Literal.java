@@ -1,5 +1,6 @@
 package com.searise.sof.expression;
 
+import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.type.DataType;
 
 public class Literal implements Expression {
@@ -21,5 +22,9 @@ public class Literal implements Expression {
 
     public DataType dataType() {
         return dataType;
+    }
+
+    public Object eval(InternalRow input) {
+        return value;
     }
 }

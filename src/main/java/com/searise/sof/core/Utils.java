@@ -1,4 +1,4 @@
-package com.searise.sof.common;
+package com.searise.sof.core;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Utils {
-    public static <T>  List<T> toImmutableList(Stream<T> stream) {
+    public static <T> List<T> toImmutableList(Stream<T> stream) {
         ImmutableList.Builder<T> builder = ImmutableList.builder();
         stream.forEach(builder::add);
         return builder.build();

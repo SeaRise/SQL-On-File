@@ -1,6 +1,6 @@
 package com.searise.sof.analyse;
 
-import com.searise.sof.common.Utils;
+import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.ScalarFunction;
 import com.searise.sof.expression.compare.*;
@@ -39,7 +39,7 @@ public class ResolveScalarFunction implements Rule {
                     case "Filter":
                         Filter filter = (Filter) p;
                         List<Expression> newConditions = Utils.toImmutableList(filter.conditions.stream().
-                            map(expr -> expr.transformUp(new ScalarFunctionApplicable())));
+                                map(expr -> expr.transformUp(new ScalarFunctionApplicable())));
                         if (!isEqualTo(filter.conditions, newConditions)) {
                             return new Filter(newConditions, filter.child);
                         }
@@ -86,7 +86,7 @@ public class ResolveScalarFunction implements Rule {
                             return new Not(func.children().get(0));
                         }
 
-                    // compare
+                        // compare
                     case EQUAL_TO_1:
                     case EQUAL_TO_2:
                         if (checkBinary(func)) {
@@ -116,7 +116,7 @@ public class ResolveScalarFunction implements Rule {
                             return new Not(new EqualTo(func.children().get(0), func.children().get(1)));
                         }
 
-                    // operator
+                        // operator
                     case PLUS:
                         if (checkBinary(func) && isOperatorDateType(func.children().get(0).dataType())) {
                             return new Add(func.children().get(0), func.children().get(1));
@@ -150,7 +150,7 @@ public class ResolveScalarFunction implements Rule {
     }
 
     private boolean isOperatorDateType(DataType dataType) {
-        return dataType == IntegerType || dataType == FloatType;
+        return dataType == IntegerType || dataType == DoubleType;
     }
 
     // Strong type match

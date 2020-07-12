@@ -13,9 +13,9 @@ public class TestCatalog implements Catalog {
         return new CatalogTable(table,
                 ImmutableList.of(
                         new StructField("a", StringType)
-                        ,new StructField("b", StringType)
-                        ,new StructField("c", StringType)
-                        ,new StructField("d", StringType)
+                        , new StructField("b", StringType)
+                        , new StructField("c", StringType)
+                        , new StructField("d", StringType)
                 ),
                 "/", ",");
     }
