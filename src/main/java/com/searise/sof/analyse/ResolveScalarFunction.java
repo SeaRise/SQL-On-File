@@ -124,7 +124,7 @@ public class ResolveScalarFunction implements Rule {
                     case MINUS:
                         if (isOperatorDateType(func.children().get(0).dataType())) {
                             if (checkBinary(func)) {
-                                return new Divide(func.children().get(0), func.children().get(1));
+                                return new Subtract(func.children().get(0), func.children().get(1));
                             } else if (func.children().size() == 1) {
                                 return new UnaryMinus(func.children().get(0));
                             }
@@ -135,7 +135,7 @@ public class ResolveScalarFunction implements Rule {
                         }
                     case SLASH:
                         if (checkBinary(func) && isOperatorDateType(func.children().get(0).dataType())) {
-                            return new Subtract(func.children().get(0), func.children().get(1));
+                            return new Divide(func.children().get(0), func.children().get(1));
                         }
                     case PERCENT:
                         if (checkBinary(func) && isOperatorDateType(func.children().get(0).dataType())) {

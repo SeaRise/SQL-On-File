@@ -22,7 +22,7 @@ public class JoinRow implements InternalRow {
         if (ordinal < left.numFields()) {
             return left.getValue(ordinal);
         } else {
-            return right.getValue(ordinal-left.numFields());
+            return right.getValue(ordinal - left.numFields());
         }
     }
 

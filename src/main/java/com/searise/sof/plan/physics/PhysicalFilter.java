@@ -6,11 +6,12 @@ import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PhysicalFilter implements PhysicalPlan {
     public final List<BoundReference> schema;
-    public final List<Expression> conditions;
+    public List<Expression> conditions;
     public final PhysicalPlan child;
 
     public PhysicalFilter(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan child) {
@@ -30,10 +31,12 @@ public class PhysicalFilter implements PhysicalPlan {
     }
 
     @Override
-    public void resolveSchema() {
-        child.resolveSchema();
+    public void resolveIndex() {
+        child.resolveIndex();
         List<BoundReference> childSchema = child.schema();
-        SchemaResolver.resolve(schema, Utils.toImmutableList(childSchema.stream().map(c -> c.exprId)));
+        Map<Long, Integer> inputs = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
+        this.conditions = ReferenceResolver.resolveExpression(conditions, inputs);
+        ReferenceResolver.resolveSchema(schema, inputs);
     }
 
     @Override

@@ -19,7 +19,7 @@ public class Or extends BinaryLogic {
         Preconditions.checkArgument(Objects.nonNull(children) &&
                 children.size() == 2 &&
                 children.get(0).dataType() == BooleanType);
-        return new Or(left, right);
+        return new Or(children.get(0), children.get(1));
     }
 
     @Override

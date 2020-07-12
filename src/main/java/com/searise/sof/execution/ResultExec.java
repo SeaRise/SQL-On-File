@@ -4,10 +4,11 @@ import com.searise.sof.core.row.InternalRow;
 
 import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 
-public class PrintlnExec implements Executor {
+public class ResultExec implements Executor {
     private final Executor child;
-    private final StringBuilder printlnBuilder = new StringBuilder();
-    public PrintlnExec(Executor child) {
+    private final StringBuilder resultBuilder = new StringBuilder();
+
+    public ResultExec(Executor child) {
         this.child = child;
     }
 
@@ -20,13 +21,15 @@ public class PrintlnExec implements Executor {
                 continue;
             }
 
-            for (int index = 0; index < row.numFields()-1; index++) {
-                printlnBuilder.append(row.getValue(index)).append(",");
+            for (int index = 0; index < row.numFields() - 1; index++) {
+                resultBuilder.append(row.getValue(index)).append(",");
             }
-            printlnBuilder.append(row.getValue(row.numFields()-1)).append("\n");
-            System.out.println(printlnBuilder.toString());
-            printlnBuilder.setLength(0);
+            resultBuilder.append(row.getValue(row.numFields() - 1)).append("\n");
         }
+    }
+
+    public String result() {
+        return resultBuilder.toString();
     }
 
     @Override

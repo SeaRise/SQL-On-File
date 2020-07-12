@@ -6,6 +6,7 @@ import com.searise.sof.catalog.Catalog;
 import com.searise.sof.core.Utils;
 import com.searise.sof.execution.Builder;
 import com.searise.sof.execution.Executor;
+import com.searise.sof.execution.ResultExec;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
@@ -34,5 +35,9 @@ public class Driver {
     private void execute(Executor executor) {
         executor.open();
         executor.close();
+        if (executor.getClass() == ResultExec.class) {
+            System.out.println("result:");
+            System.out.println(((ResultExec) executor).result());
+        }
     }
 }

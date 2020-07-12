@@ -16,7 +16,7 @@ public class Divide extends BinaryOperator {
     @Override
     public Expression copyWithNewChildren(List<Expression> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
-        return new Divide(left, right);
+        return new Divide(children.get(0), children.get(1));
     }
 
     @Override

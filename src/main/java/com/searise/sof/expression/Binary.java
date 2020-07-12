@@ -23,7 +23,7 @@ public abstract class Binary implements Expression {
         Object rightValue = right.eval(input);
         DataType inputDataType = left.dataType();
         Utils.checkArgument(inputDataType == right.dataType(),
-                "left.dataType must equal to right.dataType in binary expression");
+                "left.dataType must equal to right.dataType in binary expression " + getClass().getSimpleName());
         return doEval(leftValue, rightValue, inputDataType);
     }
 

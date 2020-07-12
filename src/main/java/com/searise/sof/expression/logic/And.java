@@ -19,7 +19,7 @@ public class And extends BinaryLogic {
         Preconditions.checkArgument(Objects.nonNull(children) &&
                 children.size() == 2 &&
                 children.get(0).dataType() == BooleanType);
-        return new And(left, right);
+        return new And(children.get(0), children.get(1));
     }
 
     @Override

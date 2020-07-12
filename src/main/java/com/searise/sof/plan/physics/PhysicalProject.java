@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class PhysicalProject implements PhysicalPlan {
     public final List<BoundReference> schema;
-    public final List<Expression> projectList;
+    public List<Expression> projectList;
     public final PhysicalPlan child;
 
     public PhysicalProject(List<BoundReference> schema, List<Expression> projectList, PhysicalPlan child) {
@@ -25,10 +25,13 @@ public class PhysicalProject implements PhysicalPlan {
     }
 
     @Override
-    public void resolveSchema() {
-        child.resolveSchema();
+    public void resolveIndex() {
+        child.resolveIndex();
         List<BoundReference> childSchema = child.schema();
-        SchemaResolver.resolve(schema, Utils.toImmutableList(childSchema.stream().map(c -> c.exprId)));
+        this.projectList = ReferenceResolver.resolveExpression(projectList, Utils.zip(index -> childSchema.get(index).exprId, childSchema.size()));
+        for (int i = 0; i < this.schema.size(); i++) {
+            schema.get(i).resolveIndex(i);
+        }
     }
 
     @Override

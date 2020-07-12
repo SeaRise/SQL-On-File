@@ -21,7 +21,7 @@ public class Not implements Expression {
 
     public Expression copyWithNewChildren(List<Expression> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 1);
-        return new Not(child);
+        return new Not(children.get(0));
     }
 
     public List<Expression> children() {

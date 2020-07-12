@@ -16,7 +16,7 @@ public class Subtract extends BinaryOperator {
     @Override
     public Expression copyWithNewChildren(List<Expression> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
-        return new Subtract(left, right);
+        return new Subtract(children.get(0), children.get(1));
     }
 
     @Override

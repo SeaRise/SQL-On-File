@@ -26,7 +26,7 @@ public class NestedLoopJoinExec implements Executor {
         this.build = build;
         this.output = new ArrayRow(schema.size());
         this.predication = new Predication(conditions);
-        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression)boundReference)), output);
+        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output);
     }
 
     @Override

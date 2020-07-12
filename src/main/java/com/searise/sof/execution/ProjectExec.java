@@ -4,7 +4,6 @@ import com.searise.sof.core.Projection;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
-import com.searise.sof.core.row.InternalRowWriter;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
 
@@ -16,6 +15,7 @@ public class ProjectExec implements Executor {
 
     private final Executor child;
     private final Projection projection;
+
     public ProjectExec(Executor child, List<Expression> projectList, List<BoundReference> schema) {
         Utils.checkArgument(projectList.size() == schema.size(), "projectList.size must equal to schema.size");
         this.child = child;

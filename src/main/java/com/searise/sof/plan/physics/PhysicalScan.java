@@ -5,6 +5,7 @@ import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.expression.attribute.BoundReference;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PhysicalScan implements PhysicalPlan {
@@ -26,8 +27,9 @@ public class PhysicalScan implements PhysicalPlan {
     }
 
     @Override
-    public void resolveSchema() {
-        SchemaResolver.resolve(schema, Utils.toImmutableList(structType.stream().map(c -> c.exprId)));
+    public void resolveIndex() {
+        Map<Long, Integer> inputs = Utils.zip(index -> structType.get(index).exprId, structType.size());
+        ReferenceResolver.resolveSchema(schema, inputs);
     }
 
     @Override

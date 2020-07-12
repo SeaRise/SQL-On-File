@@ -26,7 +26,7 @@ public class Analyzer {
                 applyingPlan = rule.apply(applyingPlan);
             }
             if (preApplyPlan == applyingPlan) {
-                Utils.checkArgument(applyingPlan.resolved(), "logical plan [%s] has not yet resolved");
+                Utils.checkArgument(applyingPlan.resolved(), "logical plan has not yet resolved: \n" + applyingPlan.visitToString());
                 return applyingPlan;
             }
             preApplyPlan = applyingPlan;

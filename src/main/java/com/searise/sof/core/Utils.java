@@ -1,6 +1,7 @@
 package com.searise.sof.core;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -9,10 +10,19 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Utils {
+    public static Map<Long, Integer> zip(ExprIdGetter exprIdGetter, int size) {
+        ImmutableMap.Builder<Long, Integer> build = ImmutableMap.builder();
+        for (int index = 0; index < size; index++) {
+            build.put(exprIdGetter.apply(index), index);
+        }
+        return build.build();
+    }
+
     public static <T> List<T> toImmutableList(Stream<T> stream) {
         ImmutableList.Builder<T> builder = ImmutableList.builder();
         stream.forEach(builder::add);

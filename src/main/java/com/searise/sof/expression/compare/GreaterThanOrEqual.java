@@ -13,7 +13,7 @@ public class GreaterThanOrEqual extends BinaryComparison {
 
     public Expression copyWithNewChildren(List<Expression> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
-        return new GreaterThanOrEqual(left, right);
+        return new GreaterThanOrEqual(children.get(0), children.get(1));
     }
 
     @Override

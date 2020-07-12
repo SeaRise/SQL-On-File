@@ -17,10 +17,11 @@ public class FilterExec implements Executor {
     private final Executor child;
     private final Projection schemaProjection;
     private final Predication predication;
+
     public FilterExec(Executor child, List<Expression> conditions, List<BoundReference> schema) {
         this.child = child;
         InternalRow output = new ArrayRow(schema.size());
-        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression)boundReference)), output);
+        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output);
         this.predication = new Predication(conditions);
     }
 

@@ -6,11 +6,12 @@ import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PhysicalNestedLoopJoin implements PhysicalPlan {
     public final List<BoundReference> schema;
-    public final List<Expression> conditions;
+    public List<Expression> conditions;
     public final PhysicalPlan stream;
     public final PhysicalPlan build;
 
@@ -32,11 +33,13 @@ public class PhysicalNestedLoopJoin implements PhysicalPlan {
     }
 
     @Override
-    public void resolveSchema() {
-        stream.resolveSchema();
-        build.resolveSchema();
+    public void resolveIndex() {
+        stream.resolveIndex();
+        build.resolveIndex();
         List<BoundReference> childSchema = Utils.combine(stream.schema(), build.schema());
-        SchemaResolver.resolve(schema, Utils.toImmutableList(childSchema.stream().map(c -> c.exprId)));
+        Map<Long, Integer> inputs = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
+        this.conditions = ReferenceResolver.resolveExpression(conditions, inputs);
+        ReferenceResolver.resolveSchema(schema, inputs);
     }
 
     @Override

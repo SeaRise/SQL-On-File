@@ -13,7 +13,7 @@ public class LessThan extends BinaryComparison {
 
     public Expression copyWithNewChildren(List<Expression> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
-        return new LessThan(left, right);
+        return new LessThan(children.get(0), children.get(1));
     }
 
     @Override

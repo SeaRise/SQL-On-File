@@ -7,7 +7,7 @@ public class Builder {
     public Executor build(PhysicalPlan physicalPlan) {
         Executor topExecutor = doBuild(physicalPlan);
         if (topExecutor.getClass() == ProjectExec.class) {
-            topExecutor = new PrintlnExec(topExecutor);
+            topExecutor = new ResultExec(topExecutor);
         }
         return topExecutor;
     }

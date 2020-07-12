@@ -69,7 +69,7 @@ public class Optimizer {
     }
 
     private PhysicalPlan onPhaseAfterprocessing(PhysicalPlan physicalPlan) {
-        physicalPlan.resolveSchema();
+        physicalPlan.resolveIndex();
         return physicalPlan;
     }
 }

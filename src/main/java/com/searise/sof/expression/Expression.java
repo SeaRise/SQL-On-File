@@ -11,10 +11,10 @@ public interface Expression extends AnalysisHelper<Expression> {
     }
 
     default DataType dataType() {
-        throw new SofException("unresolved expression can not call dataType");
+        throw new SofException(String.format("unresolved expression %s can not call dataType", getClass().getSimpleName()));
     }
 
     default Object eval(InternalRow input) {
-        throw new SofException("can not support eval");
+        throw new SofException(String.format("%s can not support eval", getClass().getSimpleName()));
     }
 }

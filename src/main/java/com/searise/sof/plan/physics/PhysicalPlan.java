@@ -8,5 +8,5 @@ import java.util.List;
 public interface PhysicalPlan extends QueryPlan {
     List<BoundReference> schema();
 
-    void resolveSchema();
+    void resolveIndex();
 }

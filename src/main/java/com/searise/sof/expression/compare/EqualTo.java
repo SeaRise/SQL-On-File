@@ -13,7 +13,7 @@ public class EqualTo extends BinaryComparison {
 
     public Expression copyWithNewChildren(List<Expression> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
-        return new EqualTo(left, right);
+        return new EqualTo(children.get(0), children.get(1));
     }
 
     @Override

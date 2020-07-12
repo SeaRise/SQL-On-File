@@ -16,7 +16,7 @@ public class Multiply extends BinaryOperator {
     @Override
     public Expression copyWithNewChildren(List<Expression> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
-        return new Multiply(left, right);
+        return new Multiply(children.get(0), children.get(1));
     }
 
     @Override
