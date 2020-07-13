@@ -28,7 +28,7 @@ public class AnalyzerSuite {
                         "  Relation [a, b] (15:StringType,16:StringType,17:StringType,18:StringType)");
 
         testAnalyse("select -((((1+1)-2)/3)*4) from a",
-                "Project [(-((((1 + 1) / 2) - 3) * 4))]\n" +
+                "Project [(-((((1 + 1) - 2) / 3) * 4))]\n" +
                         "  Relation [a] (19:StringType,20:StringType,21:StringType,22:StringType)");
 
         testAnalyse("select 1 as a, a as b from (select a, b from a) a",

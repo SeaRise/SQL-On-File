@@ -15,13 +15,13 @@ public class OptimizerSuite {
     @Test
     public void test() {
         doTest("select 1 as a, a as b from a",
-                "PhysicalProject [1 as 4:IntegerType, 0:StringType as 5:StringType]\n" +
-                        "  PhysicalScan [/|,] (StringType:0:-1,StringType:1:-1,StringType:2:-1,StringType:3:-1)");
+                "PhysicalProject [1 as 4:IntegerType, StringType:0:0 as 5:StringType]\n" +
+                        "  PhysicalScan [/|,] (StringType:0:0,StringType:1:1,StringType:2:2,StringType:3:3)");
 
         doTest("select 1 as a, a as b from (select a, b from a) a",
-                "PhysicalProject [1 as 10:IntegerType, 6:StringType as 11:StringType]\n" +
-                        "  PhysicalProject [6:StringType, 7:StringType]\n" +
-                        "    PhysicalScan [/|,] (StringType:6:-1,StringType:7:-1,StringType:8:-1,StringType:9:-1)");
+                "PhysicalProject [1 as 10:IntegerType, StringType:6:0 as 11:StringType]\n" +
+                        "  PhysicalProject [StringType:6:0, StringType:7:1]\n" +
+                        "    PhysicalScan [/|,] (StringType:6:0,StringType:7:1,StringType:8:2,StringType:9:3)");
     }
 
     private void doTest(String sql, String expect) {

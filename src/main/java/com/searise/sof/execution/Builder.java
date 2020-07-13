@@ -6,9 +6,7 @@ import com.searise.sof.plan.physics.*;
 public class Builder {
     public Executor build(PhysicalPlan physicalPlan) {
         Executor topExecutor = doBuild(physicalPlan);
-        if (topExecutor.getClass() == ProjectExec.class) {
-            topExecutor = new ResultExec(topExecutor);
-        }
+        topExecutor = new ResultExec(topExecutor);
         return topExecutor;
     }
 

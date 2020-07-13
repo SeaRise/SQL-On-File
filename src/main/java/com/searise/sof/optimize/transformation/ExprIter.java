@@ -19,21 +19,21 @@ public class ExprIter {
         this.pattern = pattern;
     }
 
-    public static Optional<ExprIter> newExprIter(Group group, Pattern pattern) {
-        GroupExpr groupExpr = group.groupExpr();
-        if (Operand.getOperand(groupExpr.exprNode) != pattern.operand ||
-                groupExpr.children.size() != pattern.children.size()) {
-            return Optional.empty();
-        }
-
-        ImmutableList.Builder<ExprIter> childrenBuilder = ImmutableList.builder();
-        for (int i = 0; i < groupExpr.children.size(); i++) {
-            Optional<ExprIter> childOptional = newExprIter(groupExpr.children.get(i), pattern.children.get(i));
-            if (!childOptional.isPresent()) {
-                return Optional.empty();
-            }
-            childrenBuilder.add(childOptional.get());
-        }
-        return Optional.of(new ExprIter(group, childrenBuilder.build(), pattern));
+    public static Optional<ExprIter> newExprIter(GroupExpr groupExpr, Pattern pattern) {
+//        if (Operand.getOperand(groupExpr.exprNode) != pattern.operand ||
+//                groupExpr.children.size() != pattern.children.size()) {
+//            return Optional.empty();
+//        }
+//
+//        ImmutableList.Builder<ExprIter> childrenBuilder = ImmutableList.builder();
+//        for (int i = 0; i < groupExpr.children.size(); i++) {
+//            Optional<ExprIter> childOptional = newExprIter(groupExpr.children.get(i), pattern.children.get(i));
+//            if (!childOptional.isPresent()) {
+//                return Optional.empty();
+//            }
+//            childrenBuilder.add(childOptional.get());
+//        }
+//        return Optional.of(new ExprIter(group, childrenBuilder.build(), pattern));
+        return Optional.empty();
     }
 }
