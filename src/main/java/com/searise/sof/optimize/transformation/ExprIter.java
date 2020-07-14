@@ -1,52 +1,47 @@
 package com.searise.sof.optimize.transformation;
 
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.SofException;
 import com.searise.sof.optimize.Group;
 import com.searise.sof.optimize.GroupExpr;
-import com.searise.sof.optimize.Iterator;
 import com.searise.sof.optimize.Operand;
-import com.searise.sof.plan.logic.LogicalPlan;
+import com.searise.sof.optimize.iter.Iterator;
 
 import java.util.List;
 import java.util.Optional;
 
 public class ExprIter {
     public final Group group;
-    public final List<ExprIter> children;
-    public final Pattern pattern;
-    public Iterator<GroupExpr> iterator;
-    public Optional<GroupExpr> cur = Optional.empty();
+    private List<ExprIter> children = ImmutableList.of();
+    private final Pattern pattern;
+    private final Iterator<GroupExpr> iterator;
+    private Optional<GroupExpr> cur;
+    private GroupExpr value;
 
-    private ExprIter(Group group, List<ExprIter> children, Pattern pattern) {
+    private ExprIter(Group group, Pattern pattern) {
         this.group = group;
-        this.children = children;
         this.pattern = pattern;
-        this.iterator = group.iter();
+        this.iterator = group.iter().newReadOnlyIter();
+        if (iterator.hasNext()) {
+            this.cur = Optional.of(iterator.next());
+        }
     }
 
-    public boolean hasValue() {
-        return cur.isPresent();
+    private ExprIter(GroupExpr groupExpr, Pattern pattern) {
+        this.group = groupExpr.group;
+        this.pattern = pattern;
+        this.iterator = new Iterator<GroupExpr>().add(groupExpr).newReadOnlyIter();
+        this.cur = Optional.of(iterator.next());
     }
+
     public GroupExpr getValue() {
-        return cur.orElseGet(() -> {
-            throw new SofException("has not value now!");
-        });
+        return value;
     }
 
     public boolean next() {
         if (!cur.isPresent()) {
-            if (!iterator.hasNext()) {
-                return false;
-            }
-            cur = Optional.of(iterator.next());
-            for (ExprIter child : children) {
-                if (!child.next()) {
-                    return false;
-                }
-            }
-            return true;
+            return false;
         }
+        value = cur.get();
 
         for (ExprIter child : children) {
             if (child.next()) {
@@ -54,20 +49,35 @@ public class ExprIter {
             }
         }
 
-        if (iterator.hasNext()) {
-            cur = Optional.of(iterator.next());
-            for (ExprIter child : children) {
-                child.reset();
-                if (!child.next()) {
-                    return false;
-                }
-            }
-        }
-        return false;
+        selfNext();
+
+        return true;
     }
 
-    public void reset() {
-        iterator.reset();
+    private void selfNext() {
+        cur = Optional.empty();
+        while (iterator.hasNext()) {
+            GroupExpr groupExpr = iterator.next();
+            if (Operand.getOperand(groupExpr.exprNode) != pattern.operand) {
+                continue;
+            }
+
+            if (pattern.children.isEmpty()) {
+                cur = Optional.of(groupExpr);
+                break;
+            }
+
+            if (groupExpr.children.size() != pattern.children.size()) {
+                continue;
+            }
+
+            Optional<List<ExprIter>> children = newChildren(groupExpr, pattern);
+            if (children.isPresent()) {
+                this.children = children.get();
+                cur = Optional.of(groupExpr);
+                break;
+            }
+        }
     }
 
     public static Optional<ExprIter> newExprIter(GroupExpr groupExpr, Pattern pattern) {
@@ -76,15 +86,24 @@ public class ExprIter {
         }
 
         if (pattern.children.isEmpty()) {
-            Iterator<LogicalPlan> iterator = new Iterator<>();
-            iterator.add(groupExpr.exprNode);
-            return Optional.of(new ExprIter(groupExpr.group, ImmutableList.of(), pattern, iterator));
+            return Optional.of(new ExprIter(groupExpr, pattern));
         }
 
         if (groupExpr.children.size() != pattern.children.size()) {
             return Optional.empty();
         }
 
+        Optional<List<ExprIter>> children = newChildren(groupExpr, pattern);
+        if (!children.isPresent()) {
+            return Optional.empty();
+        }
+
+        ExprIter iter = new ExprIter(groupExpr, pattern);
+        iter.children = children.get();
+        return Optional.of(iter);
+    }
+
+    private static Optional<List<ExprIter>> newChildren(GroupExpr groupExpr, Pattern pattern) {
         ImmutableList.Builder<ExprIter> childBuilder = ImmutableList.builder();
         for (int i = 0; i < groupExpr.children.size(); i++) {
             Optional<ExprIter> child = newExprIter(groupExpr.children.get(i), pattern.children.get(i));
@@ -93,32 +112,39 @@ public class ExprIter {
             }
             childBuilder.add(child.get());
         }
-        Iterator<LogicalPlan> iterator = new Iterator<>();
-        iterator.add(groupExpr.exprNode);
-        return Optional.of(new ExprIter(groupExpr.group, childBuilder.build(), pattern, iterator));
+        return Optional.of(childBuilder.build());
     }
 
     private static Optional<ExprIter> newExprIter(Group group, Pattern pattern) {
-        Iterator<LogicalPlan> iterator = new Iterator<>();
-        Iterator<GroupExpr> groupExprIterator = group.iter();
-        while (iterator.hasNext()) {
-            GroupExpr groupExpr = iterator.next();
-            newExprIter(groupExpr, pattern);
+        ExprIter iter = new ExprIter(group, pattern);
+        if (!iter.cur.isPresent()) {
+            return Optional.empty();
         }
-//
-//        if (Operand.getOperand(groupExpr.exprNode) != pattern.operand ||
-//                groupExpr.children.size() != pattern.children.size()) {
-//            return Optional.empty();
-//        }
-//
-//        ImmutableList.Builder<ExprIter> itersBuild = ImmutableList.builder();
-//        for (int i = 0; i < groupExpr.children.size(); i++) {
-//            List<ExprIter> children = newExprIter(groupExpr.children.get(i), pattern.children.get(i));
-//            if (children.isEmpty()) {
-//                return ImmutableList.of();
-//            }
-//        }
-//        return Optional.of(new ExprIter(group, childrenBuilder.build(), pattern));
-        return Optional.empty();
+
+        while (true) {
+            GroupExpr groupExpr = iter.cur.get();
+            if (Operand.getOperand(groupExpr.exprNode) != pattern.operand) {
+                continue;
+            }
+
+            if (pattern.children.isEmpty()) {
+                return Optional.of(iter);
+            }
+
+            if (groupExpr.children.size() != pattern.children.size()) {
+                continue;
+            }
+
+            Optional<List<ExprIter>> children = newChildren(groupExpr, pattern);
+            if (children.isPresent()) {
+                return Optional.of(iter);
+            }
+
+            if (!iter.iterator.hasNext()) {
+                return Optional.empty();
+            }
+
+            iter.cur = Optional.of(iter.iterator.next());
+        }
     }
 }

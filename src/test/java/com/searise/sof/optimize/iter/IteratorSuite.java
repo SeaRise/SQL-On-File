@@ -1,4 +1,4 @@
-package com.searise.sof.optimize;
+package com.searise.sof.optimize.iter;
 
 import com.google.common.base.Preconditions;
 import org.junit.Test;
@@ -17,14 +17,16 @@ public class IteratorSuite {
         }
         int index = 0;
         while (iterator.hasNext()) {
-            Preconditions.checkArgument(tests.get(index++).equals(iterator.next()));
+            int res = iterator.next();
+            Preconditions.checkArgument(tests.get(index++).equals(res));
         }
 
         tests = Arrays.asList(0, 1, 2, 3, 4, 5);
         iterator.reset();
         index = 0;
         while (iterator.hasNext()) {
-            Preconditions.checkArgument(tests.get(index++).equals(iterator.next()));
+            int res = iterator.next();
+            Preconditions.checkArgument(tests.get(index++).equals(res));
             if (index == 5) {
                 iterator.add(5);
             }
@@ -54,6 +56,12 @@ public class IteratorSuite {
         index = 0;
         while (iterator.hasNext()) {
             Preconditions.checkArgument(tests.get(index++).equals(iterator.next()));
+        }
+
+        Iterator<Integer> readIter = iterator.newReadOnlyIter();
+        index = 0;
+        while (readIter.hasNext()) {
+            Preconditions.checkArgument(tests.get(index++).equals(readIter.next()));
         }
     }
 }

@@ -3,6 +3,7 @@ package com.searise.sof.optimize;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Utils;
 import com.searise.sof.optimize.implementation.ImplementationRule;
+import com.searise.sof.optimize.iter.Iterator;
 import com.searise.sof.optimize.preprocess.PreprocessRule;
 import com.searise.sof.optimize.transformation.ExprIter;
 import com.searise.sof.optimize.transformation.Pattern;
@@ -10,7 +11,9 @@ import com.searise.sof.optimize.transformation.TransformationRule;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.searise.sof.optimize.Operand.getOperand;
 
@@ -61,7 +64,7 @@ public class Optimizer {
             return;
         }
         group.explored = true;
-        Iterator<GroupExpr> iterator = group.iter();
+        Iterator<GroupExpr> iterator = group.iter().reset();
         while (iterator.hasNext()) {
             GroupExpr groupExpr = iterator.next();
             if (groupExpr.explored) {
@@ -105,7 +108,7 @@ public class Optimizer {
     }
 
     private PhysicalPlan implGroup(Group group) {
-        GroupExpr groupExpr = group.iter().next();
+        GroupExpr groupExpr = group.iter().reset().next();
         List<PhysicalPlan> children = Utils.toImmutableList(groupExpr.children.stream().map(this::implGroup));
         ImplementationRule implRule = implementationRuleMap.get(getOperand(groupExpr.exprNode));
         return implRule.onImplement(groupExpr, children);

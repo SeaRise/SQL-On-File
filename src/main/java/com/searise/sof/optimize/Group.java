@@ -2,9 +2,10 @@ package com.searise.sof.optimize;
 
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.Attribute;
+import com.searise.sof.optimize.iter.Iterator;
 import com.searise.sof.plan.logic.LogicalPlan;
 
-import java.util.*;
+import java.util.List;
 
 public class Group {
     public final List<Attribute> schema;
@@ -13,7 +14,7 @@ public class Group {
 
     public Group(List<Attribute> schema) {
         this.schema = schema;
-        this.equivalents = new Iterator<>();
+        this.equivalents = new com.searise.sof.optimize.iter.Iterator<>();
     }
 
     public void insert(GroupExpr groupExpr) {
@@ -21,7 +22,6 @@ public class Group {
     }
 
     public Iterator<GroupExpr> iter() {
-        equivalents.reset();
         return equivalents;
     }
 

@@ -9,7 +9,7 @@ public class Pattern {
     public final Operand operand;
     public final List<Pattern> children;
 
-    public Pattern(Operand operand, List<com.searise.sof.optimize.transformation.Pattern> children) {
+    public Pattern(Operand operand, List<Pattern> children) {
         this.operand = operand;
         this.children = children;
     }
