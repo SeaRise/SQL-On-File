@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface TransformationRule {
     Pattern pattern();
 
-    Optional<GroupExpr> onTransform(GroupExpr groupExpr);
+    Optional<GroupExpr> onTransform(ExprIter exprIter);
 
     Map<Operand, List<TransformationRule>> transformationRuleMap = ImmutableMap.of();
 }

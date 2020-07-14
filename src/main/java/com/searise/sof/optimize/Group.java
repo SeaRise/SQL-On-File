@@ -4,18 +4,16 @@ import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.plan.logic.LogicalPlan;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class Group {
     public final List<Attribute> schema;
-    private List<GroupExpr> equivalents;
+    private Iterator<GroupExpr> equivalents;
+    public boolean explored = false;
 
     public Group(List<Attribute> schema) {
         this.schema = schema;
-        this.equivalents = new ArrayList<>();
+        this.equivalents = new Iterator<>();
     }
 
     public void insert(GroupExpr groupExpr) {
@@ -23,7 +21,8 @@ public class Group {
     }
 
     public Iterator<GroupExpr> iter() {
-        return equivalents.iterator();
+        equivalents.reset();
+        return equivalents;
     }
 
     // Convert2GroupExpr converts a logical plan to a GroupExpr.

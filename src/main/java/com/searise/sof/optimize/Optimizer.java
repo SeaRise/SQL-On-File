@@ -4,14 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Utils;
 import com.searise.sof.optimize.implementation.ImplementationRule;
 import com.searise.sof.optimize.preprocess.PreprocessRule;
+import com.searise.sof.optimize.transformation.ExprIter;
 import com.searise.sof.optimize.transformation.Pattern;
 import com.searise.sof.optimize.transformation.TransformationRule;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.searise.sof.optimize.Operand.getOperand;
 
@@ -53,10 +52,15 @@ public class Optimizer {
     }
 
     private Group onPhaseExploration(Group rootGroup) {
-        return exploreGroup(rootGroup);
+        exploreGroup(rootGroup);
+        return rootGroup;
     }
 
-    private Group exploreGroup(Group group) {
+    private void exploreGroup(Group group) {
+        if (group.explored) {
+            return;
+        }
+        group.explored = true;
         Iterator<GroupExpr> iterator = group.iter();
         while (iterator.hasNext()) {
             GroupExpr groupExpr = iterator.next();
@@ -69,12 +73,31 @@ public class Optimizer {
                 exploreGroup(child);
             }
 
-//            Operand operand = Operand.getOperand(groupExpr.exprNode);
-//            for (TransformationRule rule : transformationRuleMap.getOrDefault(operand, ImmutableList.of())) {
-//                Pattern pattern = rule.pattern();
-//            }
+            boolean isReplace = false;
+
+            Operand operand = Operand.getOperand(groupExpr.exprNode);
+            for (TransformationRule rule : transformationRuleMap.getOrDefault(operand, ImmutableList.of())) {
+                Pattern pattern = rule.pattern();
+                if (pattern.operand != operand) {
+                    continue;
+                }
+
+                Optional<ExprIter> iterOptional = ExprIter.newExprIter(groupExpr, pattern);
+                if (iterOptional.isPresent()) {
+                    ExprIter iter = iterOptional.get();
+                    while (iter.next()) {
+                        Optional<GroupExpr> replace = rule.onTransform(iter);
+                        if (replace.isPresent()) {
+                            group.insert(replace.get());
+                            isReplace = true;
+                        }
+                    }
+                }
+            }
+            if (isReplace) {
+                iterator.remove();
+            }
         }
-        return group;
     }
 
     private PhysicalPlan onPhaseImplementation(Group rootGroup) {
