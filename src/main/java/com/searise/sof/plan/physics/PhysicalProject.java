@@ -46,22 +46,22 @@ public class PhysicalProject implements PhysicalPlan {
 
     @Override
     public String toString() {
-        return String.format("PhysicalProject [%s]", projectList.stream().map(Object::toString).collect(Collectors.joining(", ")));
+        return String.format("PhysicalProject [%s] [%s]", schemaToString(), projectList.stream().map(Object::toString).collect(Collectors.joining(", ")));
     }
 
     @Override
     public void prune(List<BoundReference> father, boolean isTop) {
         if (!isTop) {
             Map<Long, Integer> exprIds = Utils.zip(index -> schema.get(index).exprId, schema.size());
-            schema = father;
             ImmutableList.Builder<Expression> newProjectListBuilder = ImmutableList.builder();
-            for (BoundReference reference : schema) {
+            for (BoundReference reference : father) {
                 int index = exprIds.getOrDefault(reference.exprId, -1);
                 if (index >= 0) {
                     newProjectListBuilder.add(projectList.get(index));
                 }
             }
             projectList = newProjectListBuilder.build();
+            schema = Utils.copy(father);
         }
 
         child.prune(extractUseSchema(projectList), false);

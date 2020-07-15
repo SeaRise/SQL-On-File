@@ -2,6 +2,7 @@ package com.searise.sof.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.searise.sof.expression.attribute.BoundReference;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -9,9 +10,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class Utils {
@@ -23,21 +22,21 @@ public class Utils {
         return build.build();
     }
 
+    public static List<BoundReference> copy(List<BoundReference> references) {
+        return Utils.toImmutableList(references.stream().map(r -> new BoundReference(r.dataType, r.exprId)));
+    }
+
     public static <T> List<T> toImmutableList(Stream<T> stream) {
         ImmutableList.Builder<T> builder = ImmutableList.builder();
         stream.forEach(builder::add);
         return builder.build();
     }
 
-    public static <T> List<T> combine(List<T> left, List<T> right) {
-        if (left.isEmpty()) {
-            return right;
-        } else if (right.isEmpty()) {
-            return left;
-        } else {
-            ImmutableList.Builder<T> builder = ImmutableList.builder();
-            return builder.addAll(left).addAll(right).build();
-        }
+    public static <T> List<T> combineDistinct(List<T> left, List<T> right) {
+        List<T> builder = new ArrayList<>();
+        builder.addAll(left);
+        builder.addAll(right);
+        return toImmutableList(builder.stream().distinct());
     }
 
     public static void checkArgument(boolean expression, @Nullable Object errorMessage) {

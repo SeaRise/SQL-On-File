@@ -5,6 +5,8 @@ import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.type.DataType;
 
+import java.util.Objects;
+
 public class BoundReference implements Expression {
     public final DataType dataType;
     public final long exprId;
@@ -29,7 +31,7 @@ public class BoundReference implements Expression {
     }
 
     public String toString() {
-        return String.format("%s:%d:%d", dataType, exprId, index);
+        return String.format("%s:exprId->%d:index->%d", dataType, exprId, index);
     }
 
     public DataType dataType() {
@@ -41,5 +43,18 @@ public class BoundReference implements Expression {
             throw new SofException("can not call eval before calling resolveIndex");
         }
         return InternalRow.getReader(index, dataType).apply(input);
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(exprId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (Objects.isNull(obj) || obj.getClass() != BoundReference.class) {
+            return false;
+        }
+        return exprId == ((BoundReference)obj).exprId;
     }
 }

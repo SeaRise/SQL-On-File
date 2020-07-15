@@ -119,6 +119,7 @@ public class Optimizer {
     }
 
     private PhysicalPlan onPhaseAfterprocessing(PhysicalPlan physicalPlan) {
+        physicalPlan.prune(ImmutableList.of(), true);
         physicalPlan.resolveIndex();
         return physicalPlan;
     }

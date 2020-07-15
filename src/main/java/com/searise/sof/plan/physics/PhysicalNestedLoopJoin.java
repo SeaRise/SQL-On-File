@@ -4,13 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
+import com.searise.sof.plan.logic.LogicalPlan;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PhysicalNestedLoopJoin implements PhysicalPlan {
-    public final List<BoundReference> schema;
+    public List<BoundReference> schema;
     public List<Expression> conditions;
     public final PhysicalPlan stream;
     public final PhysicalPlan build;
@@ -36,7 +37,7 @@ public class PhysicalNestedLoopJoin implements PhysicalPlan {
     public void resolveIndex() {
         stream.resolveIndex();
         build.resolveIndex();
-        List<BoundReference> childSchema = Utils.combine(stream.schema(), build.schema());
+        List<BoundReference> childSchema = Utils.combineDistinct(stream.schema(), build.schema());
         Map<Long, Integer> inputs = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
         this.conditions = ReferenceResolver.resolveExpression(conditions, inputs);
         ReferenceResolver.resolveSchema(schema, inputs);
@@ -44,6 +45,25 @@ public class PhysicalNestedLoopJoin implements PhysicalPlan {
 
     @Override
     public String toString() {
-        return String.format("PhysicalNestedLoopJoin [%s]", conditions.stream().map(Object::toString).collect(Collectors.joining(", ")));
+        return String.format("PhysicalNestedLoopJoin [%s] [%s]", schemaToString(), conditions.stream().map(Object::toString).collect(Collectors.joining(", ")));
+    }
+
+    @Override
+    public void prune(List<BoundReference> father, boolean isTop) {
+        if (!isTop) {
+            schema = Utils.copy(father);
+        }
+
+        List<BoundReference> useSchema = extractUseSchema(conditions);
+        pruneChild(stream, useSchema);
+        pruneChild(build, useSchema);
+    }
+
+    private void pruneChild(PhysicalPlan child, List<BoundReference> useSchema) {
+        List<BoundReference> childSchema = child.schema();
+        Map<Long, Integer> childMap = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
+        List<BoundReference> conditionsUseSchema = Utils.toImmutableList(useSchema.stream().filter(r -> childMap.containsKey(r.exprId)));
+        List<BoundReference> parentUseSchema = Utils.toImmutableList(schema.stream().filter(r -> childMap.containsKey(r.exprId)));
+        child.prune(Utils.combineDistinct(conditionsUseSchema, parentUseSchema), false);
     }
 }

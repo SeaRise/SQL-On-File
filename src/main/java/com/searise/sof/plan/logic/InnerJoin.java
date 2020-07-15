@@ -51,6 +51,6 @@ public class InnerJoin implements LogicalPlan {
 
     @Override
     public List<Attribute> schema() {
-        return Utils.combine(left.schema(), right.schema());
+        return Utils.combineDistinct(left.schema(), right.schema());
     }
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PhysicalScan implements PhysicalPlan {
-    public final List<BoundReference> schema;
+    public List<BoundReference> schema;
     public final List<Attribute> structType;
     public final String filePath;
     public final String separator;
@@ -34,7 +34,14 @@ public class PhysicalScan implements PhysicalPlan {
 
     @Override
     public String toString() {
-        return String.format("PhysicalScan [%s|%s] (%s)", filePath, separator,
-                schema.stream().map(BoundReference::toString).collect(Collectors.joining(",")));
+        return String.format("PhysicalScan [%s] [%s|%s] (%s)", schemaToString(), filePath, separator,
+                structType.stream().map(Attribute::toString).collect(Collectors.joining(",")));
+    }
+
+    @Override
+    public void prune(List<BoundReference> father, boolean isTop) {
+        if (!isTop) {
+            schema = Utils.copy(father);
+        }
     }
 }

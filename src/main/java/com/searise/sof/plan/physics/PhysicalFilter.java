@@ -41,15 +41,16 @@ public class PhysicalFilter implements PhysicalPlan {
 
     @Override
     public String toString() {
-        return String.format("PhysicalFilter [%s]", conditions.stream().map(Object::toString).collect(Collectors.joining(", ")));
+        return String.format("PhysicalFilter [%s] [%s]", schemaToString(), conditions.stream().map(Object::toString).collect(Collectors.joining(", ")));
     }
 
     @Override
     public void prune(List<BoundReference> father, boolean isTop) {
         if (!isTop) {
-            schema = father;
+            schema = Utils.copy(father);
         }
 
-        child.prune(extractUseSchema(conditions), false);
+
+        child.prune(Utils.combineDistinct(extractUseSchema(conditions), schema), false);
     }
 }
