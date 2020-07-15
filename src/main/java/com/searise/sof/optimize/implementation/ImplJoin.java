@@ -15,7 +15,7 @@ public class ImplJoin implements ImplementationRule {
     public PhysicalPlan onImplement(GroupExpr groupExpr, List<PhysicalPlan> children) {
         Preconditions.checkArgument(children.size() == 2);
         InnerJoin join = (InnerJoin) groupExpr.exprNode;
-        List<BoundReference> schema = Utils.toImmutableList(join.schema().stream().
+        List<BoundReference> schema = Utils.toImmutableList(groupExpr.group.schema.stream().
                 map(attr -> new BoundReference(attr.dataType, attr.exprId)));
         return new PhysicalNestedLoopJoin(schema, join.conditions, children.get(0), children.get(1));
     }

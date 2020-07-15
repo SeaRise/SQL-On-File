@@ -65,6 +65,7 @@ public class Optimizer {
         }
         group.explored = true;
         Iterator<GroupExpr> iterator = group.iter().reset();
+
         while (iterator.hasNext()) {
             GroupExpr groupExpr = iterator.next();
             if (groupExpr.explored) {
@@ -81,20 +82,23 @@ public class Optimizer {
             Operand operand = Operand.getOperand(groupExpr.exprNode);
             for (TransformationRule rule : transformationRuleMap.getOrDefault(operand, ImmutableList.of())) {
                 Pattern pattern = rule.pattern();
-                if (pattern.operand != operand) {
+                if (!pattern.operand.match(operand)) {
                     continue;
                 }
 
                 Optional<ExprIter> iterOptional = ExprIter.newExprIter(groupExpr, pattern);
                 if (iterOptional.isPresent()) {
                     ExprIter iter = iterOptional.get();
-                    while (iter.next()) {
-                        Optional<GroupExpr> replace = rule.onTransform(iter);
-                        if (replace.isPresent()) {
-                            group.insert(replace.get());
+                    do {
+                        List<GroupExpr> replaces = Utils.checkNotNull(rule.onTransform(iter),
+                                "the result of onTransform can not be null : " + rule.getClass().getSimpleName());
+                        if (!replaces.isEmpty()) {
+                            for (GroupExpr replace : replaces) {
+                                group.insert(replace);
+                            }
                             isReplace = true;
                         }
-                    }
+                    } while (iter.next());
                 }
             }
             if (isReplace) {

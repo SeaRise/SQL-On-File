@@ -5,7 +5,7 @@ import com.searise.sof.plan.QueryPlan;
 
 import java.util.List;
 
-public interface PhysicalPlan extends QueryPlan {
+public interface PhysicalPlan extends QueryPlan, SchemaPruneHelper {
     List<BoundReference> schema();
 
     void resolveIndex();

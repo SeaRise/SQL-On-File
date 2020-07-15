@@ -9,12 +9,16 @@ public class Pattern {
     public final Operand operand;
     public final List<Pattern> children;
 
-    public Pattern(Operand operand, List<Pattern> children) {
+    private Pattern(Operand operand, List<Pattern> children) {
         this.operand = operand;
         this.children = children;
     }
 
     public Pattern(Operand operand) {
         this(operand, ImmutableList.of());
+    }
+
+    public Pattern(Operand operand, Pattern... children) {
+        this(operand, ImmutableList.copyOf(children));
     }
 }

@@ -1,6 +1,7 @@
 package com.searise.sof.optimize.transformation;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.SofException;
 import com.searise.sof.optimize.Group;
 import com.searise.sof.optimize.GroupExpr;
 import com.searise.sof.optimize.Operand;
@@ -8,21 +9,21 @@ import com.searise.sof.optimize.iter.Iterator;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ExprIter {
     public final Group group;
     private List<ExprIter> children = ImmutableList.of();
     private final Pattern pattern;
     private final Iterator<GroupExpr> iterator;
-    private Optional<GroupExpr> cur;
-    private GroupExpr value;
+    private Optional<GroupExpr> value;
 
     private ExprIter(Group group, Pattern pattern) {
         this.group = group;
         this.pattern = pattern;
         this.iterator = group.iter().newReadOnlyIter();
         if (iterator.hasNext()) {
-            this.cur = Optional.of(iterator.next());
+            this.value = Optional.of(iterator.next());
         }
     }
 
@@ -30,40 +31,45 @@ public class ExprIter {
         this.group = groupExpr.group;
         this.pattern = pattern;
         this.iterator = new Iterator<GroupExpr>().add(groupExpr).newReadOnlyIter();
-        this.cur = Optional.of(iterator.next());
+        this.value = Optional.of(iterator.next());
     }
 
     public GroupExpr getValue() {
-        return value;
+        return value.orElseGet(() -> {
+            throw new SofException("value is null");
+        });
     }
 
     public boolean next() {
-        if (!cur.isPresent()) {
+        if (!value.isPresent()) {
             return false;
         }
-        value = cur.get();
 
-        for (ExprIter child : children) {
-            if (child.next()) {
-                return true;
+        for (int i = children.size()-1; i >= 0 ; i--) {
+            if (!children.get(i).next()) {
+                continue;
             }
+
+            for (int j = i + 1; j < children.size(); j++) {
+                children.get(j).reset();
+            }
+            return true;
         }
 
         selfNext();
-
-        return true;
+        return value.isPresent();
     }
 
     private void selfNext() {
-        cur = Optional.empty();
+        value = Optional.empty();
         while (iterator.hasNext()) {
             GroupExpr groupExpr = iterator.next();
-            if (Operand.getOperand(groupExpr.exprNode) != pattern.operand) {
+            if (Operand.getOperand(groupExpr.exprNode).match(pattern.operand)) {
                 continue;
             }
 
             if (pattern.children.isEmpty()) {
-                cur = Optional.of(groupExpr);
+                value = Optional.of(groupExpr);
                 break;
             }
 
@@ -74,14 +80,64 @@ public class ExprIter {
             Optional<List<ExprIter>> children = newChildren(groupExpr, pattern);
             if (children.isPresent()) {
                 this.children = children.get();
-                cur = Optional.of(groupExpr);
+                value = Optional.of(groupExpr);
                 break;
             }
         }
     }
 
+    public boolean reset() {
+        this.iterator.reset();
+        if (!iterator.hasNext()) {
+            return false;
+        }
+        this.value = Optional.of(iterator.next());
+        return doReset();
+    }
+
+    private boolean doReset() {
+        while (true) {
+            GroupExpr groupExpr = value.get();
+            if (!Operand.getOperand(groupExpr.exprNode).match(pattern.operand)) {
+                value = Optional.of(iterator.next());
+                continue;
+            }
+
+            if (pattern.children.isEmpty()) {
+                return true;
+            }
+
+            if (groupExpr.children.size() != pattern.children.size()) {
+                value = Optional.of(iterator.next());
+                continue;
+            }
+
+            Optional<List<ExprIter>> children = newChildren(groupExpr, pattern);
+            if (children.isPresent()) {
+                this.children = children.get();
+                return true;
+            }
+
+            if (!iterator.hasNext()) {
+                return false;
+            }
+
+            value = Optional.of(iterator.next());
+        }
+    }
+
+    @Override
+    public String toString() {
+        return visitToString("");
+    }
+
+    private String visitToString(String preString) {
+        String nextPreString = preString + "  ";
+        return preString + getValue().exprNode.toString() + "\n" + children.stream().map(child -> child.visitToString(nextPreString)).collect(Collectors.joining());
+    }
+
     public static Optional<ExprIter> newExprIter(GroupExpr groupExpr, Pattern pattern) {
-        if (Operand.getOperand(groupExpr.exprNode) != pattern.operand) {
+        if (!Operand.getOperand(groupExpr.exprNode).match(pattern.operand)) {
             return Optional.empty();
         }
 
@@ -117,34 +173,13 @@ public class ExprIter {
 
     private static Optional<ExprIter> newExprIter(Group group, Pattern pattern) {
         ExprIter iter = new ExprIter(group, pattern);
-        if (!iter.cur.isPresent()) {
+        if (!iter.value.isPresent()) {
             return Optional.empty();
         }
 
-        while (true) {
-            GroupExpr groupExpr = iter.cur.get();
-            if (Operand.getOperand(groupExpr.exprNode) != pattern.operand) {
-                continue;
-            }
-
-            if (pattern.children.isEmpty()) {
-                return Optional.of(iter);
-            }
-
-            if (groupExpr.children.size() != pattern.children.size()) {
-                continue;
-            }
-
-            Optional<List<ExprIter>> children = newChildren(groupExpr, pattern);
-            if (children.isPresent()) {
-                return Optional.of(iter);
-            }
-
-            if (!iter.iterator.hasNext()) {
-                return Optional.empty();
-            }
-
-            iter.cur = Optional.of(iter.iterator.next());
+        if (iter.doReset()) {
+            return Optional.of(iter);
         }
+        return Optional.empty();
     }
 }

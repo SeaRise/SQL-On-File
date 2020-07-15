@@ -15,7 +15,7 @@ public class ImplProject implements ImplementationRule {
     public PhysicalPlan onImplement(GroupExpr groupExpr, List<PhysicalPlan> children) {
         Preconditions.checkArgument(children.size() == 1);
         Project project = (Project) groupExpr.exprNode;
-        List<BoundReference> schema = Utils.toImmutableList(project.schema().stream().
+        List<BoundReference> schema = Utils.toImmutableList(groupExpr.group.schema.stream().
                 map(attr -> new BoundReference(attr.dataType, attr.exprId)));
         return new PhysicalProject(schema, project.projectList, children.get(0));
     }

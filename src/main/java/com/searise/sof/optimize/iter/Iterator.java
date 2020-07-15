@@ -56,7 +56,6 @@ public class Iterator<E> {
     }
 
     public Iterator<E> add(E e) {
-        lastReturned = null;
         linkList.linkLast(e);
         if (next == null) {
             next = linkList.last;

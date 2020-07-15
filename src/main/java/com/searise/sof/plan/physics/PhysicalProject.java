@@ -1,15 +1,20 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.analyse.AnalysisHelper;
+import com.searise.sof.analyse.Applicable;
+import com.searise.sof.core.ExprIdGetter;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
+import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.expression.attribute.BoundReference;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PhysicalProject implements PhysicalPlan {
-    public final List<BoundReference> schema;
+    public List<BoundReference> schema;
     public List<Expression> projectList;
     public final PhysicalPlan child;
 
@@ -42,5 +47,23 @@ public class PhysicalProject implements PhysicalPlan {
     @Override
     public String toString() {
         return String.format("PhysicalProject [%s]", projectList.stream().map(Object::toString).collect(Collectors.joining(", ")));
+    }
+
+    @Override
+    public void prune(List<BoundReference> father, boolean isTop) {
+        if (!isTop) {
+            Map<Long, Integer> exprIds = Utils.zip(index -> schema.get(index).exprId, schema.size());
+            schema = father;
+            ImmutableList.Builder<Expression> newProjectListBuilder = ImmutableList.builder();
+            for (BoundReference reference : schema) {
+                int index = exprIds.getOrDefault(reference.exprId, -1);
+                if (index >= 0) {
+                    newProjectListBuilder.add(projectList.get(index));
+                }
+            }
+            projectList = newProjectListBuilder.build();
+        }
+
+        child.prune(extractUseSchema(projectList), false);
     }
 }

@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PhysicalFilter implements PhysicalPlan {
-    public final List<BoundReference> schema;
+    public List<BoundReference> schema;
     public List<Expression> conditions;
     public final PhysicalPlan child;
 
@@ -42,5 +42,14 @@ public class PhysicalFilter implements PhysicalPlan {
     @Override
     public String toString() {
         return String.format("PhysicalFilter [%s]", conditions.stream().map(Object::toString).collect(Collectors.joining(", ")));
+    }
+
+    @Override
+    public void prune(List<BoundReference> father, boolean isTop) {
+        if (!isTop) {
+            schema = father;
+        }
+
+        child.prune(extractUseSchema(conditions), false);
     }
 }

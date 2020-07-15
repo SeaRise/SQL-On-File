@@ -15,7 +15,7 @@ public class ImplFilter implements ImplementationRule {
     public PhysicalPlan onImplement(GroupExpr groupExpr, List<PhysicalPlan> children) {
         Preconditions.checkArgument(children.size() == 1);
         Filter filter = (Filter) groupExpr.exprNode;
-        List<BoundReference> schema = Utils.toImmutableList(filter.schema().stream().
+        List<BoundReference> schema = Utils.toImmutableList(groupExpr.group.schema.stream().
                 map(attr -> new BoundReference(attr.dataType, attr.exprId)));
         return new PhysicalFilter(schema, filter.conditions, children.get(0));
     }

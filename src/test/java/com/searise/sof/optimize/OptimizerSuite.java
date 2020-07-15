@@ -20,8 +20,10 @@ public class OptimizerSuite {
 
         doTest("select 1 as a, a as b from (select a, b from a) a",
                 "PhysicalProject [1 as 10:IntegerType, StringType:6:0 as 11:StringType]\n" +
-                        "  PhysicalProject [StringType:6:0, StringType:7:1]\n" +
-                        "    PhysicalScan [/|,] (StringType:6:0,StringType:7:1,StringType:8:2,StringType:9:3)");
+                        "  PhysicalScan [/|,] (StringType:6:0,StringType:7:1)");
+
+        doTest("select a, b from a",
+                "PhysicalScan [/|,] (StringType:12:0,StringType:13:1)");
     }
 
     private void doTest(String sql, String expect) {

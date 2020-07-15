@@ -63,5 +63,12 @@ public class IteratorSuite {
         while (readIter.hasNext()) {
             Preconditions.checkArgument(tests.get(index++).equals(readIter.next()));
         }
+
+        iterator.reset();
+        index = 0;
+        while (iterator.hasNext()) {
+            iterator.next();
+            iterator.remove();
+        }
     }
 }

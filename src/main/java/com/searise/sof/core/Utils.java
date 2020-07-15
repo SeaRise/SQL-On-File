@@ -46,6 +46,13 @@ public class Utils {
         }
     }
 
+    public static <T> T checkNotNull(T obj, @Nullable Object errorMessage) {
+        if (Objects.isNull(obj)) {
+            throw new SofException(String.valueOf(errorMessage));
+        }
+        return obj;
+    }
+
     public static List<String> split(String sqls) {
         if (StringUtils.isBlank(sqls)) {
             return ImmutableList.of();

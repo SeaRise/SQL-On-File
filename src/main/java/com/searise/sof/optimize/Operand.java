@@ -4,6 +4,7 @@ import com.searise.sof.core.SofException;
 import com.searise.sof.plan.logic.*;
 
 public enum Operand {
+    OperandAny(LogicalPlan.class),
     OperandJoin(InnerJoin.class),
     OperandProject(Project.class),
     OperandFilter(Filter.class),
@@ -13,6 +14,13 @@ public enum Operand {
 
     Operand(Class<? extends LogicalPlan> planClass) {
         this.planClass = planClass;
+    }
+
+    public boolean match(Operand operand) {
+        if (this == OperandAny || operand == OperandAny) {
+            return true;
+        }
+        return this == operand;
     }
 
     public static Operand getOperand(LogicalPlan logicalPlan) {

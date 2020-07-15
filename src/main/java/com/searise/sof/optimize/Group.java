@@ -38,4 +38,14 @@ public class Group {
         group.insert(groupExpr);
         return group;
     }
+
+    @Override
+    public String toString() {
+        Iterator<GroupExpr> iter = equivalents.newReadOnlyIter();
+        StringBuilder builder = new StringBuilder().append("group:");
+        while (iter.hasNext()) {
+            builder.append(iter.next());
+        }
+        return builder.toString();
+    }
 }
