@@ -12,6 +12,7 @@ import java.util.Map;
 public interface TransformationRule {
     Pattern pattern();
 
+    // 需要确保转换后plan更优.
     List<GroupExpr> onTransform(ExprIter exprIter);
 
     Map<Operand, List<TransformationRule>> transformationRuleMap = ImmutableMap.of(
