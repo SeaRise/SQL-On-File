@@ -27,6 +27,10 @@ public class ReferenceResolver {
                 reference.resolveIndex(index);
                 return reference;
             }
+
+            if (expr.getClass() == BoundReference.class) {
+                throw new SofException("It's impossible has BoundReference in resolver");
+            }
             return expr;
         };
     }

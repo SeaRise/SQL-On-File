@@ -12,7 +12,7 @@ import java.util.List;
 public interface SchemaPruneHelper {
     void prune(List<BoundReference> father, boolean isTop);
 
-    default List<BoundReference> extractUseSchema(List<Expression> exprs) {
+    static List<BoundReference> extractUseSchema(List<Expression> exprs) {
         List<BoundReference> useBuilder = new ArrayList<>();
         for (Expression item : exprs) {
             item.transformUp((Applicable<Expression>) expr -> {
@@ -24,5 +24,9 @@ public interface SchemaPruneHelper {
             });
         }
         return Utils.toImmutableList(useBuilder.stream().distinct());
+    }
+
+    static List<BoundReference> copy(List<BoundReference> references) {
+        return Utils.toImmutableList(references.stream().map(r -> new BoundReference(r.dataType, r.exprId)));
     }
 }

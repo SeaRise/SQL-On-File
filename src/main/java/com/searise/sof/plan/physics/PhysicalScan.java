@@ -40,8 +40,6 @@ public class PhysicalScan implements PhysicalPlan {
 
     @Override
     public void prune(List<BoundReference> father, boolean isTop) {
-        if (!isTop) {
-            schema = Utils.copy(father);
-        }
+        schema = isTop ? schema : SchemaPruneHelper.copy(father);
     }
 }

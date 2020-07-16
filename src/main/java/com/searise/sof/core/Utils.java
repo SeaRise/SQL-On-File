@@ -22,10 +22,6 @@ public class Utils {
         return build.build();
     }
 
-    public static List<BoundReference> copy(List<BoundReference> references) {
-        return Utils.toImmutableList(references.stream().map(r -> new BoundReference(r.dataType, r.exprId)));
-    }
-
     public static <T> List<T> toImmutableList(Stream<T> stream) {
         ImmutableList.Builder<T> builder = ImmutableList.builder();
         stream.forEach(builder::add);

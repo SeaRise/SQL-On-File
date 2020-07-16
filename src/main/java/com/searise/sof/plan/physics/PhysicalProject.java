@@ -61,9 +61,11 @@ public class PhysicalProject implements PhysicalPlan {
                 }
             }
             projectList = newProjectListBuilder.build();
-            schema = Utils.copy(father);
+            schema = SchemaPruneHelper.copy(father);
+        } else {
+            schema = SchemaPruneHelper.copy(schema);
         }
 
-        child.prune(extractUseSchema(projectList), false);
+        child.prune(SchemaPruneHelper.extractUseSchema(projectList), false);
     }
 }

@@ -64,9 +64,10 @@ public class ScanExec implements Executor {
             throwFileFormatException();
         }
 
+
         for (int index = 0; index < schema.size(); index++) {
-            String str = getString(splits, index);
             BoundReference reference = schema.get(index);
+            String str = getString(splits,  reference.index());
             writers.get(index).apply(output, convertDataType(str, reference.dataType));
         }
 

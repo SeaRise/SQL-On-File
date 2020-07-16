@@ -46,11 +46,7 @@ public class PhysicalFilter implements PhysicalPlan {
 
     @Override
     public void prune(List<BoundReference> father, boolean isTop) {
-        if (!isTop) {
-            schema = Utils.copy(father);
-        }
-
-
-        child.prune(Utils.combineDistinct(extractUseSchema(conditions), schema), false);
+        schema = isTop ? SchemaPruneHelper.copy(schema) : SchemaPruneHelper.copy(father);
+        child.prune(Utils.combineDistinct(SchemaPruneHelper.extractUseSchema(conditions), schema), false);
     }
 }

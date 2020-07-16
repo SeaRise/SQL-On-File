@@ -50,11 +50,9 @@ public class PhysicalNestedLoopJoin implements PhysicalPlan {
 
     @Override
     public void prune(List<BoundReference> father, boolean isTop) {
-        if (!isTop) {
-            schema = Utils.copy(father);
-        }
+        schema = isTop ? SchemaPruneHelper.copy(schema) : SchemaPruneHelper.copy(father);
 
-        List<BoundReference> useSchema = extractUseSchema(conditions);
+        List<BoundReference> useSchema = SchemaPruneHelper.extractUseSchema(conditions);
         pruneChild(stream, useSchema);
         pruneChild(build, useSchema);
     }

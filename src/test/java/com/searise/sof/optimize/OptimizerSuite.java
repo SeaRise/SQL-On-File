@@ -15,15 +15,15 @@ public class OptimizerSuite {
     @Test
     public void test() {
         doTest("select 1 as a, a as b from a",
-                "PhysicalProject [1 as 4:IntegerType, StringType:0:0 as 5:StringType]\n" +
-                        "  PhysicalScan [/|,] (StringType:0:0)");
+                "PhysicalProject [IntegerType:exprId->4:index->0,StringType:exprId->5:index->1] [1 as 4:IntegerType, StringType:exprId->0:index->0 as 5:StringType]\n" +
+                        "  PhysicalScan [StringType:exprId->0:index->0] [/|,] (0:StringType,1:StringType,2:StringType,3:StringType)");
 
         doTest("select 1 as a, a as b from (select a, b from a) a",
-                "PhysicalProject [1 as 10:IntegerType, StringType:6:0 as 11:StringType]\n" +
-                        "  PhysicalScan [/|,] (StringType:6:0)");
+                "PhysicalProject [IntegerType:exprId->10:index->0,StringType:exprId->11:index->1] [1 as 10:IntegerType, StringType:exprId->6:index->0 as 11:StringType]\n" +
+                        "  PhysicalScan [StringType:exprId->6:index->0] [/|,] (6:StringType,7:StringType,8:StringType,9:StringType)");
 
         doTest("select a, b from a",
-                "PhysicalScan [/|,] (StringType:12:0,StringType:13:1)");
+                "PhysicalScan [StringType:exprId->12:index->0,StringType:exprId->13:index->1] [/|,] (12:StringType,13:StringType,14:StringType,15:StringType)");
     }
 
     private void doTest(String sql, String expect) {

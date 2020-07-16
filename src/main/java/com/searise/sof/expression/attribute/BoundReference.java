@@ -18,6 +18,9 @@ public class BoundReference implements Expression {
     }
 
     public BoundReference resolveIndex(int index) {
+        if (this.index != -1) {
+            throw new SofException("BoundReference has call resolveIndex!");
+        }
         this.index = index;
         return this;
     }
