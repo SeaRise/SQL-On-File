@@ -34,6 +34,16 @@ public class ExecutorSuite {
                 "select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a where a.d > 4.0 and b.c < 11.0",
                 "5.0,6.0,7.0,8.0"
         );
+
+        testExec("select 1 as a, a as b from a",
+                "1,1.0\n" +
+                        "1,5.0\n" +
+                        "1,9.0");
+
+        testExec("select 1 as a, a as b from (select a, b from a) a",
+                "1,1.0\n" +
+                        "1,5.0\n" +
+                        "1,9.0");
     }
 
     private void testExec(String sql, String expect) {

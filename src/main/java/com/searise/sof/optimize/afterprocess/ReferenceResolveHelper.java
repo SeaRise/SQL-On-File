@@ -1,4 +1,4 @@
-package com.searise.sof.plan.physics;
+package com.searise.sof.optimize.afterprocess;
 
 import com.searise.sof.analyse.Applicable;
 import com.searise.sof.core.SofException;
@@ -11,11 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class ReferenceResolver {
-    private ReferenceResolver() {
-    }
+public interface ReferenceResolveHelper {
+    void resolveIndex();
 
-    private static Applicable<Expression> resolver(Map<Long, Integer> inputs) {
+    static Applicable<Expression> resolver(Map<Long, Integer> inputs) {
         return expr -> {
             if (expr.getClass() == Attribute.class) {
                 Attribute attribute = (Attribute) expr;
@@ -35,12 +34,12 @@ public class ReferenceResolver {
         };
     }
 
-    public static List<Expression> resolveExpression(List<Expression> expressions, Map<Long, Integer> inputs) {
+    static List<Expression> resolveExpression(List<Expression> expressions, Map<Long, Integer> inputs) {
         Applicable<Expression> resolver = resolver(inputs);
         return Utils.toImmutableList(expressions.stream().map(expression -> expression.transformDown(resolver)));
     }
 
-    public static void resolveSchema(List<BoundReference> schema, Map<Long, Integer> inputs) {
+    static void resolveSchema(List<BoundReference> schema, Map<Long, Integer> inputs) {
         for (BoundReference reference : schema) {
             Integer index = inputs.get(reference.exprId);
             if (Objects.isNull(index)) {

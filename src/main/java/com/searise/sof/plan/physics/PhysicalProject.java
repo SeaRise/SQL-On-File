@@ -1,13 +1,12 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.analyse.AnalysisHelper;
-import com.searise.sof.analyse.Applicable;
-import com.searise.sof.core.ExprIdGetter;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
-import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.expression.attribute.BoundReference;
+import com.searise.sof.optimize.afterprocess.ReferenceResolveHelper;
+import com.searise.sof.optimize.afterprocess.RemoveAliasHelper;
+import com.searise.sof.optimize.afterprocess.SchemaPruneHelper;
 
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,7 @@ public class PhysicalProject implements PhysicalPlan {
     public void resolveIndex() {
         child.resolveIndex();
         List<BoundReference> childSchema = child.schema();
-        this.projectList = ReferenceResolver.resolveExpression(projectList, Utils.zip(index -> childSchema.get(index).exprId, childSchema.size()));
+        this.projectList = ReferenceResolveHelper.resolveExpression(projectList, Utils.zip(index -> childSchema.get(index).exprId, childSchema.size()));
         for (int i = 0; i < this.schema.size(); i++) {
             schema.get(i).resolveIndex(i);
         }
@@ -67,5 +66,11 @@ public class PhysicalProject implements PhysicalPlan {
         }
 
         child.prune(SchemaPruneHelper.extractUseSchema(projectList), false);
+    }
+
+    @Override
+    public void removeAlias() {
+        this.projectList = RemoveAliasHelper.doRemoveAlias(projectList);
+        child.removeAlias();
     }
 }

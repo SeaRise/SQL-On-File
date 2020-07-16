@@ -1,6 +1,7 @@
 package com.searise.sof.optimize;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.optimize.implementation.ImplementationRule;
 import com.searise.sof.optimize.iter.Iterator;
@@ -10,6 +11,7 @@ import com.searise.sof.optimize.transformation.Pattern;
 import com.searise.sof.optimize.transformation.TransformationRule;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Map;
@@ -108,19 +110,41 @@ public class Optimizer {
     }
 
     private PhysicalPlan onPhaseImplementation(Group rootGroup) {
-        return implGroup(rootGroup);
+        return implGroup(rootGroup).getLeft();
     }
 
-    private PhysicalPlan implGroup(Group group) {
-        GroupExpr groupExpr = group.iter().reset().next();
-        List<PhysicalPlan> children = Utils.toImmutableList(groupExpr.children.stream().map(this::implGroup));
-        ImplementationRule implRule = implementationRuleMap.get(getOperand(groupExpr.exprNode));
-        return implRule.onImplement(groupExpr, children);
+    private Pair<PhysicalPlan, Integer> implGroup(Group group) {
+        if (group.impl.isPresent()) {
+            return group.impl.get();
+        }
+
+        // todo 不是用level,而是用plan的cost来做剪枝.
+        Optional<Pair<PhysicalPlan, Integer>> bestPlan = Optional.empty();
+        Iterator<GroupExpr> iterator = group.iter().newReadOnlyIter();
+        while (iterator.hasNext()) {
+            GroupExpr groupExpr = iterator.next();
+            List<Pair<PhysicalPlan, Integer>> children = Utils.toImmutableList(groupExpr.children.stream().map(this::implGroup));
+            int childrenLevel = children.stream().map(Pair::getRight).reduce((a, b) -> a + b).orElse(0);
+            int level = childrenLevel + 1;
+            if (!bestPlan.isPresent() || bestPlan.get().getRight() > level) {
+                ImplementationRule implRule = implementationRuleMap.get(getOperand(groupExpr.exprNode));
+                List<PhysicalPlan> implChildren = Utils.toImmutableList(children.stream().map(Pair::getLeft));
+                PhysicalPlan impl = implRule.onImplement(groupExpr, implChildren);
+                bestPlan = Optional.of(Pair.of(impl, level));
+            }
+        }
+
+        group.impl = bestPlan;
+        return bestPlan.orElseGet(() -> {
+            throw new SofException("can't find best plan in implGroup");
+        });
     }
+
 
     private PhysicalPlan onPhaseAfterprocessing(PhysicalPlan physicalPlan) {
         physicalPlan.prune(ImmutableList.of(), true);
         physicalPlan.resolveIndex();
+        physicalPlan.removeAlias();
         return physicalPlan;
     }
 }

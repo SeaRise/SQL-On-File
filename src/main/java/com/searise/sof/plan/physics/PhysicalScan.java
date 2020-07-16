@@ -3,6 +3,8 @@ package com.searise.sof.plan.physics;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.expression.attribute.BoundReference;
+import com.searise.sof.optimize.afterprocess.ReferenceResolveHelper;
+import com.searise.sof.optimize.afterprocess.SchemaPruneHelper;
 
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,7 @@ public class PhysicalScan implements PhysicalPlan {
     @Override
     public void resolveIndex() {
         Map<Long, Integer> inputs = Utils.zip(index -> structType.get(index).exprId, structType.size());
-        ReferenceResolver.resolveSchema(schema, inputs);
+        ReferenceResolveHelper.resolveSchema(schema, inputs);
     }
 
     @Override

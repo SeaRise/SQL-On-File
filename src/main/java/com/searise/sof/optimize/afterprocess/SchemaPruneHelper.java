@@ -1,4 +1,4 @@
-package com.searise.sof.plan.physics;
+package com.searise.sof.optimize.afterprocess;
 
 import com.searise.sof.analyse.Applicable;
 import com.searise.sof.core.Utils;

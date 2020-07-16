@@ -65,10 +65,10 @@ public class IteratorSuite {
         }
 
         iterator.reset();
-        index = 0;
         while (iterator.hasNext()) {
             iterator.next();
             iterator.remove();
         }
+        Preconditions.checkArgument(!iterator.reset().hasNext());
     }
 }

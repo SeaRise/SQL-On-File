@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
+import com.searise.sof.optimize.afterprocess.ReferenceResolveHelper;
+import com.searise.sof.optimize.afterprocess.SchemaPruneHelper;
 
 import java.util.List;
 import java.util.Map;
@@ -35,8 +37,8 @@ public class PhysicalFilter implements PhysicalPlan {
         child.resolveIndex();
         List<BoundReference> childSchema = child.schema();
         Map<Long, Integer> inputs = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
-        this.conditions = ReferenceResolver.resolveExpression(conditions, inputs);
-        ReferenceResolver.resolveSchema(schema, inputs);
+        this.conditions = ReferenceResolveHelper.resolveExpression(conditions, inputs);
+        ReferenceResolveHelper.resolveSchema(schema, inputs);
     }
 
     @Override
@@ -48,5 +50,10 @@ public class PhysicalFilter implements PhysicalPlan {
     public void prune(List<BoundReference> father, boolean isTop) {
         schema = isTop ? SchemaPruneHelper.copy(schema) : SchemaPruneHelper.copy(father);
         child.prune(Utils.combineDistinct(SchemaPruneHelper.extractUseSchema(conditions), schema), false);
+    }
+
+    @Override
+    public void removeAlias() {
+        child.removeAlias();
     }
 }

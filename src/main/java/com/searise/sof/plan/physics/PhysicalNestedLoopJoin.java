@@ -4,7 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
-import com.searise.sof.plan.logic.LogicalPlan;
+import com.searise.sof.optimize.afterprocess.ReferenceResolveHelper;
+import com.searise.sof.optimize.afterprocess.SchemaPruneHelper;
 
 import java.util.List;
 import java.util.Map;
@@ -39,8 +40,8 @@ public class PhysicalNestedLoopJoin implements PhysicalPlan {
         build.resolveIndex();
         List<BoundReference> childSchema = Utils.combineDistinct(stream.schema(), build.schema());
         Map<Long, Integer> inputs = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
-        this.conditions = ReferenceResolver.resolveExpression(conditions, inputs);
-        ReferenceResolver.resolveSchema(schema, inputs);
+        this.conditions = ReferenceResolveHelper.resolveExpression(conditions, inputs);
+        ReferenceResolveHelper.resolveSchema(schema, inputs);
     }
 
     @Override
@@ -63,5 +64,11 @@ public class PhysicalNestedLoopJoin implements PhysicalPlan {
         List<BoundReference> conditionsUseSchema = Utils.toImmutableList(useSchema.stream().filter(r -> childMap.containsKey(r.exprId)));
         List<BoundReference> parentUseSchema = Utils.toImmutableList(schema.stream().filter(r -> childMap.containsKey(r.exprId)));
         child.prune(Utils.combineDistinct(conditionsUseSchema, parentUseSchema), false);
+    }
+
+    @Override
+    public void removeAlias() {
+        stream.removeAlias();
+        build.removeAlias();
     }
 }

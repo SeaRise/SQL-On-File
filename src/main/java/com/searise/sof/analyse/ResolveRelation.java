@@ -5,10 +5,10 @@ import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.logic.Relation;
 import com.searise.sof.plan.logic.UnresolvedRelation;
 
-public class ResolveReferences implements Rule {
+public class ResolveRelation implements Rule {
     private final Catalog catalog;
 
-    public ResolveReferences(Catalog catalog) {
+    public ResolveRelation(Catalog catalog) {
         this.catalog = catalog;
     }
 

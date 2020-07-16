@@ -18,7 +18,7 @@ public class Projection {
     public InternalRow apply(InternalRow input) {
         for (int index = 0; index < exprs.size(); index++) {
             Expression projectExpr = exprs.get(index);
-            InternalRowWriter writer = InternalRow.getWriter(index, exprs.get(index).dataType());
+            InternalRowWriter writer = InternalRow.getWriter(index, projectExpr.dataType());
             writer.apply(output, projectExpr.eval(input));
         }
         return output;

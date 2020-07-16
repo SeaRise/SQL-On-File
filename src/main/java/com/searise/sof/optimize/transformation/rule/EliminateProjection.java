@@ -15,8 +15,8 @@ import java.util.List;
 
 /**
  * 单纯的select a, b, c可以被消除.
- * 剪枝用schema,不需要project.
- * */
+ * 列裁剪用schema,不需要project.
+ */
 public class EliminateProjection implements TransformationRule {
     @Override
     public Pattern pattern() {

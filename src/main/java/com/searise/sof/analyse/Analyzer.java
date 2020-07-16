@@ -12,7 +12,7 @@ public class Analyzer {
 
     public Analyzer(Catalog catalog) {
         rules = ImmutableList.of(
-                new ResolveReferences(catalog)
+                new ResolveRelation(catalog)
                 , new ResolveScalarFunction()
                 , new ResolveAttribute()
         );

@@ -67,7 +67,7 @@ public class ScanExec implements Executor {
 
         for (int index = 0; index < schema.size(); index++) {
             BoundReference reference = schema.get(index);
-            String str = getString(splits,  reference.index());
+            String str = getString(splits, reference.index());
             writers.get(index).apply(output, convertDataType(str, reference.dataType));
         }
 

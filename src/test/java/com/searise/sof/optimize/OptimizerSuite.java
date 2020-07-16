@@ -15,11 +15,11 @@ public class OptimizerSuite {
     @Test
     public void test() {
         doTest("select 1 as a, a as b from a",
-                "PhysicalProject [IntegerType:exprId->4:index->0,StringType:exprId->5:index->1] [1 as 4:IntegerType, StringType:exprId->0:index->0 as 5:StringType]\n" +
+                "PhysicalProject [IntegerType:exprId->4:index->0,StringType:exprId->5:index->1] [1, StringType:exprId->0:index->0]\n" +
                         "  PhysicalScan [StringType:exprId->0:index->0] [/|,] (0:StringType,1:StringType,2:StringType,3:StringType)");
 
         doTest("select 1 as a, a as b from (select a, b from a) a",
-                "PhysicalProject [IntegerType:exprId->10:index->0,StringType:exprId->11:index->1] [1 as 10:IntegerType, StringType:exprId->6:index->0 as 11:StringType]\n" +
+                "PhysicalProject [IntegerType:exprId->10:index->0,StringType:exprId->11:index->1] [1, StringType:exprId->6:index->0]\n" +
                         "  PhysicalScan [StringType:exprId->6:index->0] [/|,] (6:StringType,7:StringType,8:StringType,9:StringType)");
 
         doTest("select a, b from a",

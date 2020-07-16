@@ -58,6 +58,6 @@ public class BoundReference implements Expression {
         if (Objects.isNull(obj) || obj.getClass() != BoundReference.class) {
             return false;
         }
-        return exprId == ((BoundReference)obj).exprId;
+        return exprId == ((BoundReference) obj).exprId;
     }
 }
