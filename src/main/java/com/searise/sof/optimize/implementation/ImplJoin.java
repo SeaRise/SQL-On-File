@@ -10,6 +10,7 @@ import com.searise.sof.plan.physics.PhysicalPlan;
 
 import java.util.List;
 
+// todo 实现hash join, 用sizeInBytes来决定哪种join实现.
 public class ImplJoin implements ImplementationRule {
     @Override
     public PhysicalPlan onImplement(GroupExpr groupExpr, List<PhysicalPlan> children) {

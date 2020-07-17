@@ -14,7 +14,10 @@ public interface Expression extends AnalysisHelper<Expression> {
         throw new SofException(String.format("unresolved expression %s can not call dataType", getClass().getSimpleName()));
     }
 
+    // todo 实现codegen.
     default Object eval(InternalRow input) {
         throw new SofException(String.format("%s can not support eval", getClass().getSimpleName()));
     }
+
+    // todo 实现foldable接口.
 }

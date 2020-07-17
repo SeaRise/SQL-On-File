@@ -15,6 +15,11 @@ public interface TransformationRule {
     // 需要确保转换后plan更优.
     List<GroupExpr> onTransform(ExprIter exprIter);
 
+    // todo
+    //  简单的join reorder
+    //  谓词下推
+    //  project合并
+    //  filter合并
     Map<Operand, List<TransformationRule>> transformationRuleMap = ImmutableMap.of(
             Operand.OperandProject, ImmutableList.of(new EliminateProjection())
     );

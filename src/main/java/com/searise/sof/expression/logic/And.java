@@ -2,6 +2,7 @@ package com.searise.sof.expression.logic;
 
 import com.google.common.base.Preconditions;
 import com.searise.sof.core.Utils;
+import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.type.DataType;
 
@@ -23,9 +24,13 @@ public class And extends BinaryLogic {
     }
 
     @Override
-    protected Object doEval(Object leftValue, Object rightValue, DataType dataType) {
+    protected Object doEval(InternalRow input, DataType dataType) {
         Utils.checkArgument(dataType == BooleanType,
                 "input dataType of `and` must be boolean or not " + dataType);
-        return (boolean) leftValue && (boolean) rightValue;
+
+        if (!((boolean) left.eval(input))) {
+            return false;
+        }
+        return right.eval(input);
     }
 }

@@ -19,15 +19,13 @@ public abstract class Binary implements Expression {
     }
 
     public Object eval(InternalRow input) {
-        Object leftValue = left.eval(input);
-        Object rightValue = right.eval(input);
         DataType inputDataType = left.dataType();
         Utils.checkArgument(inputDataType == right.dataType(),
                 "left.dataType must equal to right.dataType in binary expression " + getClass().getSimpleName());
-        return doEval(leftValue, rightValue, inputDataType);
+        return doEval(input, inputDataType);
     }
 
-    protected abstract Object doEval(Object leftValue, Object rightValue, DataType inputDataType);
+    protected abstract Object doEval(InternalRow input, DataType inputDataType);
 
     @Override
     public List<Expression> children() {
