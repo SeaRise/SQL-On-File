@@ -2,12 +2,16 @@ package com.searise.sof.parser;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.catalog.CatalogTable;
+import com.searise.sof.catalog.StructField;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.Literal;
 import com.searise.sof.expression.ScalarFunction;
 import com.searise.sof.expression.attribute.Alias;
 import com.searise.sof.expression.attribute.UnresolvedAttribute;
+import com.searise.sof.plan.ddl.CreateTable;
+import com.searise.sof.plan.ddl.ShowTable;
 import com.searise.sof.plan.logic.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +32,35 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
     @Override
     public LogicalPlan visitSingleStatement(SqlBaseParser.SingleStatementContext ctx) {
         return typedVisit(ctx.statement());
+    }
+
+    @Override
+    public LogicalPlan visitShowTable(SqlBaseParser.ShowTableContext ctx) {
+        return new ShowTable();
+    }
+
+    private static final String DEFAULT_SEPARATOR = ",";
+
+    @Override
+    public LogicalPlan visitCreateStatement(SqlBaseParser.CreateStatementContext ctx) {
+        String tableName = ctx.tablenName.getText();
+
+        Preconditions.checkArgument(ctx.dataType().size() == ctx.identifier().size());
+        List<SqlBaseParser.DataTypeContext> dataTypes = ctx.dataType();
+        List<SqlBaseParser.IdentifierContext> identifiers = ctx.identifier();
+        ImmutableList.Builder<StructField> structTypeBuilder = ImmutableList.builder();
+        for (int i = 0; i < dataTypes.size(); i++) {
+            StructField structField = new StructField(identifiers.get(i).getText(), getType(dataTypes.get(i).getText()));
+            structTypeBuilder.add(structField);
+        }
+
+        SqlBaseParser.FileMetaClauseContext fileMeta = ctx.fileMetaClause();
+        String filePath = removeQuotation(fileMeta.filePathClause().path.getText());
+        String separator = Objects.isNull(fileMeta.separatorClause()) ?
+                DEFAULT_SEPARATOR : removeQuotation(fileMeta.separatorClause().separator.getText());
+
+        CatalogTable catalogTable = new CatalogTable(tableName, structTypeBuilder.build(), filePath, separator);
+        return new CreateTable(catalogTable);
     }
 
     @Override

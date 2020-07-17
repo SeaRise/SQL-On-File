@@ -6,8 +6,34 @@ singleStatement
 
 statement
     : selectStatement    #QueryStatement
+    | createStatement    #createTableStatement
+    | showTable          #showTableStatement
     ;
-    
+
+showTable
+    : SHOW TABLES
+    ;
+
+createStatement
+    : CREATE TABLE tablenName=tableIdentifier '('identifier dataType (',' identifier dataType)* ')' fileMetaClause
+    ;
+
+dataType
+    : IDENTIFIER
+    ;
+
+fileMetaClause
+    : filePathClause separatorClause?
+    ;
+
+filePathClause
+    : PATH path=STRING
+    ;
+
+separatorClause
+    : SEPARATOR separator=STRING
+    ;
+
 selectStatement
     : selectClause fromCluse whereCluse?
     ;
@@ -100,6 +126,9 @@ number
     ;
 
 // key words
+SEPARATOR: 'SEPARATOR';
+PATH: 'PATH';
+WITH: 'WITH';
 SELECT: 'SELECT';
 FROM  : 'FROM';
 WHERE : 'WHERE';

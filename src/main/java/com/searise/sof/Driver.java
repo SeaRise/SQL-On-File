@@ -8,6 +8,7 @@ import com.searise.sof.execution.Builder;
 import com.searise.sof.execution.Executor;
 import com.searise.sof.execution.ResultExec;
 import com.searise.sof.parser.SqlParser;
+import com.searise.sof.plan.ddl.DDLCommand;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
 
@@ -26,6 +27,11 @@ public class Driver {
 
     private void doCompile(String sql) {
         LogicalPlan parsePlan = new SqlParser().parsePlan(sql);
+        if (parsePlan instanceof DDLCommand) {
+            DDLCommand command = (DDLCommand) parsePlan;
+            command.run(catalog);
+            return;
+        }
         LogicalPlan analyzePlan = new Analyzer(catalog).analyse(parsePlan);
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
         Executor executor = new Builder().build(physicalPlan);
@@ -36,8 +42,8 @@ public class Driver {
         executor.open();
         executor.close();
         if (executor.getClass() == ResultExec.class) {
-            System.out.println("result:");
-            System.out.println(((ResultExec) executor).result());
+            Utils.println("result:");
+            Utils.println(((ResultExec) executor).result());
         }
     }
 }

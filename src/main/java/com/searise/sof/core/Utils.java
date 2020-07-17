@@ -16,6 +16,10 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Utils {
+    public static void println(String str) {
+        System.out.println(str);
+    }
+
     public static Map<Long, Integer> zip(ExprIdGetter exprIdGetter, int size) {
         ImmutableMap.Builder<Long, Integer> build = ImmutableMap.builder();
         for (int index = 0; index < size; index++) {

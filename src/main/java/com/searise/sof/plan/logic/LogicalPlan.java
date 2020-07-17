@@ -8,7 +8,9 @@ import com.searise.sof.plan.QueryPlan;
 import java.util.List;
 
 public interface LogicalPlan extends QueryPlan<LogicalPlan>, AnalysisHelper<LogicalPlan> {
-    List<Attribute> schema();
+    default List<Attribute> schema() {
+        return ImmutableList.of();
+    }
 
     @Override
     default List<LogicalPlan> children() {

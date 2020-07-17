@@ -59,6 +59,14 @@ public class ParserSuite {
                         "      UnresolvedRelation [a]\n" +
                         "      UnresolvedRelation [b]\n" +
                         "    UnresolvedRelation [c]");
+
+        testSql("select a, b, c from a join b join c",
+                "Project ['a, 'b, 'c]\n" +
+                        "  join\n" +
+                        "    UnresolvedRelation [a]\n" +
+                        "    join\n" +
+                        "      UnresolvedRelation [b]\n" +
+                        "      UnresolvedRelation [c]");
     }
 
     private void testSql(String sql, String expect) {
