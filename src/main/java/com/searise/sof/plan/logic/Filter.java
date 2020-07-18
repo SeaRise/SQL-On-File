@@ -3,8 +3,10 @@ package com.searise.sof.plan.logic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
+import com.searise.sof.analyse.Applicable;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.Attribute;
+import org.w3c.dom.Attr;
 
 import java.util.List;
 import java.util.Objects;

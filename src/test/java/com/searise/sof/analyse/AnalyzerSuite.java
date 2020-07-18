@@ -16,26 +16,36 @@ public class AnalyzerSuite {
                         "and 1 > 2 and 1 <  2 and '1' = '2' and '1 == 2' and 1 >= 2 " +
                         "and 1 !> 2 and 1 <= 2 and 1 !< 2 and 1 <> 2 and 1 != 2",
                 "Project [1]\n" +
-                        "  Filter [((((((((((not (not (true))) and ((false) or (true))) and (1 > 2)) and (1 < 2)) and (1 = 2) = 1 == 2) and (1 >= 2)) and (1 <= 2)) and (1 <= 2)) and (1 >= 2)) and (not (1 = 2))) and (not (1 = 2))]\n" +
+                        "  Filter [((((not (not (true))) and ((false) or (true))) and (1 > 2)) and (1 < 2)) and (1 = 2) = 1 == 2, 1 >= 2, 1 <= 2, 1 <= 2, 1 >= 2, not (1 = 2), not (1 = 2)]\n" +
                         "    Relation [a] (6:StringType,7:StringType,8:StringType,9:StringType)");
 
         testAnalyse("select a.a from a",
-                "Project [11:StringType]\n" +
-                        "  Relation [a] (11:StringType,12:StringType,13:StringType,14:StringType)");
+                "Project [12:StringType]\n" +
+                        "  Relation [a] (12:StringType,13:StringType,14:StringType,15:StringType)");
 
         testAnalyse("select b.a from a as b",
-                "Project [15:StringType]\n" +
-                        "  Relation [a, b] (15:StringType,16:StringType,17:StringType,18:StringType)");
+                "Project [16:StringType]\n" +
+                        "  Relation [a, b] (16:StringType,17:StringType,18:StringType,19:StringType)");
 
         testAnalyse("select -((((1+1)-2)/3)*4) from a",
                 "Project [(-((((1 + 1) - 2) / 3) * 4))]\n" +
-                        "  Relation [a] (19:StringType,20:StringType,21:StringType,22:StringType)");
+                        "  Relation [a] (20:StringType,21:StringType,22:StringType,23:StringType)");
 
         testAnalyse("select 1 as a, a as b from (select a, b from a) a",
-                "Project [1 as 28:IntegerType, 24:StringType as 29:StringType]\n" +
+                "Project [1 as 29:IntegerType, 25:StringType as 30:StringType]\n" +
                         "  SubqueryAlias [a]\n" +
-                        "    Project [24:StringType, 25:StringType]\n" +
-                        "      Relation [a] (24:StringType,25:StringType,26:StringType,27:StringType)");
+                        "    Project [25:StringType, 26:StringType]\n" +
+                        "      Relation [a] (25:StringType,26:StringType,27:StringType,28:StringType)");
+
+        testAnalyse("select 1 from a where a > 1.0 and a < 2.0",
+                "Project [1]\n" +
+                        "  Filter [31:StringType > 1.0, 31:StringType < 2.0]\n" +
+                        "    Relation [a] (31:StringType,32:StringType,33:StringType,34:StringType)");
+
+        testAnalyse("select 1 from a where !(a <= 1.0 or a >= 2.0)",
+                "Project [1]\n" +
+                        "  Filter [not (37:StringType <= 1.0), not (37:StringType >= 2.0)]\n" +
+                        "    Relation [a] (37:StringType,38:StringType,39:StringType,40:StringType)");
     }
 
     private void testAnalyse(String sql, String expect) {
