@@ -8,6 +8,7 @@ import com.searise.sof.core.Utils;
 import com.searise.sof.execution.Builder;
 import com.searise.sof.execution.Executor;
 import com.searise.sof.execution.ResultExec;
+import com.searise.sof.optimize.Optimizer;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.ddl.DDLCommand;
 import com.searise.sof.plan.logic.LogicalPlan;
@@ -20,6 +21,10 @@ import static com.searise.sof.optimize.Optimizer.newOptimizer;
 public class Driver {
     private final Catalog catalog = new BuiltInCatalog();
     private final Context context = new Context();
+    private final SqlParser sqlParser = new SqlParser(context);
+    private final Analyzer analyzer = new Analyzer(catalog);
+    private final Optimizer optimizer = newOptimizer();
+    private final Builder builder = new Builder();
 
     public void compile(String sqls) throws IOException {
         for (String sql : Utils.split(Utils.removeComments(sqls))) {
@@ -28,15 +33,15 @@ public class Driver {
     }
 
     private void doCompile(String sql) {
-        LogicalPlan parsePlan = new SqlParser(context).parsePlan(sql);
+        LogicalPlan parsePlan = sqlParser.parsePlan(sql);
         if (parsePlan instanceof DDLCommand) {
             DDLCommand command = (DDLCommand) parsePlan;
             command.run(catalog);
             return;
         }
-        LogicalPlan analyzePlan = new Analyzer(catalog).analyse(parsePlan);
-        PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
-        Executor executor = new Builder().build(physicalPlan);
+        LogicalPlan analyzePlan = analyzer.analyse(parsePlan);
+        PhysicalPlan physicalPlan = optimizer.optimize(analyzePlan);
+        Executor executor = builder.build(physicalPlan);
         execute(executor);
     }
 
