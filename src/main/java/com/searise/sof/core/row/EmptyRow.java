@@ -3,6 +3,8 @@ package com.searise.sof.core.row;
 import com.searise.sof.core.SofException;
 
 public class EmptyRow implements InternalRow {
+    public static EmptyRow EMPTY_ROW = new EmptyRow();
+
     private EmptyRow() {
     }
 
@@ -21,5 +23,13 @@ public class EmptyRow implements InternalRow {
         throw new SofException("EmptyRow do not support setValue");
     }
 
-    public static EmptyRow EMPTY_ROW = new EmptyRow();
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return this == other;
+    }
 }

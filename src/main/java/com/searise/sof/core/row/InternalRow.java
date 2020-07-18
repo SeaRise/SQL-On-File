@@ -9,6 +9,10 @@ public interface InternalRow {
 
     Object getValue(int ordinal);
 
+    default InternalRow copy() {
+        throw new UnsupportedOperationException();
+    }
+
     default String getString(int ordinal) {
         return (String) getValue(ordinal);
     }

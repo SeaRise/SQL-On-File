@@ -16,7 +16,6 @@ import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 public class NestedLoopJoinExec implements Executor {
     private final Executor stream;
     private final Executor build;
-    private final InternalRow output;
     private final Predication predication;
     private final Projection schemaProjection;
     private InternalRow streamRow = EMPTY_ROW;
@@ -24,7 +23,7 @@ public class NestedLoopJoinExec implements Executor {
     public NestedLoopJoinExec(Executor stream, Executor build, List<Expression> conditions, List<BoundReference> schema) {
         this.stream = stream;
         this.build = build;
-        this.output = new ArrayRow(schema.size());
+        InternalRow output = new ArrayRow(schema.size());
         this.predication = new Predication(conditions);
         this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output);
     }

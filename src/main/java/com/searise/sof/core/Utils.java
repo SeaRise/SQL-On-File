@@ -41,6 +41,14 @@ public class Utils {
         return toImmutableList(builder.stream().distinct());
     }
 
+    public static <T> List<T> combineDistinct(List<T> list1, List<T> list2, List<T> list3) {
+        List<T> builder = new ArrayList<>();
+        builder.addAll(list1);
+        builder.addAll(list2);
+        builder.addAll(list3);
+        return toImmutableList(builder.stream().distinct());
+    }
+
     public static void checkArgument(boolean expression, @Nullable Object errorMessage) {
         if (!expression) {
             throw new SofException(String.valueOf(errorMessage));

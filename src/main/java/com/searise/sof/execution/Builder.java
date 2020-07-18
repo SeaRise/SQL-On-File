@@ -22,6 +22,11 @@ public class Builder {
                 Executor stream = doBuild(nestedLoopJoin.stream);
                 Executor build = doBuild(nestedLoopJoin.build);
                 return new NestedLoopJoinExec(stream, build, nestedLoopJoin.conditions, nestedLoopJoin.schema);
+            case "PhysicalHashJoin":
+                PhysicalHashJoin hashJoin = (PhysicalHashJoin) physicalPlan;
+                stream = doBuild(hashJoin.stream);
+                build = doBuild(hashJoin.build);
+                return new HashJoinExec(stream, build, hashJoin.streamJoinKeys, hashJoin.buildJoinKeys, hashJoin.otherConditions, hashJoin.schema);
             case "PhysicalProject":
                 PhysicalProject project = (PhysicalProject) physicalPlan;
                 child = doBuild(project.child);
