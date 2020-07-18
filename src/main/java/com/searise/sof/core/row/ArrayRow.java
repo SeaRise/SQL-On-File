@@ -1,5 +1,7 @@
 package com.searise.sof.core.row;
 
+import java.util.Arrays;
+
 public class ArrayRow implements InternalRow {
     private final Object[] array;
 
@@ -22,5 +24,10 @@ public class ArrayRow implements InternalRow {
     public void setValue(int ordinal, Object value) {
         rangeCheck(ordinal);
         array[ordinal] = value;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(array);
     }
 }

@@ -2,7 +2,6 @@ package com.searise.sof.plan.physics;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.ExprIdGetter;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;

@@ -33,7 +33,7 @@ public class EliminateProjection implements TransformationRule {
                 ImmutableList.Builder<GroupExpr> builder = ImmutableList.builder();
                 while (iter.hasNext()) {
                     GroupExpr next = iter.next();
-                    GroupExpr newGroupExpr = new GroupExpr(next.exprNode, next.children, groupExpr.group);
+                    GroupExpr newGroupExpr = new GroupExpr(next.exprNode, next.children);
                     newGroupExpr.explored = true;
                     builder.add(newGroupExpr);
                 }

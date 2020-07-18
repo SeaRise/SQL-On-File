@@ -1,8 +1,5 @@
 package com.searise.sof.expression.attribute;
 
-import com.searise.sof.core.ExprIdBuilder;
-import com.searise.sof.type.DataType;
-
 import java.util.Optional;
 
 public class UnresolvedAttribute extends AttributeBase {

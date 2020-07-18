@@ -32,6 +32,14 @@ public class ExprIterSuite {
                         )
                 ),
                 1);
+
+        doTestSql(
+                "select a from a where a > 10",
+                new Pattern(Operand.OperandProject,
+                        new Pattern(Operand.OperandFilter,
+                                new Pattern(Operand.OperandRelation))
+                ),
+                1);
     }
 
     private void doTestSql(String sql, Pattern pattern, int count) {

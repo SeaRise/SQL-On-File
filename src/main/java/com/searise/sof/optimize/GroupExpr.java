@@ -8,13 +8,12 @@ import java.util.stream.Collectors;
 public class GroupExpr {
     public final LogicalPlan exprNode;
     public final List<Group> children;
-    public final Group group;
+    public Group group;
     public boolean explored = false;
 
-    public GroupExpr(LogicalPlan exprNode, List<Group> children, Group group) {
+    public GroupExpr(LogicalPlan exprNode, List<Group> children) {
         this.exprNode = exprNode;
         this.children = children;
-        this.group = group;
     }
 
     @Override

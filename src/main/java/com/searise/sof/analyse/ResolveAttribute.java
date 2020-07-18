@@ -139,7 +139,15 @@ public class ResolveAttribute implements Rule {
         private Expression withSchema(UnresolvedAttribute unresolvedAttribute, List<Attribute> schema) {
             for (Attribute attribute : schema) {
                 if (StringUtils.equals(attribute.name, unresolvedAttribute.name)) {
-                    return attribute;
+                    Optional<String> table1 = unresolvedAttribute.table;
+                    Optional<String> table2 = attribute.table;
+                    if (!table1.isPresent() || !table2.isPresent()) {
+                        return attribute;
+                    } else if (StringUtils.equals(table1.get(), table2.get())) {
+                        return attribute;
+                    } else {
+                        // just else.
+                    }
                 }
             }
             return unresolvedAttribute;

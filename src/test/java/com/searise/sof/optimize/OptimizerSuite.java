@@ -24,6 +24,10 @@ public class OptimizerSuite {
 
         doTest("select a, b from a",
                 "PhysicalScan [StringType:exprId->12:index->0,StringType:exprId->13:index->1] [/|,] (12:StringType,13:StringType,14:StringType,15:StringType)");
+
+        doTest("select a from (select a from a) b where a < 10.0",
+                "PhysicalFilter [StringType:exprId->16:index->0] [StringType:exprId->16:index->0 < 10.0]\n" +
+                        "  PhysicalScan [StringType:exprId->16:index->0] [/|,] (16:StringType,17:StringType,18:StringType,19:StringType)");
     }
 
     private void doTest(String sql, String expect) {

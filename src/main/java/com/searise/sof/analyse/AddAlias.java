@@ -5,8 +5,6 @@ import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.ScalarFunction;
 import com.searise.sof.expression.attribute.Alias;
 import com.searise.sof.expression.attribute.UnresolvedAttribute;
-import com.searise.sof.plan.logic.Filter;
-import com.searise.sof.plan.logic.InnerJoin;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.logic.Project;
 

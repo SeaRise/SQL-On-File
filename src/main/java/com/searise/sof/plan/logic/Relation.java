@@ -17,7 +17,8 @@ public class Relation extends UnresolvedRelation {
         super(tableName, referenceName);
         this.catalogTable = catalogTable;
         this.schema = Utils.toImmutableList(catalogTable.structType.stream().
-                map(structField -> new Attribute(Optional.of(tableName), structField.name, ExprIdBuilder.newExprId(), structField.dataType)));
+                map(structField -> new Attribute(Optional.of(referenceName.orElse(tableName)),
+                        structField.name, ExprIdBuilder.newExprId(), structField.dataType)));
     }
 
     @Override

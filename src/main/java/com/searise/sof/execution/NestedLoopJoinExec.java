@@ -33,8 +33,11 @@ public class NestedLoopJoinExec implements Executor {
     public void open() {
         stream.open();
         build.open();
-        if (stream.hasNext()) {
+        while (stream.hasNext()) {
             streamRow = stream.next();
+            if (streamRow != EMPTY_ROW) {
+                return;
+            }
         }
     }
 
@@ -62,6 +65,13 @@ public class NestedLoopJoinExec implements Executor {
         }
 
         InternalRow buildRow = build.next();
+        while (buildRow == EMPTY_ROW && build.hasNext()) {
+            buildRow = build.next();
+        }
+        if (buildRow == EMPTY_ROW) {
+            return EMPTY_ROW;
+        }
+
         JoinRow joinRow = new JoinRow(streamRow, buildRow);
         if (!predication.apply(joinRow)) {
             return EMPTY_ROW;

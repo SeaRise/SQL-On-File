@@ -46,6 +46,19 @@ public class AnalyzerSuite {
                 "Project [1]\n" +
                         "  Filter [not (37:StringType <= 1.0), not (37:StringType >= 2.0)]\n" +
                         "    Relation [a] (37:StringType,38:StringType,39:StringType,40:StringType)");
+
+        testAnalyse("select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a and a.d > 4.0 and b.c < 11.0",
+                "Project [44:StringType, 49:StringType, 46:StringType, 51:StringType]\n" +
+                        "  join on (44:StringType = 48:StringType, 47:StringType > 4.0, 50:StringType < 11.0)\n" +
+                        "    Relation [a, a] (44:StringType,45:StringType,46:StringType,47:StringType)\n" +
+                        "    Relation [a, b] (48:StringType,49:StringType,50:StringType,51:StringType)");
+
+        testAnalyse("select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a where a.d > 4.0 and b.c < 11.0",
+                "Project [52:StringType, 57:StringType, 54:StringType, 59:StringType]\n" +
+                        "  Filter [55:StringType > 4.0, 58:StringType < 11.0]\n" +
+                        "    join on (52:StringType = 56:StringType)\n" +
+                        "      Relation [a, a] (52:StringType,53:StringType,54:StringType,55:StringType)\n" +
+                        "      Relation [a, b] (56:StringType,57:StringType,58:StringType,59:StringType)");
     }
 
     private void testAnalyse(String sql, String expect) {

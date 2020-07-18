@@ -22,6 +22,7 @@ public class Group {
     }
 
     public void insert(GroupExpr groupExpr) {
+        groupExpr.group = this;
         equivalents.add(groupExpr);
     }
 
@@ -42,13 +43,20 @@ public class Group {
     // Convert2GroupExpr converts a logical plan to a GroupExpr.
     public static GroupExpr convert2GroupExpr(LogicalPlan node, Group group) {
         List<Group> children = Utils.toImmutableList(node.children().stream().map(Group::convert2Group));
-        return new GroupExpr(node, children, group);
+        return new GroupExpr(node, children);
     }
 
     // Convert2Group converts a logical plan to a Group.
     public static Group convert2Group(LogicalPlan node) {
         Group group = new Group(node.schema());
         GroupExpr groupExpr = convert2GroupExpr(node, group);
+        group.insert(groupExpr);
+        return group;
+    }
+
+    public static Group newGroup(LogicalPlan node, List<Group> children, List<Attribute> schema) {
+        Group group = new Group(schema);
+        GroupExpr groupExpr = new GroupExpr(node, children);
         group.insert(groupExpr);
         return group;
     }

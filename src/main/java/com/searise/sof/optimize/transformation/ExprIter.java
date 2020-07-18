@@ -99,6 +99,9 @@ public class ExprIter {
         while (true) {
             GroupExpr groupExpr = value.get();
             if (!Operand.getOperand(groupExpr.exprNode).match(pattern.operand)) {
+                if (!iterator.hasNext()) {
+                    return false;
+                }
                 value = Optional.of(iterator.next());
                 continue;
             }
@@ -108,6 +111,9 @@ public class ExprIter {
             }
 
             if (groupExpr.children.size() != pattern.children.size()) {
+                if (!iterator.hasNext()) {
+                    return false;
+                }
                 value = Optional.of(iterator.next());
                 continue;
             }
@@ -121,7 +127,6 @@ public class ExprIter {
             if (!iterator.hasNext()) {
                 return false;
             }
-
             value = Optional.of(iterator.next());
         }
     }
