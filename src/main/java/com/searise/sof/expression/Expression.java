@@ -20,4 +20,7 @@ public interface Expression extends AnalysisHelper<Expression> {
     }
 
     // todo 实现foldable接口.
+    default boolean foldable() {
+        return false;
+    }
 }

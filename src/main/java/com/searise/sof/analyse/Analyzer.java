@@ -12,7 +12,8 @@ public class Analyzer {
 
     public Analyzer(Catalog catalog) {
         rules = ImmutableList.of(
-                new ResolveRelation(catalog)
+                new AddAlias()
+                , new ResolveRelation(catalog)
                 , new ResolveScalarFunction()
                 , new ResolveAttribute()
         );

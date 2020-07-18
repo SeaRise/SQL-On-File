@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class ExprIter {
     public final Group group;
-    private List<ExprIter> children = ImmutableList.of();
+    public List<ExprIter> children = ImmutableList.of();
     private final Pattern pattern;
     private final Iterator<GroupExpr> iterator;
     private Optional<GroupExpr> value;

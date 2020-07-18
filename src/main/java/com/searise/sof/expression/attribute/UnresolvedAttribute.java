@@ -1,5 +1,8 @@
 package com.searise.sof.expression.attribute;
 
+import com.searise.sof.core.ExprIdBuilder;
+import com.searise.sof.type.DataType;
+
 import java.util.Optional;
 
 public class UnresolvedAttribute extends AttributeBase {
@@ -19,4 +22,7 @@ public class UnresolvedAttribute extends AttributeBase {
     public boolean resolved() {
         return false;
     }
+
+    //只能用于top project.
+    public static final UnresolvedAttribute UnknownUnresolvedAttribute = new UnresolvedAttribute("");
 }
