@@ -7,7 +7,6 @@ import com.searise.sof.optimize.GroupExpr;
 import com.searise.sof.plan.logic.InnerJoin;
 import com.searise.sof.plan.physics.PhysicalNestedLoopJoin;
 import com.searise.sof.plan.physics.PhysicalPlan;
-import com.searise.sof.stats.SizeInBytesStatsVisitor;
 
 import java.util.List;
 

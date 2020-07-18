@@ -2,7 +2,6 @@ package com.searise.sof.plan.logic;
 
 import com.searise.sof.catalog.CatalogTable;
 import com.searise.sof.core.Context;
-import com.searise.sof.core.ExprIdBuilder;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.Attribute;
 

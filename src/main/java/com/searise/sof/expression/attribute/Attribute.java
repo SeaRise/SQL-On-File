@@ -1,6 +1,5 @@
 package com.searise.sof.expression.attribute;
 
-import com.searise.sof.core.Context;
 import com.searise.sof.core.ExprIdBuilder;
 import com.searise.sof.type.DataType;
 

@@ -1,8 +1,8 @@
 package com.searise.sof.stats;
 
 import com.searise.sof.expression.Expression;
-import com.searise.sof.expression.logic.Not;
 import com.searise.sof.expression.logic.And;
+import com.searise.sof.expression.logic.Not;
 import com.searise.sof.expression.logic.Or;
 
 import java.util.List;

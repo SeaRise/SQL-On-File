@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class SizeInBytesStatsVisitor {
-    private SizeInBytesStatsVisitor() {}
+    private SizeInBytesStatsVisitor() {
+    }
 
     public static Statistics visit(Group group) {
         if (group.stats.isPresent()) {
