@@ -21,14 +21,14 @@ public class PushDownNot implements Rule {
                 if (AnalysisHelper.isEqualTo(filter.conditions, afterPushDown)) {
                     return filter;
                 }
-                return new Filter(afterPushDown, filter.child);
+                return new Filter(afterPushDown, filter.child, filter.context);
             } else if (p.getClass() == InnerJoin.class) {
                 InnerJoin join = (InnerJoin) p;
                 List<Expression> afterPushDown = Utils.toImmutableList(join.conditions.stream().map(this::pushDownNot));
                 if (AnalysisHelper.isEqualTo(join.conditions, afterPushDown)) {
                     return join;
                 }
-                return new InnerJoin(join.left, join.right, afterPushDown);
+                return new InnerJoin(join.left, join.right, afterPushDown, join.context);
             } else {
                 return p;
             }

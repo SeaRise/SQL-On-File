@@ -3,6 +3,7 @@ package com.searise.sof.plan.logic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.Attribute;
@@ -15,15 +16,17 @@ public class InnerJoin implements LogicalPlan {
     public final LogicalPlan left;
     public final LogicalPlan right;
     public final List<Expression> conditions;
+    public final Context context;
 
-    public InnerJoin(LogicalPlan left, LogicalPlan right) {
-        this(left, right, ImmutableList.of());
+    public InnerJoin(LogicalPlan left, LogicalPlan right, Context context) {
+        this(left, right, ImmutableList.of(), context);
     }
 
-    public InnerJoin(LogicalPlan left, LogicalPlan right, List<Expression> conditions) {
+    public InnerJoin(LogicalPlan left, LogicalPlan right, List<Expression> conditions, Context context) {
         this.left = left;
         this.right = right;
         this.conditions = conditions;
+        this.context = context;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class InnerJoin implements LogicalPlan {
     @Override
     public LogicalPlan copyWithNewChildren(List<LogicalPlan> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
-        return new InnerJoin(children.get(0), children.get(1), conditions);
+        return new InnerJoin(children.get(0), children.get(1), conditions, context);
     }
 
     @Override

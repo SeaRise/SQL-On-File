@@ -1,6 +1,7 @@
 package com.searise.sof.optimize.transformation.rule;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.optimize.Group;
@@ -37,7 +38,7 @@ public class PushFilterDownJoin implements TransformationRule, PushFilterDownHel
         Pair<List<Expression>, List<Expression>> leftSplits = split(combineConds, leftExprIds);
         List<Expression> retainConds = leftSplits.getLeft();
         List<Expression> leftPushDownConds = leftSplits.getRight();
-        Group left = newChildGroup(joinExpr.children.get(0), leftPushDownConds);
+        Group left = newFilterGroup(joinExpr.children.get(0), leftPushDownConds, join.context);
 
         Group right;
         if (retainConds.isEmpty()) {
@@ -47,19 +48,19 @@ public class PushFilterDownJoin implements TransformationRule, PushFilterDownHel
             Pair<List<Expression>, List<Expression>> rightSplits = split(retainConds, rightExprIds);
             retainConds = rightSplits.getLeft();
             List<Expression> rightPushDownConds = rightSplits.getRight();
-            right = newChildGroup(joinExpr.children.get(1), rightPushDownConds);
+            right = newFilterGroup(joinExpr.children.get(1), rightPushDownConds, join.context);
         }
 
-        InnerJoin newJoin = new InnerJoin(null, null, retainConds);
+        InnerJoin newJoin = new InnerJoin(null, null, retainConds, join.context);
         GroupExpr newJoinExpr = new GroupExpr(newJoin, ImmutableList.of(left, right));
         return ImmutableList.of(newJoinExpr);
     }
 
-    private Group newChildGroup(Group originGroup, List<Expression> pushDownConds) {
+    private Group newFilterGroup(Group originGroup, List<Expression> pushDownConds, Context context) {
         if (pushDownConds.isEmpty()) {
             return originGroup;
         } else {
-            Filter pushDownFilter = new Filter(pushDownConds, null);
+            Filter pushDownFilter = new Filter(pushDownConds, null, context);
             return Group.newGroup(pushDownFilter, ImmutableList.of(originGroup), originGroup.schema);
         }
     }

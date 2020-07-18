@@ -1,5 +1,6 @@
 package com.searise.sof.expression.attribute;
 
+import com.searise.sof.core.Context;
 import com.searise.sof.core.ExprIdBuilder;
 import com.searise.sof.type.DataType;
 
@@ -27,7 +28,7 @@ public class Attribute extends UnresolvedAttribute {
         return dataType;
     }
 
-    public static Attribute newUnknownAttribute(DataType dataType) {
-        return new Attribute(Optional.empty(), "", ExprIdBuilder.newExprId(), dataType);
+    public static Attribute newUnknownAttribute(DataType dataType, ExprIdBuilder exprIdBuilder) {
+        return new Attribute(Optional.empty(), "", exprIdBuilder.newExprId(), dataType);
     }
 }

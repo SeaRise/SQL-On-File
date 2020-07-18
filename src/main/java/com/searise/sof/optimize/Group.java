@@ -5,6 +5,7 @@ import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.optimize.iter.Iterator;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
+import com.searise.sof.stats.Statistics;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public class Group {
     private Iterator<GroupExpr> equivalents;
     public boolean explored = false;
     Optional<Pair<PhysicalPlan, Integer>> impl = Optional.empty();
+    public Optional<Statistics> stats = Optional.empty();
 
     public Group(List<Attribute> schema) {
         this.schema = schema;

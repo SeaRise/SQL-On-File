@@ -33,7 +33,7 @@ public class ResolveScalarFunction implements Rule {
                         List<Expression> newProjectList = Utils.toImmutableList(project.projectList.stream().
                                 map(expr -> expr.transformUp(new ScalarFunctionApplicable())));
                         if (!isEqualTo(project.projectList, newProjectList)) {
-                            return new Project(newProjectList, project.child);
+                            return new Project(newProjectList, project.child, project.context);
                         }
                         break;
                     case "Filter":
@@ -41,7 +41,7 @@ public class ResolveScalarFunction implements Rule {
                         List<Expression> newConditions = Utils.toImmutableList(filter.conditions.stream().
                                 map(expr -> expr.transformUp(new ScalarFunctionApplicable())));
                         if (!isEqualTo(filter.conditions, newConditions)) {
-                            return new Filter(newConditions, filter.child);
+                            return new Filter(newConditions, filter.child, filter.context);
                         }
                         break;
                     case "InnerJoin":
@@ -49,7 +49,7 @@ public class ResolveScalarFunction implements Rule {
                         newConditions = Utils.toImmutableList(join.conditions.stream().
                                 map(expr -> expr.transformUp(new ScalarFunctionApplicable())));
                         if (!isEqualTo(join.conditions, newConditions)) {
-                            return new InnerJoin(join.left, join.right, newConditions);
+                            return new InnerJoin(join.left, join.right, newConditions, join.context);
                         }
                         break;
                     default:

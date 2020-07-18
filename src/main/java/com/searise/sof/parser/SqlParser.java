@@ -1,10 +1,17 @@
 package com.searise.sof.parser;
 
+import com.searise.sof.core.Context;
 import com.searise.sof.plan.logic.LogicalPlan;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Interval;
 
 public class SqlParser {
+    private final Context context;
+
+    public SqlParser(Context context) {
+        this.context = context;
+    }
+
     public LogicalPlan parsePlan(String sql) {
         SqlBaseLexer lexer = new SqlBaseLexer(new UpperCaseCharStream(CharStreams.fromString(sql)));
         ParseErrorListener parseErrorListener = new ParseErrorListener();
@@ -13,7 +20,7 @@ public class SqlParser {
         SqlBaseParser parser = new SqlBaseParser(new CommonTokenStream(lexer));
         parser.addErrorListener(parseErrorListener);
         SqlBaseParser.SingleStatementContext singleStatementContext = parser.singleStatement();
-        AstBuilder visitor = new AstBuilder();
+        AstBuilder visitor = new AstBuilder(context);
         return visitor.typedVisit(singleStatementContext);
     }
 

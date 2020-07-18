@@ -2,7 +2,8 @@ package com.searise.sof.optimize.preprocess;
 
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.analyse.Applicable;
-import com.searise.sof.analyse.TestCatalog;
+import com.searise.sof.catalog.TestCatalog;
+import com.searise.sof.core.Context;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.logic.SubqueryAlias;
@@ -17,7 +18,7 @@ public class PreprocessSuite {
     }
 
     private void doTestRemoveSubqueryAlias(String sql) {
-        LogicalPlan parsePlan = new SqlParser().parsePlan(sql);
+        LogicalPlan parsePlan = new SqlParser(new Context()).parsePlan(sql);
         LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
         LogicalPlan logicalPlan = new RemoveSubqueryAlias().apply(analyzePlan);
         logicalPlan.transformDown((Applicable<LogicalPlan>) plan -> {

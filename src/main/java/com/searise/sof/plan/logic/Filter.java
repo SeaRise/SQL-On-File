@@ -3,6 +3,7 @@ package com.searise.sof.plan.logic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
+import com.searise.sof.core.Context;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.Attribute;
 
@@ -13,10 +14,12 @@ import java.util.stream.Collectors;
 public class Filter implements LogicalPlan {
     public final LogicalPlan child;
     public final List<Expression> conditions;
+    public final Context context;
 
-    public Filter(List<Expression> conditions, LogicalPlan child) {
+    public Filter(List<Expression> conditions, LogicalPlan child, Context context) {
         this.child = child;
         this.conditions = conditions;
+        this.context = context;
     }
 
     @Override
@@ -37,7 +40,7 @@ public class Filter implements LogicalPlan {
     @Override
     public LogicalPlan copyWithNewChildren(List<LogicalPlan> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 1);
-        return new Filter(conditions, children.get(0));
+        return new Filter(conditions, children.get(0), context);
     }
 
     @Override

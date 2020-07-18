@@ -25,7 +25,7 @@ public class AddAlias implements Rule {
                     List<Expression> newProjectList = Utils.toImmutableList(project.projectList.stream().
                             map(addAliasApplicable::apply));
                     if (!isEqualTo(project.projectList, newProjectList)) {
-                        return new Project(newProjectList, project.child);
+                        return new Project(newProjectList, project.child, project.context);
                     }
                 }
             }

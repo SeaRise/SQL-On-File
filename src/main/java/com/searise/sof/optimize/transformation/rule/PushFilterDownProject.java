@@ -39,14 +39,14 @@ public class PushFilterDownProject implements TransformationRule, PushFilterDown
         if (pushDownConds.isEmpty()) {
             return ImmutableList.of();
         }
-        Filter pushDownFilter = new Filter(pushDownConds, null);
+        Filter pushDownFilter = new Filter(pushDownConds, null, project.context);
         Group pushDownFilterGroup = Group.newGroup(pushDownFilter, projectExpr.children, projectExpr.group.schema);
 
         if (retainConds.isEmpty()) {
             return ImmutableList.of(new GroupExpr(project, ImmutableList.of(pushDownFilterGroup)));
         }
         Group newProjectGroup = Group.newGroup(project, ImmutableList.of(pushDownFilterGroup), projectExpr.group.schema);
-        Filter retainFilter = new Filter(retainConds, null);
+        Filter retainFilter = new Filter(retainConds, null, filter.context);
         GroupExpr retainFilterExpr = new GroupExpr(retainFilter, ImmutableList.of(newProjectGroup));
         return ImmutableList.of(retainFilterExpr);
     }

@@ -1,4 +1,4 @@
-package com.searise.sof.execution;
+package com.searise.sof.catalog;
 
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.catalog.Catalog;

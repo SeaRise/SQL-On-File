@@ -20,7 +20,8 @@ public class ResolveRelation implements Rule {
                 return new Relation(
                         catalog.getTable(unresolvedRelation.tableName),
                         unresolvedRelation.tableName,
-                        unresolvedRelation.referenceName);
+                        unresolvedRelation.referenceName,
+                        unresolvedRelation.context);
             }
             return p;
         });

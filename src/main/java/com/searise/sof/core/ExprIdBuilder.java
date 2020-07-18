@@ -3,12 +3,12 @@ package com.searise.sof.core;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class ExprIdBuilder {
-    private ExprIdBuilder() {
+    public ExprIdBuilder() {
     }
 
-    private static AtomicLong curId = new java.util.concurrent.atomic.AtomicLong();
+    private AtomicLong curId = new java.util.concurrent.atomic.AtomicLong();
 
-    public static long newExprId() {
+    public long newExprId() {
         return curId.getAndIncrement();
     }
 }

@@ -3,6 +3,7 @@ package com.searise.sof;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.BuiltInCatalog;
 import com.searise.sof.catalog.Catalog;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.execution.Builder;
 import com.searise.sof.execution.Executor;
@@ -18,6 +19,7 @@ import static com.searise.sof.optimize.Optimizer.newOptimizer;
 
 public class Driver {
     private final Catalog catalog = new BuiltInCatalog();
+    private final Context context = new Context();
 
     public void compile(String sqls) throws IOException {
         for (String sql : Utils.split(Utils.removeComments(sqls))) {
@@ -26,7 +28,7 @@ public class Driver {
     }
 
     private void doCompile(String sql) {
-        LogicalPlan parsePlan = new SqlParser().parsePlan(sql);
+        LogicalPlan parsePlan = new SqlParser(context).parsePlan(sql);
         if (parsePlan instanceof DDLCommand) {
             DDLCommand command = (DDLCommand) parsePlan;
             command.run(catalog);

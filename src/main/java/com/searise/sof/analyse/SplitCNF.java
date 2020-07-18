@@ -20,14 +20,14 @@ public class SplitCNF implements Rule {
                 if (AnalysisHelper.isEqualTo(filter.conditions, afterSplit)) {
                     return filter;
                 }
-                return new Filter(afterSplit, filter.child);
+                return new Filter(afterSplit, filter.child, filter.context);
             } else if (p.getClass() == InnerJoin.class) {
                 InnerJoin join = (InnerJoin) p;
                 List<Expression> afterSplit = Utils.toImmutableList(join.conditions.stream().flatMap(c -> splitCNF(c).stream()));
                 if (AnalysisHelper.isEqualTo(join.conditions, afterSplit)) {
                     return join;
                 }
-                return new InnerJoin(join.left, join.right, afterSplit);
+                return new InnerJoin(join.left, join.right, afterSplit, join.context);
             } else {
                 return p;
             }

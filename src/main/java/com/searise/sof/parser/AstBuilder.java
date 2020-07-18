@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.catalog.CatalogTable;
 import com.searise.sof.catalog.StructField;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.Literal;
@@ -23,6 +24,11 @@ import java.util.Optional;
 import static com.searise.sof.type.DataType.*;
 
 public class AstBuilder extends SqlBaseBaseVisitor<Object> {
+    private final Context context;
+
+    public AstBuilder(Context context) {
+        this.context = context;
+    }
 
     @SuppressWarnings("unchecked")
     <V> V typedVisit(ParseTree ctx) {
@@ -68,12 +74,12 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
         LogicalPlan child = typedVisit(ctx.fromCluse());
         if (Objects.nonNull(ctx.whereCluse())) {
             Expression condition = typedVisit(ctx.whereCluse().expression());
-            child = new Filter(ImmutableList.of(condition), child);
+            child = new Filter(ImmutableList.of(condition), child, context);
         }
 
         List<Expression> projectList = Utils.toImmutableList(
                 ctx.selectClause().expression().stream().map(this::typedVisit));
-        return new Project(projectList, child);
+        return new Project(projectList, child, context);
     }
 
     @Override
@@ -91,7 +97,7 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
                         Objects.isNull(joinRelationContext.joinCriteria()) ?
                                 ImmutableList.of() :
                                 ImmutableList.of(typedVisit(joinRelationContext.joinCriteria().booleanExpression()));
-                relation = new InnerJoin(relation, right, conditions);
+                relation = new InnerJoin(relation, right, conditions, context);
             }
         }
         return relation;
@@ -102,13 +108,13 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
         if (Objects.nonNull(ctx.selectStatement())) {
             String subqueryName = ctx.identifier().getText();
             Preconditions.checkArgument(StringUtils.isNotBlank(subqueryName));
-            return new SubqueryAlias(subqueryName, typedVisit(ctx.selectStatement()));
+            return new SubqueryAlias(subqueryName, typedVisit(ctx.selectStatement()), context);
         }
 
         Preconditions.checkArgument(Objects.nonNull(ctx.tableIdentifier()) && ctx.tableIdentifier().size() > 0);
         LogicalPlan plan = typedVisit(ctx.tableIdentifier(0));
         for (int i = 1; i < ctx.tableIdentifier().size(); i++) {
-            plan = new InnerJoin(plan, typedVisit(ctx.tableIdentifier(i)));
+            plan = new InnerJoin(plan, typedVisit(ctx.tableIdentifier(i)), context);
         }
         return plan;
     }
@@ -185,12 +191,12 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
 
     @Override
     public UnresolvedRelation visitTableIdentifierDefault(SqlBaseParser.TableIdentifierDefaultContext ctx) {
-        return new UnresolvedRelation(ctx.tableName.getText());
+        return new UnresolvedRelation(ctx.tableName.getText(), context);
     }
 
     @Override
     public UnresolvedRelation visitTableAlias(SqlBaseParser.TableAliasContext ctx) {
-        return new UnresolvedRelation(ctx.tableName.getText(), Optional.of(ctx.alias.getText()));
+        return new UnresolvedRelation(ctx.tableName.getText(), Optional.of(ctx.alias.getText()), context);
     }
 
     @Override

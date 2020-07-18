@@ -3,6 +3,7 @@ package com.searise.sof.plan.logic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.Alias;
@@ -16,10 +17,12 @@ public class Project implements LogicalPlan {
     public final LogicalPlan child;
     public final List<Expression> projectList;
     private List<Attribute> schema = ImmutableList.of();
+    public final Context context;
 
-    public Project(List<Expression> projectList, LogicalPlan child) {
+    public Project(List<Expression> projectList, LogicalPlan child, Context context) {
         this.child = child;
         this.projectList = projectList;
+        this.context = context;
         refreshSchema();
     }
 
@@ -40,7 +43,7 @@ public class Project implements LogicalPlan {
                 Alias alias = (Alias) expr;
                 return (Attribute) alias.attribute;
             } else {
-                return Attribute.newUnknownAttribute(expr.dataType());
+                return Attribute.newUnknownAttribute(expr.dataType(), context.exprIdBuilder);
             }
         }));
     }
@@ -58,7 +61,7 @@ public class Project implements LogicalPlan {
     @Override
     public LogicalPlan copyWithNewChildren(List<LogicalPlan> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 1);
-        return new Project(projectList, children.get(0));
+        return new Project(projectList, children.get(0), this.context);
     }
 
     @Override

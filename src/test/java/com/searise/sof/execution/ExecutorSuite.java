@@ -2,6 +2,8 @@ package com.searise.sof.execution;
 
 import com.google.common.base.Preconditions;
 import com.searise.sof.analyse.Analyzer;
+import com.searise.sof.catalog.TestCatalog;
+import com.searise.sof.core.Context;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
@@ -47,7 +49,7 @@ public class ExecutorSuite {
     }
 
     private void testExec(String sql, String expect) {
-        LogicalPlan parsePlan = new SqlParser().parsePlan(sql);
+        LogicalPlan parsePlan = new SqlParser(new Context()).parsePlan(sql);
         LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
         ResultExec executor = (ResultExec) new Builder().build(physicalPlan);

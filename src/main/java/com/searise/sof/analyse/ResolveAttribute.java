@@ -1,6 +1,7 @@
 package com.searise.sof.analyse;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.ExprIdBuilder;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
@@ -30,18 +31,18 @@ public class ResolveAttribute implements Rule {
                         Project project = (Project) p;
                         List<Attribute> childSchema = project.child.schema();
                         List<Expression> newProjectList = Utils.toImmutableList(project.projectList.stream().
-                                map(expr -> expr.transformUp(new AttributeApplicable(ImmutableList.of(childSchema), Optional.empty()))));
+                                map(expr -> expr.transformUp(new AttributeApplicable(ImmutableList.of(childSchema), Optional.empty(), project.context))));
                         if (!isEqualTo(project.projectList, newProjectList)) {
-                            return new Project(newProjectList, project.child);
+                            return new Project(newProjectList, project.child, project.context);
                         }
                         break;
                     case "Filter":
                         Filter filter = (Filter) p;
                         childSchema = filter.child.schema();
                         List<Expression> newConditions = Utils.toImmutableList(filter.conditions.stream().
-                                map(expr -> expr.transformUp(new AttributeApplicable(ImmutableList.of(childSchema), Optional.empty()))));
+                                map(expr -> expr.transformUp(new AttributeApplicable(ImmutableList.of(childSchema), Optional.empty(), filter.context))));
                         if (!isEqualTo(filter.conditions, newConditions)) {
-                            return new Filter(newConditions, filter.child);
+                            return new Filter(newConditions, filter.child, filter.context);
                         }
                         break;
                     case "InnerJoin":
@@ -52,9 +53,9 @@ public class ResolveAttribute implements Rule {
                         }
                         List<List<Attribute>> childSchemas = ImmutableList.of(join.left.schema(), join.right.schema());
                         newConditions = Utils.toImmutableList(join.conditions.stream().
-                                map(expr -> expr.transformUp(new AttributeApplicable(childSchemas, childAliases))));
+                                map(expr -> expr.transformUp(new AttributeApplicable(childSchemas, childAliases, join.context))));
                         if (!isEqualTo(join.conditions, newConditions)) {
-                            return new InnerJoin(join.left, join.right, newConditions);
+                            return new InnerJoin(join.left, join.right, newConditions, join.context);
                         }
                         break;
                     default:
@@ -91,10 +92,12 @@ public class ResolveAttribute implements Rule {
     private class AttributeApplicable implements Applicable<Expression> {
         private final List<List<Attribute>> childSchemas;
         private final Optional<List<String>> childAliases;
+        private final Context context;
 
-        public AttributeApplicable(List<List<Attribute>> childSchemas, Optional<List<String>> childAliases) {
+        public AttributeApplicable(List<List<Attribute>> childSchemas, Optional<List<String>> childAliases, Context context) {
             this.childSchemas = childSchemas;
             this.childAliases = childAliases;
+            this.context = context;
         }
 
         @Override
@@ -106,7 +109,7 @@ public class ResolveAttribute implements Rule {
                 } else if (expression.getClass() == Alias.class) {
                     Alias alias = (Alias) expression;
                     AttributeBase aliasName = alias.attribute;
-                    return new Alias(new Attribute(aliasName.table, aliasName.name, ExprIdBuilder.newExprId(), alias.child.dataType()), alias.child);
+                    return new Alias(new Attribute(aliasName.table, aliasName.name, context.exprIdBuilder.newExprId(), alias.child.dataType()), alias.child);
                 } else {
                     // just else
                 }
