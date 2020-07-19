@@ -84,6 +84,18 @@ public class ExecutorSuite {
                 "1,1.0\n" +
                         "1,5.0\n" +
                         "1,9.0");
+
+        testExec(
+                "select a+b, b-c, c*d, d/a, b % a, -a from (select (a+1.0) as a, (b+1.0) as b, (c+1.0) as c, (d+1.0) as d from a) a",
+                "5.0,-1.0,20.0,2.5,1.0,-2.0\n" +
+                        "13.0,-1.0,72.0,1.5,1.0,-6.0\n" +
+                        "21.0,-1.0,156.0,1.3,1.0,-10.0"
+        );
+
+        testExec(
+                "select a, b, c, d from (select a, b, c, d from a where a > 1.0) a where a < 9.0",
+                "5.0,6.0,7.0,8.0"
+        );
     }
 
     private void testExec(String sql, String expect) {

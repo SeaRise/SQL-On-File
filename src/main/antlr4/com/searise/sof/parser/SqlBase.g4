@@ -92,9 +92,9 @@ valueExpression
     ;
 
 primaryExpression
-    : columnIdentifier      #columnReference
+    :'(' expression ')'    #parenthesizedExpression
+    | columnIdentifier      #columnReference
     | constant              #constantValue
-    | '(' expression ')'    #parenthesizedExpression
     ;
 
 constant

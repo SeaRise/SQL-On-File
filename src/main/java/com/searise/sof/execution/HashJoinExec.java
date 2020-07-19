@@ -110,7 +110,6 @@ public class HashJoinExec implements Executor {
         }
 
         JoinRow joinRow = new JoinRow(streamRow, buildRow);
-//        System.out.println(joinRow);
         if (!predication.apply(joinRow)) {
             return EMPTY_ROW;
         }

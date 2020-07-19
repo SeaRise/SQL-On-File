@@ -68,6 +68,14 @@ public class ParserSuite {
                         "    join\n" +
                         "      UnresolvedRelation [b]\n" +
                         "      UnresolvedRelation [c]");
+
+        testSql(
+                "select a+b, b-c, c*d, d/a, b % a, -a from (select (a+1.0) as a, (b+1.0) as b, (c+1.0) as c, (d+1.0) as d from a) a",
+                "Project [+('a, 'b), -('b, 'c), *('c, 'd), /('d, 'a), %('b, 'a), -('a)]\n" +
+                        "  SubqueryAlias [a]\n" +
+                        "    Project [+('a, 1.0) as 'a, +('b, 1.0) as 'b, +('c, 1.0) as 'c, +('d, 1.0) as 'd]\n" +
+                        "      UnresolvedRelation [a]"
+        );
     }
 
     private void testSql(String sql, String expect) {

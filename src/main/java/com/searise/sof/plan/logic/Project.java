@@ -32,7 +32,8 @@ public class Project implements LogicalPlan {
     }
 
     private void refreshSchema() {
-        if (!resolved()) {
+        // 当child为null的时候,说明在optimizer中init,这时候schema是不需要的.
+        if (Objects.isNull(child) || !resolved()) {
             return;
         }
 

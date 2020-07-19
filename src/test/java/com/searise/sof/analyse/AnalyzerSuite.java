@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.Context;
 import com.searise.sof.parser.SqlParser;
+import com.searise.sof.plan.logic.LogicalPlan;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
@@ -61,12 +62,21 @@ public class AnalyzerSuite {
                         "    join on (0:DoubleType = 4:DoubleType)\n" +
                         "      Relation [a, a] (0:DoubleType,1:DoubleType,2:DoubleType,3:DoubleType)\n" +
                         "      Relation [a, b] (4:DoubleType,5:DoubleType,6:DoubleType,7:DoubleType)");
+
+        testAnalyse(
+                "select a+b, b-c, c*d, d/a, b % a, -a from (select (a+1.0) as a, (b+1.0) as b, (c+1.0) as c, (d+1.0) as d from a) a",
+                "Project [(4:DoubleType + 5:DoubleType) as 8:DoubleType, (5:DoubleType - 6:DoubleType) as 9:DoubleType, (6:DoubleType * 7:DoubleType) as 10:DoubleType, (7:DoubleType / 4:DoubleType) as 11:DoubleType, (5:DoubleType % 4:DoubleType) as 12:DoubleType, (-4:DoubleType) as 13:DoubleType]\n" +
+                        "  SubqueryAlias [a]\n" +
+                        "    Project [(0:DoubleType + 1.0) as 4:DoubleType, (1:DoubleType + 1.0) as 5:DoubleType, (2:DoubleType + 1.0) as 6:DoubleType, (3:DoubleType + 1.0) as 7:DoubleType]\n" +
+                        "      Relation [a] (0:DoubleType,1:DoubleType,2:DoubleType,3:DoubleType)"
+        );
     }
 
     private void testAnalyse(String sql, String expect) {
         SqlParser sqlParser = new SqlParser(new Context());
         Analyzer analyzer = new Analyzer(new TestCatalog());
-        String result = StringUtils.trim(analyzer.analyse(sqlParser.parsePlan(sql)).visitToString());
+        LogicalPlan parsePlan = sqlParser.parsePlan(sql);
+        String result = StringUtils.trim(analyzer.analyse(parsePlan).visitToString());
         Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
     }
 }

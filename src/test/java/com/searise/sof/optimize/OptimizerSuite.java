@@ -2,13 +2,18 @@ package com.searise.sof.optimize;
 
 import com.google.common.base.Preconditions;
 import com.searise.sof.analyse.Analyzer;
+import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.Context;
+import com.searise.sof.core.Utils;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
+import com.searise.sof.plan.runnable.RunnableCommand;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+
+import java.util.List;
 
 import static com.searise.sof.optimize.Optimizer.newOptimizer;
 
@@ -29,10 +34,63 @@ public class OptimizerSuite {
         doTest("select a from (select a from a) b where a < 10.0",
                 "PhysicalFilter [DoubleType:exprId->0:index->0] [DoubleType:exprId->0:index->0 < 10.0]\n" +
                         "  PhysicalScan [DoubleType:exprId->0:index->0] [src\\test\\resources\\input.txt|,] (0:DoubleType,1:DoubleType,2:DoubleType,3:DoubleType)");
+
+        doTest(
+                "set sof_force_join_type=loop;select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a where a.d > 4.0 and b.c < 11.0",
+                "PhysicalNestedLoopJoin [DoubleType:exprId->0:index->0,DoubleType:exprId->5:index->3,DoubleType:exprId->2:index->1,DoubleType:exprId->7:index->4] [DoubleType:exprId->0:index->0 = DoubleType:exprId->4:index->2]\n" +
+                        "  PhysicalFilter [DoubleType:exprId->0:index->1,DoubleType:exprId->2:index->2] [DoubleType:exprId->3:index->0 > 4.0]\n" +
+                        "    PhysicalScan [DoubleType:exprId->3:index->3,DoubleType:exprId->0:index->0,DoubleType:exprId->2:index->2] [src\\test\\resources\\input.txt|,] (0:DoubleType,1:DoubleType,2:DoubleType,3:DoubleType)\n" +
+                        "  PhysicalFilter [DoubleType:exprId->4:index->1,DoubleType:exprId->5:index->2,DoubleType:exprId->7:index->3] [DoubleType:exprId->6:index->0 < 11.0]\n" +
+                        "    PhysicalScan [DoubleType:exprId->6:index->2,DoubleType:exprId->4:index->0,DoubleType:exprId->5:index->1,DoubleType:exprId->7:index->3] [src\\test\\resources\\input.txt|,] (4:DoubleType,5:DoubleType,6:DoubleType,7:DoubleType)"
+        );
+        doTest(
+                "set sof_force_join_type=hash;select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a where a.d > 4.0 and b.c < 11.0",
+                "PhysicalHashJoin [DoubleType:exprId->0:index->0,DoubleType:exprId->5:index->3,DoubleType:exprId->2:index->1,DoubleType:exprId->7:index->4], stream: [DoubleType:exprId->0:index->0], build: [DoubleType:exprId->4:index->0], others: [] \n" +
+                        "  PhysicalFilter [DoubleType:exprId->0:index->1,DoubleType:exprId->2:index->2] [DoubleType:exprId->3:index->0 > 4.0]\n" +
+                        "    PhysicalScan [DoubleType:exprId->3:index->3,DoubleType:exprId->0:index->0,DoubleType:exprId->2:index->2] [src\\test\\resources\\input.txt|,] (0:DoubleType,1:DoubleType,2:DoubleType,3:DoubleType)\n" +
+                        "  PhysicalFilter [DoubleType:exprId->4:index->1,DoubleType:exprId->5:index->2,DoubleType:exprId->7:index->3] [DoubleType:exprId->6:index->0 < 11.0]\n" +
+                        "    PhysicalScan [DoubleType:exprId->6:index->2,DoubleType:exprId->4:index->0,DoubleType:exprId->5:index->1,DoubleType:exprId->7:index->3] [src\\test\\resources\\input.txt|,] (4:DoubleType,5:DoubleType,6:DoubleType,7:DoubleType)"
+        );
+
+        doTest(
+                "set sof_force_join_type=loop;select a.a, b.b, a.c, b.d from a as a join a as b",
+                "PhysicalNestedLoopJoin [DoubleType:exprId->0:index->0,DoubleType:exprId->5:index->2,DoubleType:exprId->2:index->1,DoubleType:exprId->7:index->3] []\n" +
+                        "  PhysicalScan [DoubleType:exprId->0:index->0,DoubleType:exprId->2:index->2] [src\\test\\resources\\input.txt|,] (0:DoubleType,1:DoubleType,2:DoubleType,3:DoubleType)\n" +
+                        "  PhysicalScan [DoubleType:exprId->5:index->1,DoubleType:exprId->7:index->3] [src\\test\\resources\\input.txt|,] (4:DoubleType,5:DoubleType,6:DoubleType,7:DoubleType)"
+        );
+        doTest(
+                "set sof_force_join_type=hash;select a.a, b.b, a.c, b.d from a as a join a as b",
+                "PhysicalHashJoin [DoubleType:exprId->0:index->0,DoubleType:exprId->5:index->2,DoubleType:exprId->2:index->1,DoubleType:exprId->7:index->3], stream: [], build: [], others: [] \n" +
+                        "  PhysicalScan [DoubleType:exprId->0:index->0,DoubleType:exprId->2:index->2] [src\\test\\resources\\input.txt|,] (0:DoubleType,1:DoubleType,2:DoubleType,3:DoubleType)\n" +
+                        "  PhysicalScan [DoubleType:exprId->5:index->1,DoubleType:exprId->7:index->3] [src\\test\\resources\\input.txt|,] (4:DoubleType,5:DoubleType,6:DoubleType,7:DoubleType)"
+        );
+
+        doTest(
+                "select a+b, b-c, c*d, d/a, b % a, -a from (select (a+1.0) as a, (b+1.0) as b, (c+1.0) as c, (d+1.0) as d from a) a",
+                "PhysicalProject [DoubleType:exprId->8:index->0,DoubleType:exprId->9:index->1,DoubleType:exprId->10:index->2,DoubleType:exprId->11:index->3,DoubleType:exprId->12:index->4,DoubleType:exprId->13:index->5] [((DoubleType:exprId->0:index->0 + 1.0) + (DoubleType:exprId->1:index->1 + 1.0)), ((DoubleType:exprId->1:index->1 + 1.0) - (DoubleType:exprId->2:index->2 + 1.0)), ((DoubleType:exprId->2:index->2 + 1.0) * (DoubleType:exprId->3:index->3 + 1.0)), ((DoubleType:exprId->3:index->3 + 1.0) / (DoubleType:exprId->0:index->0 + 1.0)), ((DoubleType:exprId->1:index->1 + 1.0) % (DoubleType:exprId->0:index->0 + 1.0)), (-(DoubleType:exprId->0:index->0 + 1.0))]\n" +
+                        "  PhysicalScan [DoubleType:exprId->0:index->0,DoubleType:exprId->1:index->1,DoubleType:exprId->2:index->2,DoubleType:exprId->3:index->3] [src\\test\\resources\\input.txt|,] (0:DoubleType,1:DoubleType,2:DoubleType,3:DoubleType)"
+        );
+
+        doTest(
+                "select a, b, c, d from (select a, b, c, d from a where a > 1.0) a where a < 9.0",
+                "PhysicalFilter [DoubleType:exprId->0:index->0,DoubleType:exprId->1:index->1,DoubleType:exprId->2:index->2,DoubleType:exprId->3:index->3] [DoubleType:exprId->0:index->0 < 9.0, DoubleType:exprId->0:index->0 > 1.0]\n" +
+                        "  PhysicalScan [DoubleType:exprId->0:index->0,DoubleType:exprId->1:index->1,DoubleType:exprId->2:index->2,DoubleType:exprId->3:index->3] [src\\test\\resources\\input.txt|,] (0:DoubleType,1:DoubleType,2:DoubleType,3:DoubleType)"
+        );
     }
 
     private void doTest(String sql, String expect) {
-        LogicalPlan parsePlan = new SqlParser(new Context()).parsePlan(sql);
+        Context context = new Context();
+        Catalog catalog = new TestCatalog();
+        List<String> splits = Utils.split(sql);
+        for (int i = 0; i < splits.size() - 1; i++) {
+            LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(i));
+            if (parsePlan instanceof RunnableCommand) {
+                RunnableCommand command = (RunnableCommand) parsePlan;
+                command.run(catalog);
+            }
+        }
+
+        LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(splits.size() - 1));
         LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
         String result = StringUtils.trim(physicalPlan.visitToString());
