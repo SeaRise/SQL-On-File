@@ -1,7 +1,7 @@
-package com.searise.sof.plan.ddl;
+package com.searise.sof.plan.runnable;
 
 import com.searise.sof.catalog.Catalog;
 
-public interface DDLCommand {
+public interface RunnableCommand {
     void run(Catalog catalog);
 }

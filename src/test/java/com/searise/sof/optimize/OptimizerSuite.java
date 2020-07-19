@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.Context;
-import com.searise.sof.core.ExprIdBuilder;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;

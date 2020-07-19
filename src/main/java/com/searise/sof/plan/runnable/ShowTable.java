@@ -1,4 +1,4 @@
-package com.searise.sof.plan.ddl;
+package com.searise.sof.plan.runnable;
 
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.core.Utils;
@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
-public class ShowTable implements LogicalPlan, DDLCommand {
+public class ShowTable implements LogicalPlan, RunnableCommand {
     @Override
     public void run(Catalog catalog) {
         List<String> allTable = catalog.getAllTable();

@@ -8,6 +8,11 @@ statement
     : selectStatement    #QueryStatement
     | createStatement    #createTableStatement
     | showTable          #showTableStatement
+    | setConf            #setConfStatement
+    ;
+
+setConf
+    : SET key=identifier EQ value=identifier
     ;
 
 showTable
@@ -149,6 +154,7 @@ SCHEMA: 'SCHEMA';
 INDEX : 'INDEX';
 ON    : 'ON';
 AS    : 'AS';
+SET    : 'SET';
 
 OR  : 'OR';
 AND : 'AND';

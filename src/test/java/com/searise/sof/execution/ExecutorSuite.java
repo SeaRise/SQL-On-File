@@ -2,13 +2,18 @@ package com.searise.sof.execution;
 
 import com.google.common.base.Preconditions;
 import com.searise.sof.analyse.Analyzer;
+import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.Context;
+import com.searise.sof.core.Utils;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
+import com.searise.sof.plan.runnable.RunnableCommand;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+
+import java.util.List;
 
 import static com.searise.sof.optimize.Optimizer.newOptimizer;
 
@@ -28,17 +33,37 @@ public class ExecutorSuite {
         );
 
         testExec(
-                "select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a and a.d > 4.0 and b.c < 11.0",
+                "set sof_force_join_type=loop;select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a and a.d > 4.0 and b.c < 11.0",
+                "5.0,6.0,7.0,8.0"
+        );
+        testExec(
+                "set sof_force_join_type=hash;select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a and a.d > 4.0 and b.c < 11.0",
                 "5.0,6.0,7.0,8.0"
         );
 
         testExec(
-                "select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a where a.d > 4.0 and b.c < 11.0",
+                "set sof_force_join_type=loop;select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a where a.d > 4.0 and b.c < 11.0",
+                "5.0,6.0,7.0,8.0"
+        );
+        testExec(
+                "set sof_force_join_type=hash;select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a where a.d > 4.0 and b.c < 11.0",
                 "5.0,6.0,7.0,8.0"
         );
 
         testExec(
-                "select a.a, b.b, a.c, b.d from a as a join a as b",
+                "set sof_force_join_type=loop;select a.a, b.b, a.c, b.d from a as a join a as b",
+                "1.0,2.0,3.0,4.0\n" +
+                        "1.0,6.0,3.0,8.0\n" +
+                        "1.0,10.0,3.0,12.0\n" +
+                        "5.0,2.0,7.0,4.0\n" +
+                        "5.0,6.0,7.0,8.0\n" +
+                        "5.0,10.0,7.0,12.0\n" +
+                        "9.0,2.0,11.0,4.0\n" +
+                        "9.0,6.0,11.0,8.0\n" +
+                        "9.0,10.0,11.0,12.0"
+        );
+        testExec(
+                "set sof_force_join_type=hash;select a.a, b.b, a.c, b.d from a as a join a as b",
                 "1.0,2.0,3.0,4.0\n" +
                         "1.0,6.0,3.0,8.0\n" +
                         "1.0,10.0,3.0,12.0\n" +
@@ -62,7 +87,18 @@ public class ExecutorSuite {
     }
 
     private void testExec(String sql, String expect) {
-        LogicalPlan parsePlan = new SqlParser(new Context()).parsePlan(sql);
+        Context context = new Context();
+        Catalog catalog = new TestCatalog();
+        List<String> splits = Utils.split(sql);
+        for (int i = 0; i < splits.size() - 1; i++) {
+            LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(i));
+            if (parsePlan instanceof RunnableCommand) {
+                RunnableCommand command = (RunnableCommand) parsePlan;
+                command.run(catalog);
+            }
+        }
+
+        LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(splits.size() - 1));
         LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
         ResultExec executor = (ResultExec) new Builder().build(physicalPlan);

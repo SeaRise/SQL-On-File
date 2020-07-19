@@ -10,9 +10,9 @@ import com.searise.sof.execution.Executor;
 import com.searise.sof.execution.ResultExec;
 import com.searise.sof.optimize.Optimizer;
 import com.searise.sof.parser.SqlParser;
-import com.searise.sof.plan.ddl.DDLCommand;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
+import com.searise.sof.plan.runnable.RunnableCommand;
 
 import java.io.IOException;
 
@@ -34,8 +34,8 @@ public class Driver {
 
     private void doCompile(String sql) {
         LogicalPlan parsePlan = sqlParser.parsePlan(sql);
-        if (parsePlan instanceof DDLCommand) {
-            DDLCommand command = (DDLCommand) parsePlan;
+        if (parsePlan instanceof RunnableCommand) {
+            RunnableCommand command = (RunnableCommand) parsePlan;
             command.run(catalog);
             return;
         }

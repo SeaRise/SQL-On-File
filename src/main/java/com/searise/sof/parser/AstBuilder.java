@@ -11,9 +11,10 @@ import com.searise.sof.expression.Literal;
 import com.searise.sof.expression.ScalarFunction;
 import com.searise.sof.expression.attribute.Alias;
 import com.searise.sof.expression.attribute.UnresolvedAttribute;
-import com.searise.sof.plan.ddl.CreateTable;
-import com.searise.sof.plan.ddl.ShowTable;
 import com.searise.sof.plan.logic.*;
+import com.searise.sof.plan.runnable.CreateTable;
+import com.searise.sof.plan.runnable.SetCommand;
+import com.searise.sof.plan.runnable.ShowTable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,6 +39,13 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
     @Override
     public LogicalPlan visitSingleStatement(SqlBaseParser.SingleStatementContext ctx) {
         return typedVisit(ctx.statement());
+    }
+
+    @Override
+    public LogicalPlan visitSetConf(SqlBaseParser.SetConfContext ctx) {
+        String key = ctx.key.getText();
+        String value = ctx.value.getText();
+        return new SetCommand(key, value, context);
     }
 
     @Override

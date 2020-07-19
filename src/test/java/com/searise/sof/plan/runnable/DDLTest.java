@@ -1,4 +1,4 @@
-package com.searise.sof.plan.ddl;
+package com.searise.sof.plan.runnable;
 
 import com.searise.sof.catalog.BuiltInCatalog;
 import com.searise.sof.catalog.Catalog;

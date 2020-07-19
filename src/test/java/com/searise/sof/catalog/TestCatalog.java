@@ -1,9 +1,6 @@
 package com.searise.sof.catalog;
 
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.catalog.Catalog;
-import com.searise.sof.catalog.CatalogTable;
-import com.searise.sof.catalog.StructField;
 
 import static com.searise.sof.type.DataType.DoubleType;
 

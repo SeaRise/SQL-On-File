@@ -3,7 +3,6 @@ package com.searise.sof.analyse;
 import com.google.common.base.Preconditions;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.Context;
-import com.searise.sof.core.ExprIdBuilder;
 import com.searise.sof.parser.SqlParser;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
