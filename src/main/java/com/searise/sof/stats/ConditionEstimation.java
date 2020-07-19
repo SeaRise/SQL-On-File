@@ -6,6 +6,9 @@ import com.searise.sof.expression.logic.Not;
 import com.searise.sof.expression.logic.Or;
 
 import java.util.List;
+import java.util.Optional;
+
+import static com.searise.sof.expression.Expression.getBooleanLiteralValue;
 
 public class ConditionEstimation {
     private static final double singleConditionFactor = 0.8;
@@ -30,6 +33,10 @@ public class ConditionEstimation {
         } else if (condition.getClass() == Not.class) {
             return 1 - estimate(condition.children().get(0));
         } else {
+            Optional<Boolean> bool = getBooleanLiteralValue(condition);
+            if (bool.isPresent()) {
+                return bool.get() ? 1 : 0;
+            }
             // 默认单个条件选择率为singleConditionFactor
             return singleConditionFactor;
         }

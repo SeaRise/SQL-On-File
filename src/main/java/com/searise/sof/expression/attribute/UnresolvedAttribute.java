@@ -13,7 +13,7 @@ public class UnresolvedAttribute extends AttributeBase {
     }
 
     public String toString() {
-        return "'" + table.map(s -> s + "." + name).orElse(name);
+        return "UnresolvedAttribute:'" + table.map(s -> s + "." + name).orElse(name);
     }
 
     public boolean resolved() {

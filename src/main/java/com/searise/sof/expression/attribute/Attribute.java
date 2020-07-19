@@ -20,7 +20,7 @@ public class Attribute extends UnresolvedAttribute {
     }
 
     public String toString() {
-        return String.format("%s:%s", exprId, dataType);
+        return String.format("attribute:%s:%s", exprId, dataType);
     }
 
     public DataType dataType() {

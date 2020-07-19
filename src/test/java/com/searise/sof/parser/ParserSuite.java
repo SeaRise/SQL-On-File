@@ -10,59 +10,59 @@ public class ParserSuite {
     @Test
     public void test() {
         testSql("select a.a from a",
-                "Project ['a.a]\n" +
+                "Project [UnresolvedAttribute:'a.a]\n" +
                         "  UnresolvedRelation [a]");
 
         testSql("select 1+1, 1-1, 1*1, 1/1, 1%1, -(5) from a",
-                "Project [+(1, 1), -(1, 1), *(1, 1), /(1, 1), %(1, 1), -(5)]\n" +
+                "Project [+(literal:1:IntegerType, literal:1:IntegerType), -(literal:1:IntegerType, literal:1:IntegerType), *(literal:1:IntegerType, literal:1:IntegerType), /(literal:1:IntegerType, literal:1:IntegerType), %(literal:1:IntegerType, literal:1:IntegerType), -(literal:5:IntegerType)]\n" +
                         "  UnresolvedRelation [a]");
 
         testSql("select b.a from a as b",
-                "Project ['b.a]\n" +
+                "Project [UnresolvedAttribute:'b.a]\n" +
                         "  UnresolvedRelation [a, b]");
 
         testSql("select a as c from a as b",
-                "Project ['a as 'c]\n" +
+                "Project [UnresolvedAttribute:'a as UnresolvedAttribute:'c]\n" +
                         "  UnresolvedRelation [a, b]");
 
         testSql("select a, b, c from b where 'a' = 'v' and a > 'c'",
-                "Project ['a, 'b, 'c]\n" +
-                        "  Filter [and(=(a, v), >('a, c))]\n" +
-                        "    UnresolvedRelation [b]\n");
+                "Project [UnresolvedAttribute:'a, UnresolvedAttribute:'b, UnresolvedAttribute:'c]\n" +
+                        "  Filter [and(=(literal:a:StringType, literal:v:StringType), >(UnresolvedAttribute:'a, literal:c:StringType))]\n" +
+                        "    UnresolvedRelation [b]");
 
         testSql("select 'a', 0.5, c from b where 'a' >= 'v' or a > 'c'",
-                "Project [a, 0.5, 'c]\n" +
-                        "  Filter [or(>=(a, v), >('a, c))]\n" +
-                        "    UnresolvedRelation [b]\n");
+                "Project [literal:a:StringType, literal:0.5:DoubleType, UnresolvedAttribute:'c]\n" +
+                        "  Filter [or(>=(literal:a:StringType, literal:v:StringType), >(UnresolvedAttribute:'a, literal:c:StringType))]\n" +
+                        "    UnresolvedRelation [b]");
 
         testSql("select a, b, c from (select a from b) a where 'a' = 'v' and a = 'c'",
-                "Project ['a, 'b, 'c]\n" +
-                        "  Filter [and(=(a, v), =('a, c))]\n" +
+                "Project [UnresolvedAttribute:'a, UnresolvedAttribute:'b, UnresolvedAttribute:'c]\n" +
+                        "  Filter [and(=(literal:a:StringType, literal:v:StringType), =(UnresolvedAttribute:'a, literal:c:StringType))]\n" +
                         "    SubqueryAlias [a]\n" +
-                        "      Project ['a]\n" +
+                        "      Project [UnresolvedAttribute:'a]\n" +
                         "        UnresolvedRelation [b]");
 
         testSql("select a, b, c from (select a from b, c, d) a where 'a' = 'v' and a = 'c'",
-                "Project ['a, 'b, 'c]\n" +
-                        "  Filter [and(=(a, v), =('a, c))]\n" +
+                "Project [UnresolvedAttribute:'a, UnresolvedAttribute:'b, UnresolvedAttribute:'c]\n" +
+                        "  Filter [and(=(literal:a:StringType, literal:v:StringType), =(UnresolvedAttribute:'a, literal:c:StringType))]\n" +
                         "    SubqueryAlias [a]\n" +
-                        "      Project ['a]\n" +
+                        "      Project [UnresolvedAttribute:'a]\n" +
                         "        join\n" +
                         "          join\n" +
                         "            UnresolvedRelation [b]\n" +
                         "            UnresolvedRelation [c]\n" +
-                        "          UnresolvedRelation [d]\n");
+                        "          UnresolvedRelation [d]");
 
         testSql("select a, b, c from a join b on a.a = b.b join c on a.a = c.c",
-                "Project ['a, 'b, 'c]\n" +
-                        "  join on (=('a.a, 'c.c))\n" +
-                        "    join on (=('a.a, 'b.b))\n" +
+                "Project [UnresolvedAttribute:'a, UnresolvedAttribute:'b, UnresolvedAttribute:'c]\n" +
+                        "  join on (=(UnresolvedAttribute:'a.a, UnresolvedAttribute:'c.c))\n" +
+                        "    join on (=(UnresolvedAttribute:'a.a, UnresolvedAttribute:'b.b))\n" +
                         "      UnresolvedRelation [a]\n" +
                         "      UnresolvedRelation [b]\n" +
                         "    UnresolvedRelation [c]");
 
         testSql("select a, b, c from a join b join c",
-                "Project ['a, 'b, 'c]\n" +
+                "Project [UnresolvedAttribute:'a, UnresolvedAttribute:'b, UnresolvedAttribute:'c]\n" +
                         "  join\n" +
                         "    UnresolvedRelation [a]\n" +
                         "    join\n" +
@@ -71,9 +71,9 @@ public class ParserSuite {
 
         testSql(
                 "select a+b, b-c, c*d, d/a, b % a, -a from (select (a+1.0) as a, (b+1.0) as b, (c+1.0) as c, (d+1.0) as d from a) a",
-                "Project [+('a, 'b), -('b, 'c), *('c, 'd), /('d, 'a), %('b, 'a), -('a)]\n" +
+                "Project [+(UnresolvedAttribute:'a, UnresolvedAttribute:'b), -(UnresolvedAttribute:'b, UnresolvedAttribute:'c), *(UnresolvedAttribute:'c, UnresolvedAttribute:'d), /(UnresolvedAttribute:'d, UnresolvedAttribute:'a), %(UnresolvedAttribute:'b, UnresolvedAttribute:'a), -(UnresolvedAttribute:'a)]\n" +
                         "  SubqueryAlias [a]\n" +
-                        "    Project [+('a, 1.0) as 'a, +('b, 1.0) as 'b, +('c, 1.0) as 'c, +('d, 1.0) as 'd]\n" +
+                        "    Project [+(UnresolvedAttribute:'a, literal:1.0:DoubleType) as UnresolvedAttribute:'a, +(UnresolvedAttribute:'b, literal:1.0:DoubleType) as UnresolvedAttribute:'b, +(UnresolvedAttribute:'c, literal:1.0:DoubleType) as UnresolvedAttribute:'c, +(UnresolvedAttribute:'d, literal:1.0:DoubleType) as UnresolvedAttribute:'d]\n" +
                         "      UnresolvedRelation [a]"
         );
     }

@@ -15,6 +15,7 @@ public class Analyzer {
                 new AddAlias()
                 , new ResolveRelation(catalog)
                 , new ResolveScalarFunction()
+                , new FoldExpression()
                 , new PushDownNot()
                 , new SplitCNF()
                 , new ResolveAttribute()

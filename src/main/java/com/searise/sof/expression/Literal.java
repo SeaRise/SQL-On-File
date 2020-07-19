@@ -13,7 +13,7 @@ public class Literal implements Expression {
     }
 
     public String toString() {
-        return value.toString();
+        return String.format("literal:%s:%s", value, dataType);
     }
 
     public boolean resolved() {
@@ -26,5 +26,9 @@ public class Literal implements Expression {
 
     public Object eval(InternalRow input) {
         return value;
+    }
+
+    public boolean foldable() {
+        return true;
     }
 }

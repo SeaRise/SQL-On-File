@@ -19,7 +19,7 @@ public abstract class BinaryComparison extends Binary {
 
     @Override
     public String toString() {
-        return String.format("%s %s %s", left, op, right);
+        return String.format("%s %s %s:%s", left, op, right, dataType());
     }
 
     @Override

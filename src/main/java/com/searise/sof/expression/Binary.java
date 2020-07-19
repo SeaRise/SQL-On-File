@@ -21,7 +21,7 @@ public abstract class Binary implements Expression {
     public Object eval(InternalRow input) {
         DataType inputDataType = left.dataType();
         Utils.checkArgument(inputDataType == right.dataType(),
-                "left.dataType must equal to right.dataType in binary expression " + getClass().getSimpleName());
+                String.format("left(%s).dataType[%s] must equal to right(%s).dataType[%s] in binary expression: %s", left, left.dataType(), right, right.dataType(), getClass().getSimpleName()));
         return doEval(input, inputDataType);
     }
 
