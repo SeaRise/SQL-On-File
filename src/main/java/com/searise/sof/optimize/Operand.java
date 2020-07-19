@@ -6,6 +6,7 @@ import com.searise.sof.plan.logic.*;
 public enum Operand {
     OperandAny(LogicalPlan.class),
     OperandJoin(InnerJoin.class),
+    OperandMultiJoin(MultiJoin.class),
     OperandProject(Project.class),
     OperandFilter(Filter.class),
     OperandRelation(Relation.class);
