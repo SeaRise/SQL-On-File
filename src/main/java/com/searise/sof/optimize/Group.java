@@ -3,6 +3,7 @@ package com.searise.sof.optimize;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.optimize.iter.Iterator;
+import com.searise.sof.optimize.transformation.ExploreRecord;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
 import com.searise.sof.stats.Statistics;
@@ -14,7 +15,7 @@ import java.util.Optional;
 public class Group {
     public final List<Attribute> schema;
     private Iterator<GroupExpr> equivalents;
-    public boolean explored = false;
+    public ExploreRecord explored = new ExploreRecord();
     Optional<Pair<PhysicalPlan, Integer>> impl = Optional.empty();
     public Optional<Statistics> stats = Optional.empty();
 

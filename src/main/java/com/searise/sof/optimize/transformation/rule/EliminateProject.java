@@ -34,7 +34,7 @@ public class EliminateProject implements TransformationRule {
                 while (iter.hasNext()) {
                     GroupExpr next = iter.next();
                     GroupExpr newGroupExpr = new GroupExpr(next.exprNode, next.children);
-                    newGroupExpr.explored = true;
+                    newGroupExpr.explored = next.explored.copy();
                     builder.add(newGroupExpr);
                 }
                 return builder.build().stream();

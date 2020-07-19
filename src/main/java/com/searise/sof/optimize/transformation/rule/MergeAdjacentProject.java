@@ -32,16 +32,11 @@ public class MergeAdjacentProject implements TransformationRule {
         Project bottomProject = (Project) bottomProjectExpr.exprNode;
 
         Map<Long, Expression> replace = bottomProject.projectList.stream().
-                filter(e -> e.getClass() == Alias.class).collect(Collectors.toMap(
-                expr -> {
-                    Alias alias = (Alias) expr;
-                    return ((Attribute) alias.attribute).exprId;
-                },
-                expr -> {
-                    Alias alias = (Alias) expr;
-                    return alias.child;
-                }
-        ));
+                filter(e -> e.getClass() == Alias.class).
+                collect(Collectors.toMap(
+                        expr -> ((Attribute) ((Alias) expr).attribute).exprId,
+                        expr -> ((Alias) expr).child
+                ));
 
         List<Expression> newProjectList = Utils.toImmutableList(topProject.projectList.stream().map(expr ->
                 expr.transformUp((Applicable<Expression>) expression -> {

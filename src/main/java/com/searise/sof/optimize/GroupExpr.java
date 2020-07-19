@@ -1,5 +1,6 @@
 package com.searise.sof.optimize;
 
+import com.searise.sof.optimize.transformation.ExploreRecord;
 import com.searise.sof.plan.logic.LogicalPlan;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public class GroupExpr {
     public final LogicalPlan exprNode;
     public final List<Group> children;
     public Group group;
-    public boolean explored = false;
+    public ExploreRecord explored = new ExploreRecord();
 
     public GroupExpr(LogicalPlan exprNode, List<Group> children) {
         this.exprNode = exprNode;

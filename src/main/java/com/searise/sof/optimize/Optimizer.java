@@ -23,20 +23,20 @@ public class Optimizer {
     public static Optimizer newOptimizer() {
         return new Optimizer(
                 PreprocessRule.preprocessRules
-                , TransformationRule.transformationRuleMap
+                , TransformationRule.transformationRuleBatches
                 , ImplementationRule.implementationRuleMap
         );
     }
 
     private final List<PreprocessRule> preprocessRules;
-    private final Map<Operand, List<TransformationRule>> transformationRuleMap;
+    private final List<Map<Operand, List<TransformationRule>>> transformationRuleBatches;
     private final Map<Operand, ImplementationRule> implementationRuleMap;
 
     public Optimizer(List<PreprocessRule> preprocessRules,
-                     Map<Operand, List<TransformationRule>> transformationRuleMap,
+                     List<Map<Operand, List<TransformationRule>>> transformationRuleBatches,
                      Map<Operand, ImplementationRule> implementationRuleMap) {
         this.preprocessRules = preprocessRules;
-        this.transformationRuleMap = transformationRuleMap;
+        this.transformationRuleBatches = transformationRuleBatches;
         this.implementationRuleMap = implementationRuleMap;
     }
 
@@ -57,32 +57,34 @@ public class Optimizer {
     }
 
     private Group onPhaseExploration(Group rootGroup) {
-        exploreGroup(rootGroup);
+        for (int batchIndex = 0; batchIndex < transformationRuleBatches.size(); batchIndex++) {
+            exploreGroup(rootGroup, transformationRuleBatches.get(batchIndex), batchIndex);
+        }
         return rootGroup;
     }
 
-    private void exploreGroup(Group group) {
-        if (group.explored) {
+    private void exploreGroup(Group group, Map<Operand, List<TransformationRule>> batch, int batchIndex) {
+        if (group.explored.isExplored(batchIndex)) {
             return;
         }
-        group.explored = true;
+        group.explored.explore(batchIndex);
         Iterator<GroupExpr> iterator = group.iter().reset();
 
         while (iterator.hasNext()) {
             GroupExpr groupExpr = iterator.next();
-            if (groupExpr.explored) {
+            if (groupExpr.explored.isExplored(batchIndex)) {
                 continue;
             }
 
-            groupExpr.explored = true;
+            groupExpr.explored.explore(batchIndex);
             for (Group child : groupExpr.children) {
-                exploreGroup(child);
+                exploreGroup(child, batch, batchIndex);
             }
 
             boolean isReplace = false;
 
             Operand operand = Operand.getOperand(groupExpr.exprNode);
-            for (TransformationRule rule : transformationRuleMap.getOrDefault(operand, ImmutableList.of())) {
+            for (TransformationRule rule : batch.getOrDefault(operand, ImmutableList.of())) {
                 Pattern pattern = rule.pattern();
                 if (!pattern.operand.match(operand)) {
                     continue;

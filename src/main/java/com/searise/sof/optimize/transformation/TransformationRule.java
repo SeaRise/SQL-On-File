@@ -15,10 +15,14 @@ public interface TransformationRule {
     // 需要确保转换后plan更优.
     List<GroupExpr> onTransform(ExprIter exprIter);
 
-    // todo
-    //  简单的join reorder
-    Map<Operand, List<TransformationRule>> transformationRuleMap = ImmutableMap.of(
+    Map<Operand, List<TransformationRule>> defaultTransformationRuleMap = ImmutableMap.of(
             Operand.OperandProject, ImmutableList.of(new EliminateProject(), new MergeAdjacentProject())
             , Operand.OperandFilter, ImmutableList.of(new PushFilterDownProject(), new PushFilterDownJoin(), new MergeAdjacentFilter())
+    );
+
+    // todo
+    //  简单的join reorder
+    List<Map<Operand, List<TransformationRule>>> transformationRuleBatches = ImmutableList.of(
+            defaultTransformationRuleMap
     );
 }
