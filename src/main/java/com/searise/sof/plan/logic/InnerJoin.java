@@ -30,6 +30,11 @@ public class InnerJoin implements LogicalPlan {
     }
 
     @Override
+    public Context context() {
+        return context;
+    }
+
+    @Override
     public List<LogicalPlan> children() {
         return ImmutableList.of(left, right);
     }

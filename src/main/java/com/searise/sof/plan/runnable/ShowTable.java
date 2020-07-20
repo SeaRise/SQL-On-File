@@ -1,6 +1,7 @@
 package com.searise.sof.plan.runnable;
 
 import com.searise.sof.catalog.Catalog;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.plan.logic.LogicalPlan;
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +9,11 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 public class ShowTable implements LogicalPlan, RunnableCommand {
+    public final Context context;
+    public ShowTable(Context context) {
+        this.context = context;
+    }
+
     @Override
     public void run(Catalog catalog) {
         List<String> allTable = catalog.getAllTable();
@@ -34,5 +40,10 @@ public class ShowTable implements LogicalPlan, RunnableCommand {
         int len = str.length();
         int left = (maxLen - len) / 2;
         return StringUtils.repeat(' ', left) + str + StringUtils.repeat(' ', maxLen - left - len);
+    }
+
+    @Override
+    public Context context() {
+        return context;
     }
 }

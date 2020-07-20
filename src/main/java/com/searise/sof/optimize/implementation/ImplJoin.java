@@ -35,7 +35,7 @@ public class ImplJoin implements ImplementationRule {
         } else if (StringUtils.equals(forceJoinType, Conf.FORCE_JOIN_TYPE_HASH_VALUE)) {
             return selectHashJoin(groupExpr, join, schema, children);
         } else {
-            BigInteger threshold = new BigInteger(join.context.conf.getConf(Conf.AUTO_HASHJOIN_THRESHOLD));
+            BigInteger threshold = new BigInteger(join.context.conf.getConf(Conf.AUTO_HASH_JOIN_THRESHOLD));
 
             Statistics leftStats = SizeInBytesStatsVisitor.visit(groupExpr.children.get(0));
             Statistics rightStats = SizeInBytesStatsVisitor.visit(groupExpr.children.get(1));

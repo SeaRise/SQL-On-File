@@ -14,5 +14,5 @@ public class Statistics {
         return String.format("stats [sizeInBytes: %s]", sizeInBytes);
     }
 
-    public static Statistics EMPTY = new Statistics(new BigInteger("0"));
+    public static Statistics EMPTY = new Statistics(BigInteger.ZERO);
 }

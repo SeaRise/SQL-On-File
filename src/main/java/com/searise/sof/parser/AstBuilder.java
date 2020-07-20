@@ -50,7 +50,7 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
 
     @Override
     public LogicalPlan visitShowTable(SqlBaseParser.ShowTableContext ctx) {
-        return new ShowTable();
+        return new ShowTable(context);
     }
 
     private static final String DEFAULT_SEPARATOR = ",";
@@ -74,7 +74,7 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
                 DEFAULT_SEPARATOR : removeQuotation(fileMeta.separatorClause().separator.getText());
 
         CatalogTable catalogTable = new CatalogTable(tableName, structTypeBuilder.build(), filePath, separator);
-        return new CreateTable(catalogTable);
+        return new CreateTable(catalogTable, context);
     }
 
     @Override

@@ -28,6 +28,11 @@ public class MergeAdjacentProject implements TransformationRule {
     public List<GroupExpr> onTransform(ExprIter exprIter) {
         GroupExpr topProjectExpr = exprIter.getValue();
         Project topProject = (Project) topProjectExpr.exprNode;
+        // 避免和EliminateProject重复,导致产生多余的分支.
+        if (topProject.projectList.stream().allMatch(expr -> expr.getClass() == Attribute.class)) {
+            return ImmutableList.of();
+        }
+
         GroupExpr bottomProjectExpr = exprIter.children.get(0).getValue();
         Project bottomProject = (Project) bottomProjectExpr.exprNode;
 

@@ -28,6 +28,11 @@ public class Filter implements LogicalPlan {
     }
 
     @Override
+    public Context context() {
+        return context;
+    }
+
+    @Override
     public List<Attribute> schema() {
         return child.schema();
     }

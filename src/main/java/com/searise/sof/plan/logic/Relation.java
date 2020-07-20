@@ -22,6 +22,11 @@ public class Relation extends UnresolvedRelation {
     }
 
     @Override
+    public Context context() {
+        return context;
+    }
+
+    @Override
     public String toString() {
         String aliasToString = referenceName.map(s -> ", " + s).orElse("");
         return String.format("Relation [%s%s] (%s)", tableName, aliasToString,

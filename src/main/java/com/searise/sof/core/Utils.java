@@ -2,6 +2,7 @@ package com.searise.sof.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -9,10 +10,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class Utils {
@@ -39,6 +37,13 @@ public class Utils {
         builder.addAll(left);
         builder.addAll(right);
         return toImmutableList(builder.stream().distinct());
+    }
+
+    public static <T> Set<T> combineDistinct(Set<T> left, Set<T> right) {
+        ImmutableSet.Builder<T> builder = ImmutableSet.builder();
+        builder.addAll(left);
+        builder.addAll(right);
+        return builder.build();
     }
 
     public static <T> List<T> combineDistinct(List<T> list1, List<T> list2, List<T> list3) {

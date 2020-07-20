@@ -43,7 +43,7 @@ public class TransformLeafJoinToMultiJoin implements TransformationRule {
             return ImmutableList.of();
         }
 
-        MultiJoin multiJoin = new MultiJoin(join.conditions);
+        MultiJoin multiJoin = new MultiJoin(join.conditions, join.context);
         GroupExpr multiJoinExpr = new GroupExpr(multiJoin, joinExpr.children);
         return ImmutableList.of(multiJoinExpr);
     }

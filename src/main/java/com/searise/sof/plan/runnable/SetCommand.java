@@ -19,4 +19,9 @@ public class SetCommand implements LogicalPlan, RunnableCommand {
     public void run(Catalog catalog) {
         context.conf.setConf(key, value);
     }
+
+    @Override
+    public Context context() {
+        return context;
+    }
 }

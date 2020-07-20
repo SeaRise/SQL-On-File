@@ -42,7 +42,7 @@ public class MergeJoinTwoSideMultiJoin implements TransformationRule {
 
         List<Expression> newConditions = Utils.combineDistinct(leftMultiJoin.conditions, rightMultiJoin.conditions, join.conditions);
         List<Group> newChildren = Utils.combineDistinct(leftMultiJoinExpr.children, rightMultiJoinExpr.children, joinExpr.children);
-        MultiJoin newMultiJoin = new MultiJoin(newConditions);
+        MultiJoin newMultiJoin = new MultiJoin(newConditions, join.context);
         GroupExpr newMultiJoinExpr = new GroupExpr(newMultiJoin, newChildren);
         return ImmutableList.of(newMultiJoinExpr);
     }

@@ -23,6 +23,11 @@ public class UnresolvedRelation implements LogicalPlan {
     }
 
     @Override
+    public Context context() {
+        return context;
+    }
+
+    @Override
     public String toString() {
         String aliasToString = referenceName.map(s -> ", " + s).orElse("");
         return String.format("UnresolvedRelation [%s%s]", tableName, aliasToString);
