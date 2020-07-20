@@ -42,11 +42,11 @@ public class GreedyJoinReorder implements TransformationRule {
 
         GroupExpr groupExpr = exprIter.getValue();
         MultiJoin multiJoin = (MultiJoin) groupExpr.exprNode;
-        Group reorderGroup = reorder(multiJoin.context, multiJoin.conditions, groupExpr.children);
-        return ImmutableList.of(reorderGroup.iter().next());
+        GroupExpr reorderGroupExpr = reorder(multiJoin.context, multiJoin.conditions, groupExpr.children);
+        return ImmutableList.of(reorderGroupExpr);
     }
 
-    public Group reorder(Context context, List<Expression> conditions, List<Group> leaves) {
+    public GroupExpr reorder(Context context, List<Expression> conditions, List<Group> leaves) {
         List<JoinPlan> joinPlanPool = new ArrayList<>(leaves.size());
         for (int i = 0; i < leaves.size(); i++) {
             joinPlanPool.add(new JoinPlan(leaves.get(i), BigInteger.ZERO, ImmutableSet.of(i)));
@@ -78,7 +78,7 @@ public class GreedyJoinReorder implements TransformationRule {
             }
             joinPlanPool.add(newJoinPlan);
         }
-        return joinPlanPool.get(0).group;
+        return joinPlanPool.get(0).group.iter().next();
     }
 
     /**

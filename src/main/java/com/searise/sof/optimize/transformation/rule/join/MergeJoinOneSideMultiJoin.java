@@ -17,14 +17,14 @@ import com.searise.sof.plan.logic.MultiJoin;
 import java.util.List;
 
 /**
- *         join                     multi-join
- *    |            \     ---->     |    |   \
- * multi-join       b              c    d    b
- *  |     \
- *  c     d
- *
- *  b != join/multi-join
- * */
+ *      join                     multi-join
+ * |            \     ---->     |    |   \
+ * multi-join    b              c    d    b
+ * |     \
+ * c     d
+ * <p>
+ * b != join/multi-join
+ */
 public class MergeJoinOneSideMultiJoin implements TransformationRule {
     private final int multiJoinIndex;
 
@@ -53,7 +53,7 @@ public class MergeJoinOneSideMultiJoin implements TransformationRule {
         GroupExpr joinExpr = exprIter.getValue();
         InnerJoin join = (InnerJoin) joinExpr.exprNode;
 
-        GroupExpr otherExpr = exprIter.children.get(1-multiJoinIndex).getValue();
+        GroupExpr otherExpr = exprIter.children.get(1 - multiJoinIndex).getValue();
         LogicalPlan otherPlan = otherExpr.exprNode;
         if (otherPlan.getClass() == MultiJoin.class || otherPlan.getClass() == InnerJoin.class) {
             return ImmutableList.of();

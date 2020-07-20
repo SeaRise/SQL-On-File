@@ -76,6 +76,34 @@ public class OptimizerSuite {
                 "PhysicalFilter [DoubleType:exprId->0:index->0,DoubleType:exprId->1:index->1,DoubleType:exprId->2:index->2,DoubleType:exprId->3:index->3] [DoubleType:exprId->0:index->0 < literal:9.0:DoubleType:BooleanType, DoubleType:exprId->0:index->0 > literal:1.0:DoubleType:BooleanType]\n" +
                         "  PhysicalScan [DoubleType:exprId->0:index->0,DoubleType:exprId->1:index->1,DoubleType:exprId->2:index->2,DoubleType:exprId->3:index->3] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)"
         );
+
+        doTest(
+                "select a.a, b.a, c.a, d.a, e.a, f.a, g.a from a join b join c join d join e join f join g",
+                "PhysicalHashJoin [DoubleType:exprId->0:index->6,DoubleType:exprId->4:index->0,DoubleType:exprId->8:index->1,DoubleType:exprId->12:index->2,DoubleType:exprId->16:index->3,DoubleType:exprId->20:index->4,DoubleType:exprId->24:index->5], stream: [], build: [], others: [] \n" +
+                        "  PhysicalHashJoin [DoubleType:exprId->4:index->5,DoubleType:exprId->8:index->0,DoubleType:exprId->12:index->1,DoubleType:exprId->16:index->2,DoubleType:exprId->20:index->3,DoubleType:exprId->24:index->4], stream: [], build: [], others: [] \n" +
+                        "    PhysicalHashJoin [DoubleType:exprId->8:index->4,DoubleType:exprId->12:index->0,DoubleType:exprId->16:index->1,DoubleType:exprId->20:index->2,DoubleType:exprId->24:index->3], stream: [], build: [], others: [] \n" +
+                        "      PhysicalHashJoin [DoubleType:exprId->12:index->3,DoubleType:exprId->16:index->0,DoubleType:exprId->20:index->1,DoubleType:exprId->24:index->2], stream: [], build: [], others: [] \n" +
+                        "        PhysicalHashJoin [DoubleType:exprId->16:index->2,DoubleType:exprId->20:index->0,DoubleType:exprId->24:index->1], stream: [], build: [], others: [] \n" +
+                        "          PhysicalHashJoin [DoubleType:exprId->20:index->0,DoubleType:exprId->24:index->1], stream: [], build: [], others: [] \n" +
+                        "            PhysicalScan [DoubleType:exprId->20:index->0] [src\\test\\resources\\input.txt|,] (attribute:20:DoubleType,attribute:21:DoubleType,attribute:22:DoubleType,attribute:23:DoubleType)\n" +
+                        "            PhysicalScan [DoubleType:exprId->24:index->0] [src\\test\\resources\\input.txt|,] (attribute:24:DoubleType,attribute:25:DoubleType,attribute:26:DoubleType,attribute:27:DoubleType)\n" +
+                        "          PhysicalScan [DoubleType:exprId->16:index->0] [src\\test\\resources\\input.txt|,] (attribute:16:DoubleType,attribute:17:DoubleType,attribute:18:DoubleType,attribute:19:DoubleType)\n" +
+                        "        PhysicalScan [DoubleType:exprId->12:index->0] [src\\test\\resources\\input.txt|,] (attribute:12:DoubleType,attribute:13:DoubleType,attribute:14:DoubleType,attribute:15:DoubleType)\n" +
+                        "      PhysicalScan [DoubleType:exprId->8:index->0] [src\\test\\resources\\input.txt|,] (attribute:8:DoubleType,attribute:9:DoubleType,attribute:10:DoubleType,attribute:11:DoubleType)\n" +
+                        "    PhysicalScan [DoubleType:exprId->4:index->0] [src\\test\\resources\\input.txt|,] (attribute:4:DoubleType,attribute:5:DoubleType,attribute:6:DoubleType,attribute:7:DoubleType)\n" +
+                        "  PhysicalScan [DoubleType:exprId->0:index->0] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)"
+        );
+
+        doTest(
+                "select a.a, b.a, c.a, d.a from a join b on a.a = b.b join c on c.c = b.b and c.c = a.a join d on d.a = a.a and d.a = c.c",
+                "PhysicalHashJoin [DoubleType:exprId->0:index->0,DoubleType:exprId->4:index->2,DoubleType:exprId->8:index->3,DoubleType:exprId->12:index->4], stream: [DoubleType:exprId->0:index->0, DoubleType:exprId->10:index->1], build: [DoubleType:exprId->12:index->0, DoubleType:exprId->12:index->0], others: [] \n" +
+                        "  PhysicalHashJoin [DoubleType:exprId->0:index->1,DoubleType:exprId->10:index->3,DoubleType:exprId->4:index->2,DoubleType:exprId->8:index->4], stream: [DoubleType:exprId->5:index->0, DoubleType:exprId->0:index->1], build: [DoubleType:exprId->10:index->0, DoubleType:exprId->10:index->0], others: [] \n" +
+                        "    PhysicalHashJoin [DoubleType:exprId->5:index->1,DoubleType:exprId->0:index->0,DoubleType:exprId->4:index->2], stream: [DoubleType:exprId->0:index->0], build: [DoubleType:exprId->5:index->0], others: [] \n" +
+                        "      PhysicalScan [DoubleType:exprId->0:index->0] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)\n" +
+                        "      PhysicalScan [DoubleType:exprId->5:index->1,DoubleType:exprId->4:index->0] [src\\test\\resources\\input.txt|,] (attribute:4:DoubleType,attribute:5:DoubleType,attribute:6:DoubleType,attribute:7:DoubleType)\n" +
+                        "    PhysicalScan [DoubleType:exprId->10:index->2,DoubleType:exprId->8:index->0] [src\\test\\resources\\input.txt|,] (attribute:8:DoubleType,attribute:9:DoubleType,attribute:10:DoubleType,attribute:11:DoubleType)\n" +
+                        "  PhysicalScan [DoubleType:exprId->12:index->0] [src\\test\\resources\\input.txt|,] (attribute:12:DoubleType,attribute:13:DoubleType,attribute:14:DoubleType,attribute:15:DoubleType)"
+        );
     }
 
     private void doTest(String sql, String expect) {

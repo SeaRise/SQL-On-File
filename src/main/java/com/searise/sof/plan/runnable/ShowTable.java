@@ -10,6 +10,7 @@ import java.util.List;
 
 public class ShowTable implements LogicalPlan, RunnableCommand {
     public final Context context;
+
     public ShowTable(Context context) {
         this.context = context;
     }

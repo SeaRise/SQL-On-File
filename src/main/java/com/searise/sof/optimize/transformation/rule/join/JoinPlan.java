@@ -1,11 +1,9 @@
 package com.searise.sof.optimize.transformation.rule.join;
 
-import com.searise.sof.expression.Expression;
 import com.searise.sof.optimize.Group;
 import com.searise.sof.stats.SizeInBytesStatsVisitor;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Set;
 
 public class JoinPlan {

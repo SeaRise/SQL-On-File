@@ -3,6 +3,7 @@ package com.searise.sof.expression.attribute;
 import com.searise.sof.core.ExprIdBuilder;
 import com.searise.sof.type.DataType;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class Attribute extends UnresolvedAttribute {
@@ -29,5 +30,18 @@ public class Attribute extends UnresolvedAttribute {
 
     public static Attribute newUnknownAttribute(DataType dataType, ExprIdBuilder exprIdBuilder) {
         return new Attribute(Optional.empty(), "", exprIdBuilder.newExprId(), dataType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(exprId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (Objects.isNull(obj) || obj.getClass() != Attribute.class) {
+            return false;
+        }
+        return exprId == ((Attribute) obj).exprId;
     }
 }

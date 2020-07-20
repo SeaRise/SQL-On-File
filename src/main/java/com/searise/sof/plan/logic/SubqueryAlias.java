@@ -3,10 +3,12 @@ package com.searise.sof.plan.logic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Context;
+import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.Attribute;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class SubqueryAlias implements LogicalPlan {
     public final String name;
@@ -47,6 +49,6 @@ public class SubqueryAlias implements LogicalPlan {
 
     @Override
     public List<Attribute> schema() {
-        return child.schema();
+        return Utils.toImmutableList(child.schema().stream().map(a -> new Attribute(Optional.of(name), a.name, a.exprId, a.dataType)));
     }
 }

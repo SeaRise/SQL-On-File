@@ -15,12 +15,12 @@ import com.searise.sof.plan.logic.MultiJoin;
 import java.util.List;
 
 /**
- *         join                     multi-join
- *    |            \     ---->     |   |   \  \
- * multi-join   multi-join         a   b    c  d
- *  |     \      |      \
- *  a     b      c      d
- * */
+ *          join                       multi-join
+ *     |            \      ---->     |   |   \  \
+ * multi-join   multi-join           a   b    c  d
+ * |     \      |      \
+ * a     b      c      d
+ */
 public class MergeJoinTwoSideMultiJoin implements TransformationRule {
     @Override
     public Pattern pattern() {

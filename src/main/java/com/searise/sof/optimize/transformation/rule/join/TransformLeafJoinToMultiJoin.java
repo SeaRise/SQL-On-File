@@ -13,12 +13,12 @@ import com.searise.sof.plan.logic.MultiJoin;
 import java.util.List;
 
 /**
- *     join               multi-join
- *    |   \     ---->     |        \
- *   a     b              a        b
- *
- *   a,b != join/multi-join
- * */
+ *  join               multi-join
+ * |   \     ---->     |        \
+ * a     b              a        b
+ * <p>
+ * a,b != join/multi-join
+ */
 public class TransformLeafJoinToMultiJoin implements TransformationRule {
     @Override
     public Pattern pattern() {
