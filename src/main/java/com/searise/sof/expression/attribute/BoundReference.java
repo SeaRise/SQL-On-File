@@ -49,6 +49,26 @@ public class BoundReference implements Expression {
     }
 
     @Override
+    public String genCode() {
+        if (index < 0) {
+            throw new SofException("can not call genCode before calling resolveIndex");
+        }
+        String template = "input.get%s(%d)";
+        switch (dataType) {
+            case StringType:
+                return String.format(template, "String", index);
+            case BooleanType:
+                return String.format(template, "Boolean", index);
+            case IntegerType:
+                return String.format(template, "Int", index);
+            case DoubleType:
+                return String.format(template, "Double", index);
+            default:
+                throw new SofException(String.format("unsupported dataType[%s] in genCode", dataType));
+        }
+    }
+
+    @Override
     public int hashCode() {
         return Long.hashCode(exprId);
     }

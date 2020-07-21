@@ -1,5 +1,6 @@
 package com.searise.sof.expression;
 
+import com.searise.sof.core.SofException;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.type.DataType;
 
@@ -30,5 +31,13 @@ public class Literal implements Expression {
 
     public boolean foldable() {
         return true;
+    }
+
+    @Override
+    public String genCode() {
+        if (dataType == DataType.StringType) {
+            return String.format("\"%s\"", value.toString());
+        }
+        return value.toString();
     }
 }

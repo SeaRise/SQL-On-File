@@ -45,4 +45,10 @@ public class Not implements Expression {
         boolean childBoolean = (boolean) child.eval(input);
         return !childBoolean;
     }
+
+    @Override
+    public String genCode() {
+        String childCode = child.genCode();
+        return String.format("!(%s)", childCode);
+    }
 }

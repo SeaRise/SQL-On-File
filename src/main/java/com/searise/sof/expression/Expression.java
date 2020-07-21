@@ -3,6 +3,7 @@ package com.searise.sof.expression;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
 import com.searise.sof.analyse.Applicable;
+import com.searise.sof.codegen.Codegen;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.attribute.Attribute;
@@ -11,7 +12,7 @@ import com.searise.sof.type.DataType;
 import java.util.List;
 import java.util.Optional;
 
-public interface Expression extends AnalysisHelper<Expression> {
+public interface Expression extends AnalysisHelper<Expression>, Codegen {
     default boolean resolved() {
         return children().stream().allMatch(Expression::resolved);
     }

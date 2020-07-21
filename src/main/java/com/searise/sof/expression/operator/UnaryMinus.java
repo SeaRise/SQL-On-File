@@ -50,4 +50,10 @@ public class UnaryMinus implements Expression {
                 throw new SofException(String.format("unsupported dataType[%s] in Add", dataType()));
         }
     }
+
+    @Override
+    public String genCode() {
+        String childCode = child.genCode();
+        return String.format("- (%s)", childCode);
+    }
 }

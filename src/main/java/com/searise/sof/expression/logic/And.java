@@ -13,7 +13,7 @@ import static com.searise.sof.type.DataType.BooleanType;
 
 public class And extends BinaryLogic {
     public And(Expression left, Expression right) {
-        super(left, right, "and");
+        super(left, right, "&&");
     }
 
     public Expression copyWithNewChildren(List<Expression> children) {

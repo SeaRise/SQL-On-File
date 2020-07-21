@@ -13,7 +13,7 @@ import static com.searise.sof.type.DataType.BooleanType;
 
 public class Or extends BinaryLogic {
     public Or(Expression left, Expression right) {
-        super(left, right, "or");
+        super(left, right, "||");
     }
 
     public Expression copyWithNewChildren(List<Expression> children) {

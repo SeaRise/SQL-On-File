@@ -31,4 +31,11 @@ public abstract class Binary implements Expression {
     public List<Expression> children() {
         return ImmutableList.of(left, right);
     }
+
+    @Override
+    public String genCode() {
+        String leftCode = left.genCode();
+        String rightCode = right.genCode();
+        return String.format("(%s) %s (%s)", leftCode, op, rightCode);
+    }
 }
