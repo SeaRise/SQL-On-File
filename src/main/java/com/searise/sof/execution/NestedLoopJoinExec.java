@@ -52,8 +52,11 @@ public class NestedLoopJoinExec implements Executor {
         }
 
         if (!build.hasNext()) {
-            if (stream.hasNext()) {
+            while (stream.hasNext()) {
                 streamRow = stream.next();
+                if (streamRow == EMPTY_ROW) {
+                    continue;
+                }
                 // reset build
                 build.close();
                 build.open();

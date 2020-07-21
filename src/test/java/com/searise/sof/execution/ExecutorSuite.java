@@ -96,6 +96,28 @@ public class ExecutorSuite {
                 "select a, b, c, d from (select a, b, c, d from a where a > 1.0) a where a < 9.0",
                 "5.0,6.0,7.0,8.0"
         );
+
+        testExec(
+                "set sof_force_join_type=hash;select a.a, b.a, c.a, d.a from a join b on a.a = b.b join c on c.c = b.b and c.c = a.a join d on d.a = a.a and d.a = c.c",
+                ""
+        );
+        testExec(
+                "set sof_force_join_type=loop;select a.a, b.a, c.a, d.a from a join b on a.a = b.b join c on c.c = b.b and c.c = a.a join d on d.a = a.a and d.a = c.c",
+                ""
+        );
+
+        testExec(
+                "set sof_force_join_type=hash;select a.a, b.a, c.a, d.a from a join b on a.a = b.a join c on c.c = b.c and c.a = a.a join d on d.a = a.a and d.c = c.c",
+                "1.0,1.0,1.0,1.0\n" +
+                        "5.0,5.0,5.0,5.0\n" +
+                        "9.0,9.0,9.0,9.0"
+        );
+        testExec(
+                "set sof_force_join_type=loop;select a.a, b.a, c.a, d.a from a join b on a.a = b.a join c on c.c = b.c and c.a = a.a join d on d.a = a.a and d.c = c.c",
+                "1.0,1.0,1.0,1.0\n" +
+                        "5.0,5.0,5.0,5.0\n" +
+                        "9.0,9.0,9.0,9.0"
+        );
     }
 
     private void testExec(String sql, String expect) {

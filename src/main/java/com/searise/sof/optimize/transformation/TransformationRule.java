@@ -30,11 +30,11 @@ public interface TransformationRule {
     );
 
     Map<Operand, List<TransformationRule>> joinReorderTransformationRuleMap = ImmutableMap.of(
-            Operand.OperandMultiJoin, ImmutableList.of(new DPJoinReorder(), new GreedyJoinReorder())
+            Operand.OperandMultiJoin, ImmutableList.of(new GreedyJoinReorder())
     );
 
     // todo
-    //  简单的join reorder
+    //  dp join reorder
     List<Map<Operand, List<TransformationRule>>> transformationRuleBatches = ImmutableList.of(
             defaultTransformationRuleMap
             , prepareJoinReorderTransformationRuleMap

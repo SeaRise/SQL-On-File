@@ -2,7 +2,6 @@ package com.searise.sof.optimize.transformation.rule.join;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.searise.sof.core.Conf;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
@@ -18,10 +17,7 @@ import com.searise.sof.plan.logic.MultiJoin;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 类似赫夫曼树的实现.
@@ -35,18 +31,13 @@ public class GreedyJoinReorder implements TransformationRule {
 
     @Override
     public List<GroupExpr> onTransform(ExprIter exprIter) {
-        int greedyJoinReorderThreshold = exprIter.getValue().exprNode.context().conf.getIntConf(Conf.GREEDY_JOIN_REORDER_THRESHOLD);
-        if (exprIter.getValue().children.size() < greedyJoinReorderThreshold) {
-            return ImmutableList.of();
-        }
-
         GroupExpr groupExpr = exprIter.getValue();
         MultiJoin multiJoin = (MultiJoin) groupExpr.exprNode;
         GroupExpr reorderGroupExpr = reorder(multiJoin.context, multiJoin.conditions, groupExpr.children);
         return ImmutableList.of(reorderGroupExpr);
     }
 
-    public GroupExpr reorder(Context context, List<Expression> conditions, List<Group> leaves) {
+    private GroupExpr reorder(Context context, List<Expression> conditions, List<Group> leaves) {
         List<JoinPlan> joinPlanPool = new ArrayList<>(leaves.size());
         for (int i = 0; i < leaves.size(); i++) {
             joinPlanPool.add(new JoinPlan(leaves.get(i), BigInteger.ZERO, ImmutableSet.of(i)));
@@ -61,13 +52,15 @@ public class GreedyJoinReorder implements TransformationRule {
                 for (int inner = outer + 1; inner < joinPlanPool.size(); inner++) {
                     JoinPlan outerPlan = joinPlanPool.get(outer);
                     JoinPlan innerPlan = joinPlanPool.get(inner);
-                    Pair<JoinPlan, List<Expression>> result = buildJoinPlan(context, outerPlan, innerPlan, retainConditions);
-                    JoinPlan buildJoinPlan = result.getLeft();
-                    if (Objects.isNull(newJoinPlan) || buildJoinPlan.cost.compareTo(newJoinPlan.cost) <= 0) {
-                        newJoinPlan = buildJoinPlan;
-                        newRetainConditions = result.getRight();
-                        //先大再小.
-                        removePlanIndexes = ImmutableList.of(inner, outer);
+                    Optional<Pair<JoinPlan, List<Expression>>> result = buildJoinPlan(context, outerPlan, innerPlan, retainConditions);
+                    if (result.isPresent()) {
+                        JoinPlan buildJoinPlan = result.get().getLeft();
+                        if (Objects.isNull(newJoinPlan) || buildJoinPlan.cost.compareTo(newJoinPlan.cost) <= 0) {
+                            newJoinPlan = buildJoinPlan;
+                            newRetainConditions = result.get().getRight();
+                            //先大再小.
+                            removePlanIndexes = ImmutableList.of(inner, outer);
+                        }
                     }
                 }
             }
@@ -84,7 +77,11 @@ public class GreedyJoinReorder implements TransformationRule {
     /**
      * 这里并不管是否会构造出笛卡尔积.
      */
-    private Pair<JoinPlan, List<Expression>> buildJoinPlan(Context context, JoinPlan plan1, JoinPlan plan2, List<Expression> conditions) {
+    private Optional<Pair<JoinPlan, List<Expression>>> buildJoinPlan(Context context, JoinPlan plan1, JoinPlan plan2, List<Expression> conditions) {
+        if (plan1.leaves.stream().anyMatch(plan2.leaves::contains)) {
+            return Optional.empty();
+        }
+
         ImmutableSet.Builder<Long> schemaBuilder = ImmutableSet.builder();
         for (Attribute attribute : plan1.group.schema) {
             schemaBuilder.add(attribute.exprId);
@@ -116,6 +113,6 @@ public class GreedyJoinReorder implements TransformationRule {
         Group group = Group.newGroup(join, newChildren, Utils.combineDistinct(plan1.group.schema, plan2.group.schema));
         JoinPlan newJoinPlan = new JoinPlan(group, newCost, Utils.combineDistinct(plan1.leaves, plan2.leaves));
 
-        return Pair.of(newJoinPlan, retainConditions);
+        return Optional.of(Pair.of(newJoinPlan, retainConditions));
     }
 }

@@ -53,6 +53,9 @@ public class HashJoinExec implements Executor {
             }
         }
 
+        if (streamRow == EMPTY_ROW) {
+            return;
+        }
         InternalRow streamKeyRow = getKeyRow(streamRow, streamKeyProjection);
         hitIter = buildMap.get(streamKeyRow).iterator();
     }
@@ -94,8 +97,11 @@ public class HashJoinExec implements Executor {
         }
 
         if (!hitIter.hasNext()) {
-            if (stream.hasNext()) {
+            while (stream.hasNext()) {
                 streamRow = stream.next();
+                if (streamRow == EMPTY_ROW) {
+                    continue;
+                }
                 InternalRow streamKeyRow = getKeyRow(streamRow, streamKeyProjection);
                 hitIter = buildMap.get(streamKeyRow).iterator();
                 return next();
