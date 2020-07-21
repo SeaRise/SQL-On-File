@@ -9,10 +9,16 @@ import com.searise.sof.plan.QueryPlan;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface PhysicalPlan extends QueryPlan, ReferenceResolveHelper, SchemaPruneHelper, RemoveAliasHelper {
+public interface PhysicalPlan extends QueryPlan<PhysicalPlan>, ReferenceResolveHelper, SchemaPruneHelper, RemoveAliasHelper {
     List<BoundReference> schema();
 
     default String schemaToString() {
         return schema().stream().map(BoundReference::toString).collect(Collectors.joining(","));
+    }
+
+    default void removeAlias() {
+        for (PhysicalPlan child : children()) {
+            child.removeAlias();
+        }
     }
 }

@@ -20,12 +20,15 @@ import static com.searise.sof.optimize.Optimizer.newOptimizer;
 public class OptimizerSuite {
     @Test
     public void test() {
+        doTest("select a as a, b as b from a",
+                "PhysicalScan [DoubleType:exprId->0:index->0,DoubleType:exprId->1:index->1] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
+
         doTest("select 1 as a, a as b from a",
-                "PhysicalProject [IntegerType:exprId->4:index->0,DoubleType:exprId->5:index->1] [literal:1:IntegerType, DoubleType:exprId->0:index->0]\n" +
+                "PhysicalProject [IntegerType:exprId->4:index->0,DoubleType:exprId->0:index->1] [literal:1:IntegerType, DoubleType:exprId->0:index->0]\n" +
                         "  PhysicalScan [DoubleType:exprId->0:index->0] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
 
         doTest("select 1 as a, a as b from (select a, b from a) a",
-                "PhysicalProject [IntegerType:exprId->4:index->0,DoubleType:exprId->5:index->1] [literal:1:IntegerType, DoubleType:exprId->0:index->0]\n" +
+                "PhysicalProject [IntegerType:exprId->4:index->0,DoubleType:exprId->0:index->1] [literal:1:IntegerType, DoubleType:exprId->0:index->0]\n" +
                         "  PhysicalScan [DoubleType:exprId->0:index->0] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
 
         doTest("select a, b from a",

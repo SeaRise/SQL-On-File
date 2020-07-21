@@ -8,5 +8,6 @@ import java.util.List;
 public interface PreprocessRule extends Rule {
     List<PreprocessRule> preprocessRules = ImmutableList.of(
             new RemoveSubqueryAlias()
+            , new RemoveUselessAlias()
     );
 }

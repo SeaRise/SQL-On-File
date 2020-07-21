@@ -20,6 +20,11 @@ import static com.searise.sof.optimize.Optimizer.newOptimizer;
 public class ExecutorSuite {
     @Test
     public void test() {
+        testExec("select a as a, b as b from a",
+                "1.0,2.0\n" +
+                        "5.0,6.0\n" +
+                        "9.0,10.0");
+
         testExec(
                 "select a+b, b-c, c*d, d/a, b % a, -a from a",
                 "3.0,-1.0,12.0,4.0,0.0,-1.0\n" +

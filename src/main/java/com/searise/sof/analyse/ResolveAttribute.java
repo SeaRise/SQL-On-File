@@ -77,7 +77,14 @@ public class ResolveAttribute implements Rule {
                 } else if (expression.getClass() == Alias.class) {
                     Alias alias = (Alias) expression;
                     AttributeBase aliasName = alias.attribute;
-                    return new Alias(new Attribute(aliasName.table, aliasName.name, context.exprIdBuilder.newExprId(), alias.child.dataType()), alias.child);
+                    long aliasExprId;
+                    // 如果是attr as alias, 那么alias和attr可以共用exprId, 后面可以消除alias.
+                    if (alias.child.getClass() == Attribute.class) {
+                        aliasExprId = ((Attribute) alias.child).exprId;
+                    } else {
+                        aliasExprId = context.exprIdBuilder.newExprId();
+                    }
+                    return new Alias(new Attribute(aliasName.table, aliasName.name, aliasExprId, alias.child.dataType()), alias.child);
                 } else {
                     // just else
                 }

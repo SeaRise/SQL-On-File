@@ -51,9 +51,4 @@ public class PhysicalFilter implements PhysicalPlan {
         schema = isTop ? SchemaPruneHelper.copy(schema) : SchemaPruneHelper.copy(father);
         child.prune(Utils.combineDistinct(SchemaPruneHelper.extractUseSchema(conditions), schema), false);
     }
-
-    @Override
-    public void removeAlias() {
-        child.removeAlias();
-    }
 }

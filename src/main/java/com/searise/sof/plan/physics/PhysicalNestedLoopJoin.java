@@ -65,10 +65,4 @@ public class PhysicalNestedLoopJoin implements PhysicalPlan {
         List<BoundReference> parentUseSchema = Utils.toImmutableList(schema.stream().filter(r -> childMap.containsKey(r.exprId)));
         child.prune(Utils.combineDistinct(conditionsUseSchema, parentUseSchema), false);
     }
-
-    @Override
-    public void removeAlias() {
-        stream.removeAlias();
-        build.removeAlias();
-    }
 }

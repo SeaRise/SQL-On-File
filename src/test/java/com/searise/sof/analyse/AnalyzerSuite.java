@@ -12,7 +12,7 @@ public class AnalyzerSuite {
     @Test
     public void test() {
         testAnalyse("select 1 as a, a as b from a",
-                "Project [literal:1:IntegerType as attribute:4:IntegerType, attribute:0:DoubleType as attribute:5:DoubleType]\n" +
+                "Project [literal:1:IntegerType as attribute:4:IntegerType, attribute:0:DoubleType as attribute:0:DoubleType]\n" +
                         "  Relation [a] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
 
         testAnalyse("select 1 from a where !(not(true)) and (false or true) " +
@@ -35,7 +35,7 @@ public class AnalyzerSuite {
                         "  Relation [a] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
 
         testAnalyse("select 1 as a, a as b from (select a, b from a) a",
-                "Project [literal:1:IntegerType as attribute:4:IntegerType, attribute:0:DoubleType as attribute:5:DoubleType]\n" +
+                "Project [literal:1:IntegerType as attribute:4:IntegerType, attribute:0:DoubleType as attribute:0:DoubleType]\n" +
                         "  SubqueryAlias [a]\n" +
                         "    Project [attribute:0:DoubleType, attribute:1:DoubleType]\n" +
                         "      Relation [a] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
@@ -72,7 +72,7 @@ public class AnalyzerSuite {
         );
 
         testAnalyse("select 1+1 > 2 as a, a as b from a where 1 > 2 and 2 < (1+3)",
-                "Project [literal:false:BooleanType as attribute:6:BooleanType, attribute:0:DoubleType as attribute:5:DoubleType]\n" +
+                "Project [literal:false:BooleanType as attribute:5:BooleanType, attribute:0:DoubleType as attribute:0:DoubleType]\n" +
                         "  Filter [literal:false:BooleanType]\n" +
                         "    Relation [a] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
     }
