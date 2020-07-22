@@ -32,10 +32,20 @@ public class Utils {
         return builder.build();
     }
 
-    public static <T> List<T> combineDistinct(List<T> left, List<T> right) {
+    @SafeVarargs
+    public static <T> List<T> combine(List<T>... lists) {
         List<T> builder = new ArrayList<>();
-        builder.addAll(left);
-        builder.addAll(right);
+        for (List<T> list : lists) {
+            builder.addAll(list);
+        }
+        return toImmutableList(builder.stream());
+    }
+    @SafeVarargs
+    public static <T> List<T> combineDistinct(List<T>... lists) {
+        List<T> builder = new ArrayList<>();
+        for (List<T> list : lists) {
+            builder.addAll(list);
+        }
         return toImmutableList(builder.stream().distinct());
     }
 
@@ -44,14 +54,6 @@ public class Utils {
         builder.addAll(left);
         builder.addAll(right);
         return builder.build();
-    }
-
-    public static <T> List<T> combineDistinct(List<T> list1, List<T> list2, List<T> list3) {
-        List<T> builder = new ArrayList<>();
-        builder.addAll(list1);
-        builder.addAll(list2);
-        builder.addAll(list3);
-        return toImmutableList(builder.stream().distinct());
     }
 
     public static void checkArgument(boolean expression, @Nullable Object errorMessage) {

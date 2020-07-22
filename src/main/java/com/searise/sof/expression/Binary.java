@@ -1,6 +1,9 @@
 package com.searise.sof.expression;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.codegen.CodegenContext;
+import com.searise.sof.codegen.ExprCode;
+import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.type.DataType;
@@ -21,21 +24,37 @@ public abstract class Binary implements Expression {
     public Object eval(InternalRow input) {
         DataType inputDataType = left.dataType();
         Utils.checkArgument(inputDataType == right.dataType(),
-                String.format("left(%s).dataType[%s] must equal to right(%s).dataType[%s] in binary expression: %s", left, left.dataType(), right, right.dataType(), getClass().getSimpleName()));
+                String.format("left(%s).dataType[%s] must equal to right(%s).dataType[%s] in binary expression: %s",
+                        left, left.dataType(), right, right.dataType(), getClass().getSimpleName()));
         return doEval(input, inputDataType);
     }
 
     protected abstract Object doEval(InternalRow input, DataType inputDataType);
 
+    public ExprCode genCode(CodegenContext codegenContext) {
+        if (!resolved()) {
+            throw new SofException(String.format("unresolved expression %s can not call genCode", getClass().getSimpleName()));
+        }
+
+        Utils.checkArgument(left.dataType() == right.dataType(),
+                String.format("left(%s).dataType[%s] must equal to right(%s).dataType[%s] in binary expression: %s",
+                        left, left.dataType(), right, right.dataType(), getClass().getSimpleName()));
+        genCodePreCheck();
+        return doGenCode(codegenContext);
+    }
+
+    protected ExprCode doGenCode(CodegenContext codegenContext) {
+        ExprCode leftExprCode = left.genCode(codegenContext);
+        ExprCode rightExprCode = right.genCode(codegenContext);
+        String code = String.format("(%s) %s (%s)", leftExprCode.code, op, rightExprCode.code);
+        return new ExprCode(code, Utils.combine(leftExprCode.params, rightExprCode.params),
+                Utils.combine(leftExprCode.paramNames, rightExprCode.paramNames), dataType());
+    }
+
+    protected abstract void genCodePreCheck();
+
     @Override
     public List<Expression> children() {
         return ImmutableList.of(left, right);
-    }
-
-    @Override
-    public String genCode() {
-        String leftCode = left.genCode();
-        String rightCode = right.genCode();
-        return String.format("(%s) %s (%s)", leftCode, op, rightCode);
     }
 }

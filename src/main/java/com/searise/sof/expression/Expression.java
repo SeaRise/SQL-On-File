@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
 import com.searise.sof.analyse.Applicable;
 import com.searise.sof.codegen.Codegen;
+import com.searise.sof.codegen.CodegenContext;
+import com.searise.sof.codegen.ExprCode;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.attribute.Attribute;
@@ -21,7 +23,6 @@ public interface Expression extends AnalysisHelper<Expression>, Codegen {
         throw new SofException(String.format("unresolved expression %s can not call dataType", getClass().getSimpleName()));
     }
 
-    // todo 实现codegen.
     default Object eval(InternalRow input) {
         throw new SofException(String.format("%s can not support eval", getClass().getSimpleName()));
     }
@@ -57,5 +58,19 @@ public interface Expression extends AnalysisHelper<Expression>, Codegen {
             }
         }
         return Optional.empty();
+    }
+
+    default ExprCode genCode(CodegenContext codegenContext) {
+        if (!resolved()) {
+            throw new SofException(String.format("unresolved expression %s can not call genCode", getClass().getSimpleName()));
+        }
+
+        return fallback(this, codegenContext);
+    }
+
+    static ExprCode fallback(Expression expression, CodegenContext codegenContext) {
+        String val = codegenContext.genExprName("self");
+        String code = String.format("(%s) %s.eval(%s)", expression.dataType().javaType, val, codegenContext.inputVal);
+        return new ExprCode(code, ImmutableList.of(expression), ImmutableList.of(val), expression.dataType());
     }
 }

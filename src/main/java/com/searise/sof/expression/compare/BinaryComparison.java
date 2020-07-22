@@ -1,5 +1,9 @@
 package com.searise.sof.expression.compare;
 
+import com.google.common.collect.ImmutableList;
+import com.searise.sof.codegen.CodeGenerator;
+import com.searise.sof.codegen.CodegenContext;
+import com.searise.sof.codegen.ExprCode;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.Binary;
@@ -49,4 +53,45 @@ public abstract class BinaryComparison extends Binary {
     }
 
     protected abstract boolean handleCompareToResult(int result);
+
+    protected void genCodePreCheck() {
+    }
+
+    @Override
+    protected ExprCode doGenCode(CodegenContext codegenContext) {
+        switch (left.dataType()) {
+            case IntegerType:
+            case DoubleType:
+                return super.doGenCode(codegenContext);
+            case StringType:
+            case BooleanType:
+                //遇到StringType和BooleanType就替换codegen的children.
+                return withCodegenChildren(codegenContext);
+            default:
+                throw new SofException(String.format("unsupported dataType[%s] in %s", dataType(), getClass().getSimpleName()));
+        }
+    }
+
+    private ExprCode withCodegenChildren(CodegenContext codegenContext) {
+        Expression newExpr;
+        try {
+            ExprCode leftExprCode = left.genCode(codegenContext);
+            ExprCode rightExprCode = right.genCode(codegenContext);
+            Expression newLeft = CodeGenerator.gen(leftExprCode);
+            Expression newRight = CodeGenerator.gen(rightExprCode);
+            newExpr = this.copyWithNewChildren(ImmutableList.of(newLeft, newRight));
+
+            ImmutableList.Builder<String> paramNamesBuilder = ImmutableList.builder();
+            String val = codegenContext.genExprName("self");
+            paramNamesBuilder.add(val).addAll(leftExprCode.paramNames).addAll(rightExprCode.paramNames);
+
+            ImmutableList.Builder<Expression> paramsBuilder = ImmutableList.builder();
+            paramsBuilder.add(newExpr).addAll(leftExprCode.params).addAll(rightExprCode.params);
+
+            String code = String.format("(%s) %s.eval(%s)", dataType().javaType, val, codegenContext.inputVal);
+            return new ExprCode(code, paramsBuilder.build(), paramNamesBuilder.build(), dataType());
+        } catch (Exception e) {
+            return Expression.fallback(this, codegenContext);
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.searise.sof.expression.operator;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.core.SofException;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.Binary;
 import com.searise.sof.expression.Expression;
@@ -31,4 +32,14 @@ public abstract class BinaryOperator extends Binary {
     }
 
     protected abstract Object doEval(Object leftValue, Object rightValue, DataType dataType);
+
+    protected void genCodePreCheck() {
+        switch (left.dataType()) {
+            case IntegerType:
+            case DoubleType:
+                return;
+            default:
+                throw new SofException(String.format("unsupported dataType[%s] in %s", dataType(), getClass().getSimpleName()));
+        }
+    }
 }

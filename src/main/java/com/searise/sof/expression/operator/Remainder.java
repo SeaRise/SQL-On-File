@@ -27,7 +27,7 @@ public class Remainder extends BinaryOperator {
             case DoubleType:
                 return (double) leftValue % (double) rightValue;
             default:
-                throw new SofException(String.format("unsupported dataType[%s] in Add", dataType()));
+                throw new SofException(String.format("unsupported dataType[%s] in Remainder", dataType()));
         }
     }
 }

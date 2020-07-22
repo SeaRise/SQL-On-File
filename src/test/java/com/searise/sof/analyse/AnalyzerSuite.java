@@ -52,14 +52,14 @@ public class AnalyzerSuite {
 
         testAnalyse("select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a and a.d > 4.0 and b.c < 11.0",
                 "Project [attribute:0:DoubleType, attribute:5:DoubleType, attribute:2:DoubleType, attribute:7:DoubleType]\n" +
-                        "  join on (attribute:0:DoubleType = attribute:4:DoubleType:BooleanType, attribute:3:DoubleType > literal:4.0:DoubleType:BooleanType, attribute:6:DoubleType < literal:11.0:DoubleType:BooleanType)\n" +
+                        "  join on (attribute:0:DoubleType == attribute:4:DoubleType:BooleanType, attribute:3:DoubleType > literal:4.0:DoubleType:BooleanType, attribute:6:DoubleType < literal:11.0:DoubleType:BooleanType)\n" +
                         "    Relation [a, a] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)\n" +
                         "    Relation [a, b] (attribute:4:DoubleType,attribute:5:DoubleType,attribute:6:DoubleType,attribute:7:DoubleType)");
 
         testAnalyse("select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a where a.d > 4.0 and b.c < 11.0",
                 "Project [attribute:0:DoubleType, attribute:5:DoubleType, attribute:2:DoubleType, attribute:7:DoubleType]\n" +
                         "  Filter [attribute:3:DoubleType > literal:4.0:DoubleType:BooleanType, attribute:6:DoubleType < literal:11.0:DoubleType:BooleanType]\n" +
-                        "    join on (attribute:0:DoubleType = attribute:4:DoubleType:BooleanType)\n" +
+                        "    join on (attribute:0:DoubleType == attribute:4:DoubleType:BooleanType)\n" +
                         "      Relation [a, a] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)\n" +
                         "      Relation [a, b] (attribute:4:DoubleType,attribute:5:DoubleType,attribute:6:DoubleType,attribute:7:DoubleType)");
 

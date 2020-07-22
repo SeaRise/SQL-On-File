@@ -2,6 +2,9 @@ package com.searise.sof.expression.logic;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.codegen.CodegenContext;
+import com.searise.sof.codegen.ExprCode;
+import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.Expression;
@@ -46,9 +49,12 @@ public class Not implements Expression {
         return !childBoolean;
     }
 
-    @Override
-    public String genCode() {
-        String childCode = child.genCode();
-        return String.format("!(%s)", childCode);
+    public ExprCode genCode(CodegenContext codegenContext) {
+        if (dataType() == BooleanType) {
+            ExprCode childExprCode = child.genCode(codegenContext);
+            String code = String.format("!(%s)", childExprCode.code);
+            return new ExprCode(code, childExprCode.params, childExprCode.paramNames, dataType());
+        }
+        throw new SofException(String.format("unsupported dataType[%s] in Not", dataType()));
     }
 }

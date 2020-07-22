@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class EqualTo extends BinaryComparison {
     public EqualTo(Expression left, Expression right) {
-        super(left, right, "=");
+        super(left, right, "==");
     }
 
     public Expression copyWithNewChildren(List<Expression> children) {

@@ -17,10 +17,18 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <antlr4.version>4.7.2</antlr4.version>
+        <janino.version>2.5.10</janino.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
+        <!-- janino -->
+        <dependency>
+            <groupId>janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>${janino.version}</version>
+        </dependency>
+
         <!-- antlr4 -->
         <dependency>
             <groupId>org.antlr</groupId>

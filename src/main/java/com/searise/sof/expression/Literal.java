@@ -1,6 +1,8 @@
 package com.searise.sof.expression;
 
-import com.searise.sof.core.SofException;
+import com.google.common.collect.ImmutableList;
+import com.searise.sof.codegen.CodegenContext;
+import com.searise.sof.codegen.ExprCode;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.type.DataType;
 
@@ -34,10 +36,8 @@ public class Literal implements Expression {
     }
 
     @Override
-    public String genCode() {
-        if (dataType == DataType.StringType) {
-            return String.format("\"%s\"", value.toString());
-        }
-        return value.toString();
+    public ExprCode genCode(CodegenContext codegenContext) {
+        String code = dataType == DataType.StringType ? String.format("\"%s\"", value.toString()) : value.toString();
+        return new ExprCode(code, ImmutableList.of(), ImmutableList.of(), dataType);
     }
 }

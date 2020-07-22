@@ -40,7 +40,7 @@ public class OptimizerSuite {
 
         doTest(
                 "set sof_force_join_type=loop;select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a where a.d > 4.0 and b.c < 11.0",
-                "PhysicalNestedLoopJoin [DoubleType:exprId->0:index->0,DoubleType:exprId->5:index->3,DoubleType:exprId->2:index->1,DoubleType:exprId->7:index->4] [DoubleType:exprId->0:index->0 = DoubleType:exprId->4:index->2:BooleanType]\n" +
+                "PhysicalNestedLoopJoin [DoubleType:exprId->0:index->0,DoubleType:exprId->5:index->3,DoubleType:exprId->2:index->1,DoubleType:exprId->7:index->4] [DoubleType:exprId->0:index->0 == DoubleType:exprId->4:index->2:BooleanType]\n" +
                         "  PhysicalFilter [DoubleType:exprId->0:index->1,DoubleType:exprId->2:index->2] [DoubleType:exprId->3:index->0 > literal:4.0:DoubleType:BooleanType]\n" +
                         "    PhysicalScan [DoubleType:exprId->3:index->3,DoubleType:exprId->0:index->0,DoubleType:exprId->2:index->2] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)\n" +
                         "  PhysicalFilter [DoubleType:exprId->4:index->1,DoubleType:exprId->5:index->2,DoubleType:exprId->7:index->3] [DoubleType:exprId->6:index->0 < literal:11.0:DoubleType:BooleanType]\n" +
