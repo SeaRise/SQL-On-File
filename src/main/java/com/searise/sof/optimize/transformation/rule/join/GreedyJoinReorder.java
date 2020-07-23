@@ -104,7 +104,7 @@ public class GreedyJoinReorder implements TransformationRule {
         List<Expression> relatedConditions = relatedBuilder.build();
         List<Expression> retainConditions = retainBuilder.build();
 
-        BigInteger selfCost = plan1.sizeInBytes().add(plan1.sizeInBytes());
+        BigInteger selfCost = plan1.sizeInBytes().add(plan2.sizeInBytes());
         BigInteger newCost = selfCost.add(plan1.cost).add(plan2.cost);
         InnerJoin join = new InnerJoin(null, null, relatedConditions, context);
         List<Group> newChildren = plan1.leaves.size() > plan2.leaves.size() ?

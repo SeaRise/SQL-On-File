@@ -31,7 +31,7 @@ public class AnalyzerSuite {
                         "  Relation [a, b] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
 
         testAnalyse("select -((((1+1)-2)/3)*4) from a",
-                "Project [literal:0:IntegerType]\n" +
+                "Project [literal:0:IntegerType as attribute:4:IntegerType]\n" +
                         "  Relation [a] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
 
         testAnalyse("select 1 as a, a as b from (select a, b from a) a",
@@ -75,6 +75,10 @@ public class AnalyzerSuite {
                 "Project [literal:false:BooleanType as attribute:5:BooleanType, attribute:0:DoubleType as attribute:0:DoubleType]\n" +
                         "  Filter [literal:false:BooleanType]\n" +
                         "    Relation [a] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
+
+        testAnalyse("select (a+1)+1 from a",
+                "Project [((attribute:0:DoubleType + literal:1.0:DoubleType) + literal:1.0:DoubleType) as attribute:4:DoubleType]\n" +
+                        "  Relation [a] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
     }
 
     private void testAnalyse(String sql, String expect) {

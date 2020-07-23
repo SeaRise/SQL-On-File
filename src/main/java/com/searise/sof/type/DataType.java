@@ -7,15 +7,17 @@ import org.apache.commons.lang3.StringUtils;
 //  现在是强类型限制,在analyse那里加上一个cast算子,
 //  用于转换类型
 public enum DataType {
-    StringType("string", "String"),
-    BooleanType("bool", "Boolean"),
-    IntegerType("int", "Integer"),
-    DoubleType("double", "Double");
+    BooleanType(0, "bool", "Boolean"),
+    StringType(1, "string", "String"),
+    IntegerType(2, "int", "Integer"),
+    DoubleType(3, "double", "Double");
 
+    public final int priority;
     public final String name;
     public final String javaType;
 
-    DataType(String name, String javaType) {
+    DataType(int priority, String name, String javaType) {
+        this.priority = priority;
         this.name = name;
         this.javaType = javaType;
     }

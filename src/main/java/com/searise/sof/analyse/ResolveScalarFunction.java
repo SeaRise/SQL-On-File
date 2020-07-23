@@ -156,6 +156,6 @@ public class ResolveScalarFunction implements Rule {
     // Strong type match
     private boolean checkBinary(ScalarFunction func) {
         return (func.children().size() == 2 &&
-                func.children().get(0).dataType() == func.children().get(0).dataType());
+                func.children().get(0).dataType() == func.children().get(1).dataType());
     }
 }

@@ -15,8 +15,13 @@ public abstract class BinaryOperator extends Binary {
 
     @Override
     public DataType dataType() {
-        Preconditions.checkArgument(resolved() && left.dataType() == right.dataType());
+        Preconditions.checkArgument(resolved() && left.dataType() == right.dataType(), String.format("%s:%s", left, right));
         return left.dataType();
+    }
+
+    @Override
+    public boolean resolved() {
+        return left.dataType() == right.dataType() && super.resolved();
     }
 
     @Override

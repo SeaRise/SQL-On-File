@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.InternalRowWriter;
+import com.searise.sof.expression.Cast;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.Literal;
 import com.searise.sof.expression.attribute.BoundReference;
@@ -57,6 +58,18 @@ public class CodegenSuite {
         writer.apply(row, 1);
         Expression codegen = CodeGenerator.gen(boundReference.genCode(new CodegenContext()));
         Preconditions.checkArgument(1 == (Integer) codegen.eval(row));
+    }
+
+    @Test
+    public void testCast() throws CompileException, Parser.ParseException, Scanner.ScanException, IOException {
+        BoundReference boundReference = new BoundReference(DataType.IntegerType, 0);
+        boundReference.resolveIndex(0);
+        InternalRow row = new ArrayRow(1);
+        InternalRowWriter writer = InternalRow.getWriter(0, DataType.IntegerType);
+        writer.apply(row, 1);
+        Cast cast = new Cast(DataType.DoubleType, boundReference);
+        Expression codegen = CodeGenerator.gen(cast.genCode(new CodegenContext()));
+        Preconditions.checkArgument(1.0 == (double) codegen.eval(row));
     }
 
     @Test

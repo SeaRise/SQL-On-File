@@ -128,6 +128,11 @@ public class ExecutorSuite {
                 "true\n" +
                         "true\n" +
                         "true");
+
+        testExec("select (a+1)+1 from a",
+                "3.0\n" +
+                        "7.0\n" +
+                        "11.0");
     }
 
     private void testExec(String sql, String expect) {

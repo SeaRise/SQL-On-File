@@ -19,14 +19,12 @@ public class AddAlias implements Rule {
     @Override
     public LogicalPlan apply(LogicalPlan plan) {
         return plan.transformUp((Applicable<LogicalPlan>) p -> {
-            if (p.children().stream().allMatch(AnalysisHelper::resolved) && !p.resolved()) {
-                if (p.getClass() == Project.class) {
-                    Project project = (Project) p;
-                    List<Expression> newProjectList = Utils.toImmutableList(project.projectList.stream().
-                            map(addAliasApplicable::apply));
-                    if (!isEqualTo(project.projectList, newProjectList)) {
-                        return new Project(newProjectList, project.child, project.context);
-                    }
+            if (p.getClass() == Project.class) {
+                Project project = (Project) p;
+                List<Expression> newProjectList = Utils.toImmutableList(project.projectList.stream().
+                        map(addAliasApplicable::apply));
+                if (!isEqualTo(project.projectList, newProjectList)) {
+                    return new Project(newProjectList, project.child, project.context);
                 }
             }
             return p;
