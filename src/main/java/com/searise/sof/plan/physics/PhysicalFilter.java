@@ -1,6 +1,7 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
@@ -15,11 +16,13 @@ public class PhysicalFilter implements PhysicalPlan {
     public List<BoundReference> schema;
     public List<Expression> conditions;
     public final PhysicalPlan child;
+    public final Context context;
 
-    public PhysicalFilter(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan child) {
+    public PhysicalFilter(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan child, Context context) {
         this.schema = schema;
         this.conditions = conditions;
         this.child = child;
+        this.context = context;
     }
 
     @Override
@@ -30,6 +33,11 @@ public class PhysicalFilter implements PhysicalPlan {
     @Override
     public List<PhysicalPlan> children() {
         return ImmutableList.of(child);
+    }
+
+    @Override
+    public Context context() {
+        return context;
     }
 
     @Override

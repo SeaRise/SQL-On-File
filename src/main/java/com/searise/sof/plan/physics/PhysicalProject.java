@@ -2,6 +2,7 @@ package com.searise.sof.plan.physics;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
@@ -21,11 +22,13 @@ public class PhysicalProject implements PhysicalPlan {
     public List<BoundReference> schema;
     public List<Expression> projectList;
     public final PhysicalPlan child;
+    public final Context context;
 
-    public PhysicalProject(List<BoundReference> schema, List<Expression> projectList, PhysicalPlan child) {
+    public PhysicalProject(List<BoundReference> schema, List<Expression> projectList, PhysicalPlan child, Context context) {
         this.schema = schema;
         this.projectList = projectList;
         this.child = child;
+        this.context = context;
     }
 
     @Override
@@ -71,6 +74,11 @@ public class PhysicalProject implements PhysicalPlan {
     @Override
     public List<PhysicalPlan> children() {
         return ImmutableList.of(child);
+    }
+
+    @Override
+    public Context context() {
+        return context;
     }
 
     @Override

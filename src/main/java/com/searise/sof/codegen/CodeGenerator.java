@@ -1,6 +1,8 @@
 package com.searise.sof.codegen;
 
 import com.searise.sof.expression.Expression;
+import com.searise.sof.expression.Literal;
+import com.searise.sof.expression.attribute.BoundReference;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.janino.ClassBodyEvaluator;
 import org.codehaus.janino.CompileException;
@@ -65,5 +67,16 @@ public class CodeGenerator {
             builder.append("import ").append(aClass.getName()).append(";\n");
         }
         return builder.toString();
+    }
+
+    public static Expression tryCodegen(Expression expression) {
+        if (expression.getClass() == BoundReference.class || expression.getClass() == Literal.class) {
+            return expression;
+        }
+        try {
+            return CodeGenerator.gen(expression.genCode(new CodegenContext()));
+        } catch (Exception e) {
+            return expression;
+        }
     }
 }

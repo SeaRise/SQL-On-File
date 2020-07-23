@@ -1,6 +1,7 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.Attribute;
@@ -22,11 +23,13 @@ public class PhysicalHashJoin implements PhysicalPlan {
     public List<Expression> buildJoinKeys;
     public final PhysicalPlan stream;
     public final PhysicalPlan build;
+    public final Context context;
 
-    public PhysicalHashJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build) {
+    public PhysicalHashJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build, Context context) {
         this.schema = schema;
         this.stream = stream;
         this.build = build;
+        this.context = context;
 
         Set<Long> streamIds = stream.schema().stream().map(r -> r.exprId).collect(Collectors.toSet());
         Set<Long> buildIds = build.schema().stream().map(r -> r.exprId).collect(Collectors.toSet());
@@ -67,6 +70,11 @@ public class PhysicalHashJoin implements PhysicalPlan {
             }
         }
         return Triple.of(streamKeyBuilder.build(), buildKeyBuilder.build(), otherCondBuilder.build());
+    }
+
+    @Override
+    public Context context() {
+        return context;
     }
 
     @Override

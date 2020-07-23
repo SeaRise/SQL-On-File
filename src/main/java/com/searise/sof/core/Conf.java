@@ -12,9 +12,13 @@ public class Conf {
     public static final String AUTO_HASH_JOIN_THRESHOLD = "sof_auto_hash_join_threshold";
     public static final String AUTO_HASH_JOIN_THRESHOLD_DEFAULT_VALUE = "1000"; // 1000byte
 
+    public static final String CODEGEN_EXPRESSION = "sof_codegen_expression";
+    public static final String CODEGEN_EXPRESSION_DEFAULT_VALUE = "true";
+
     public Conf() {
         setConf(FORCE_JOIN_TYPE, FORCE_JOIN_TYPE_DEFAULT_VALUE);
         setConf(AUTO_HASH_JOIN_THRESHOLD, AUTO_HASH_JOIN_THRESHOLD_DEFAULT_VALUE);
+        setConf(CODEGEN_EXPRESSION, CODEGEN_EXPRESSION_DEFAULT_VALUE);
     }
 
     private final Map<String, String> conf = new HashMap<>();
@@ -33,5 +37,9 @@ public class Conf {
 
     public int getIntConf(String key) {
         return Integer.valueOf(getConf(key));
+    }
+
+    public boolean getBoolConf(String key) {
+        return Boolean.valueOf(getConf(key));
     }
 }

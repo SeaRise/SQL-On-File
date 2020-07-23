@@ -1,5 +1,6 @@
 package com.searise.sof.execution;
 
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Projection;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.ArrayRow;
@@ -15,12 +16,14 @@ public class ProjectExec implements Executor {
 
     private final Executor child;
     private final Projection projection;
+    public final Context context;
 
-    public ProjectExec(Executor child, List<Expression> projectList, List<BoundReference> schema) {
+    public ProjectExec(Executor child, List<Expression> projectList, List<BoundReference> schema, Context context) {
+        this.context = context;
         Utils.checkArgument(projectList.size() == schema.size(), "projectList.size must equal to schema.size");
         this.child = child;
         InternalRow output = new ArrayRow(schema.size());
-        projection = new Projection(projectList, output);
+        projection = new Projection(projectList, output, context);
     }
 
     @Override

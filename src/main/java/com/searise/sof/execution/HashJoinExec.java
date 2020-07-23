@@ -2,10 +2,7 @@ package com.searise.sof.execution;
 
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
-import com.searise.sof.core.MutableProjection;
-import com.searise.sof.core.Predication;
-import com.searise.sof.core.Projection;
-import com.searise.sof.core.Utils;
+import com.searise.sof.core.*;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.JoinRow;
@@ -27,17 +24,19 @@ public class HashJoinExec implements Executor {
     private Multimap<InternalRow, InternalRow> buildMap = ImmutableListMultimap.of();
     private InternalRow streamRow = EMPTY_ROW;
     private Iterator<InternalRow> hitIter;
+    public final Context context;
 
     public HashJoinExec(Executor stream, Executor build, List<Expression> streamJoinKeys, List<Expression> buildJoinKeys,
-                        List<Expression> otherConditions, List<BoundReference> schema) {
+                        List<Expression> otherConditions, List<BoundReference> schema, Context context) {
         this.stream = stream;
         this.build = build;
+        this.context = context;
         InternalRow output = new ArrayRow(schema.size());
-        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output);
+        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output, context);
 
-        this.predication = new Predication(otherConditions);
-        streamKeyProjection = new MutableProjection(streamJoinKeys);
-        buildKeyProjection = new MutableProjection(buildJoinKeys);
+        this.predication = new Predication(otherConditions, context);
+        streamKeyProjection = new MutableProjection(streamJoinKeys, context);
+        buildKeyProjection = new MutableProjection(buildJoinKeys, context);
     }
 
     @Override

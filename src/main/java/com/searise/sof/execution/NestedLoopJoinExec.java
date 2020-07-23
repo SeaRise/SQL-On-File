@@ -1,5 +1,6 @@
 package com.searise.sof.execution;
 
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Predication;
 import com.searise.sof.core.Projection;
 import com.searise.sof.core.Utils;
@@ -19,13 +20,15 @@ public class NestedLoopJoinExec implements Executor {
     private final Predication predication;
     private final Projection schemaProjection;
     private InternalRow streamRow = EMPTY_ROW;
+    public final Context context;
 
-    public NestedLoopJoinExec(Executor stream, Executor build, List<Expression> conditions, List<BoundReference> schema) {
+    public NestedLoopJoinExec(Executor stream, Executor build, List<Expression> conditions, List<BoundReference> schema, Context context) {
         this.stream = stream;
         this.build = build;
+        this.context = context;
         InternalRow output = new ArrayRow(schema.size());
-        this.predication = new Predication(conditions);
-        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output);
+        this.predication = new Predication(conditions, context);
+        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output, context);
     }
 
     @Override

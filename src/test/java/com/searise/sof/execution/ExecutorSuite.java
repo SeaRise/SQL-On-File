@@ -123,6 +123,11 @@ public class ExecutorSuite {
                         "5.0,5.0,5.0,5.0\n" +
                         "9.0,9.0,9.0,9.0"
         );
+
+        testExec("select ((a+b-c*d) > (a*b*c*5.0*d)) or (((a%b+5.0-c)/(-a)) != 0.0) from a",
+                "true\n" +
+                        "true\n" +
+                        "true");
     }
 
     private void testExec(String sql, String expect) {
@@ -140,7 +145,7 @@ public class ExecutorSuite {
         LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(splits.size() - 1));
         LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
-        ResultExec executor = (ResultExec) new Builder().build(physicalPlan);
+        ResultExec executor = (ResultExec) new Builder(context).build(physicalPlan);
         executor.open();
         executor.close();
         String result = StringUtils.trim(executor.result());

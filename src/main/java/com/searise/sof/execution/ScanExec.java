@@ -1,6 +1,7 @@
 package com.searise.sof.execution;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
@@ -25,12 +26,14 @@ public class ScanExec implements Executor {
     private String curLine;
     private final InternalRow output;
     private final List<InternalRowWriter> writers;
+    public final Context context;
 
-    public ScanExec(List<BoundReference> schema, String filePath, String separator) {
+    public ScanExec(List<BoundReference> schema, String filePath, String separator, Context context) {
         this.schema = schema;
         this.filePath = filePath;
         this.separator = separator;
         this.output = new ArrayRow(schema.size());
+        this.context = context;
         ImmutableList.Builder<InternalRowWriter> writerBuilder = ImmutableList.builder();
         for (int index = 0; index < schema.size(); index++) {
             writerBuilder.add(InternalRow.getWriter(index, schema.get(index).dataType));

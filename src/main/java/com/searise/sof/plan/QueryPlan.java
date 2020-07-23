@@ -1,6 +1,7 @@
 package com.searise.sof.plan;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.Context;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,4 +19,6 @@ public interface QueryPlan<T extends QueryPlan> {
         String nextPreString = preString + "  ";
         return preString + toString() + "\n" + children().stream().map(child -> child.visitToString(nextPreString)).collect(Collectors.joining());
     }
+
+    Context context();
 }

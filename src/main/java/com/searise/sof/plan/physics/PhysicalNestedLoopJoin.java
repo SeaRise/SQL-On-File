@@ -1,6 +1,7 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
@@ -16,12 +17,14 @@ public class PhysicalNestedLoopJoin implements PhysicalPlan {
     public List<Expression> conditions;
     public final PhysicalPlan stream;
     public final PhysicalPlan build;
+    public final Context context;
 
-    public PhysicalNestedLoopJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build) {
+    public PhysicalNestedLoopJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build, Context context) {
         this.schema = schema;
         this.conditions = conditions;
         this.stream = stream;
         this.build = build;
+        this.context = context;
     }
 
     @Override
@@ -32,6 +35,11 @@ public class PhysicalNestedLoopJoin implements PhysicalPlan {
     @Override
     public List<PhysicalPlan> children() {
         return ImmutableList.of(stream, build);
+    }
+
+    @Override
+    public Context context() {
+        return context;
     }
 
     @Override

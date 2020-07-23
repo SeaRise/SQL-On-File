@@ -1,5 +1,6 @@
 package com.searise.sof.execution;
 
+import com.searise.sof.core.Context;
 import com.searise.sof.core.row.InternalRow;
 
 import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
@@ -7,9 +8,11 @@ import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 public class ResultExec implements Executor {
     private final Executor child;
     private final StringBuilder resultBuilder = new StringBuilder();
+    public final Context context;
 
-    public ResultExec(Executor child) {
+    public ResultExec(Executor child, Context context) {
         this.child = child;
+        this.context = context;
     }
 
     @Override

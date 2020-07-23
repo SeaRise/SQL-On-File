@@ -17,6 +17,6 @@ public class ImplProject implements ImplementationRule {
         Project project = (Project) groupExpr.exprNode;
         List<BoundReference> schema = Utils.toImmutableList(groupExpr.group.schema.stream().
                 map(attr -> new BoundReference(attr.dataType, attr.exprId)));
-        return new PhysicalProject(schema, project.projectList, children.get(0));
+        return new PhysicalProject(schema, project.projectList, children.get(0), project.context);
     }
 }

@@ -40,6 +40,7 @@ public class Utils {
         }
         return toImmutableList(builder.stream());
     }
+
     @SafeVarargs
     public static <T> List<T> combineDistinct(List<T>... lists) {
         List<T> builder = new ArrayList<>();

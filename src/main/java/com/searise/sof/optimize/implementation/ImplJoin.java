@@ -51,17 +51,17 @@ public class ImplJoin implements ImplementationRule {
         Statistics leftStats = SizeInBytesStatsVisitor.visit(groupExpr.children.get(0));
         Statistics rightStats = SizeInBytesStatsVisitor.visit(groupExpr.children.get(1));
         if (leftStats.sizeInBytes.compareTo(rightStats.sizeInBytes) >= 0) {
-            return new PhysicalNestedLoopJoin(schema, join.conditions, children.get(0), children.get(1));
+            return new PhysicalNestedLoopJoin(schema, join.conditions, children.get(0), children.get(1), join.context);
         }
-        return new PhysicalNestedLoopJoin(schema, join.conditions, children.get(1), children.get(0));
+        return new PhysicalNestedLoopJoin(schema, join.conditions, children.get(1), children.get(0), join.context);
     }
 
     private PhysicalHashJoin selectHashJoin(GroupExpr groupExpr, InnerJoin join, List<BoundReference> schema, List<PhysicalPlan> children) {
         Statistics leftStats = SizeInBytesStatsVisitor.visit(groupExpr.children.get(0));
         Statistics rightStats = SizeInBytesStatsVisitor.visit(groupExpr.children.get(1));
         if (leftStats.sizeInBytes.compareTo(rightStats.sizeInBytes) >= 0) {
-            return new PhysicalHashJoin(schema, join.conditions, children.get(0), children.get(1));
+            return new PhysicalHashJoin(schema, join.conditions, children.get(0), children.get(1), join.context);
         }
-        return new PhysicalHashJoin(schema, join.conditions, children.get(1), children.get(0));
+        return new PhysicalHashJoin(schema, join.conditions, children.get(1), children.get(0), join.context);
     }
 }

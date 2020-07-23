@@ -1,5 +1,6 @@
 package com.searise.sof.execution;
 
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Predication;
 import com.searise.sof.core.Projection;
 import com.searise.sof.core.Utils;
@@ -17,12 +18,14 @@ public class FilterExec implements Executor {
     private final Executor child;
     private final Projection schemaProjection;
     private final Predication predication;
+    public final Context context;
 
-    public FilterExec(Executor child, List<Expression> conditions, List<BoundReference> schema) {
+    public FilterExec(Executor child, List<Expression> conditions, List<BoundReference> schema, Context context) {
         this.child = child;
+        this.context = context;
         InternalRow output = new ArrayRow(schema.size());
-        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output);
-        this.predication = new Predication(conditions);
+        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output, context);
+        this.predication = new Predication(conditions, context);
     }
 
     @Override

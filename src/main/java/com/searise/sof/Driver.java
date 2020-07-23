@@ -24,7 +24,7 @@ public class Driver {
     private final SqlParser sqlParser = new SqlParser(context);
     private final Analyzer analyzer = new Analyzer(catalog);
     private final Optimizer optimizer = newOptimizer();
-    private final Builder builder = new Builder();
+    private final Builder builder = new Builder(context);
 
     public void compile(String sqls) throws IOException {
         for (String sql : Utils.split(Utils.removeComments(sqls))) {

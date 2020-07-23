@@ -6,8 +6,8 @@ import com.searise.sof.expression.Expression;
 import java.util.List;
 
 public class Projection extends MutableProjection {
-    public Projection(List<Expression> exprs, InternalRow output) {
-        super(exprs);
+    public Projection(List<Expression> exprs, InternalRow output, Context context) {
+        super(exprs, context);
         this.output = output;
     }
 

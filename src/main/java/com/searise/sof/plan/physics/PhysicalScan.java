@@ -1,5 +1,6 @@
 package com.searise.sof.plan.physics;
 
+import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.expression.attribute.BoundReference;
@@ -15,12 +16,14 @@ public class PhysicalScan implements PhysicalPlan {
     public final List<Attribute> structType;
     public final String filePath;
     public final String separator;
+    public final Context context;
 
-    public PhysicalScan(List<BoundReference> schema, List<Attribute> structType, String filePath, String separator) {
+    public PhysicalScan(List<BoundReference> schema, List<Attribute> structType, String filePath, String separator, Context context) {
         this.schema = schema;
         this.structType = structType;
         this.filePath = filePath;
         this.separator = separator;
+        this.context = context;
     }
 
     @Override
@@ -43,5 +46,10 @@ public class PhysicalScan implements PhysicalPlan {
     @Override
     public void prune(List<BoundReference> father, boolean isTop) {
         schema = isTop ? schema : SchemaPruneHelper.copy(father);
+    }
+
+    @Override
+    public Context context() {
+        return context;
     }
 }
