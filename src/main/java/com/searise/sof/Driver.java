@@ -37,6 +37,7 @@ public class Driver {
         if (parsePlan instanceof RunnableCommand) {
             RunnableCommand command = (RunnableCommand) parsePlan;
             command.run(catalog);
+            Utils.println("ok");
             return;
         }
         LogicalPlan analyzePlan = analyzer.analyse(parsePlan);
@@ -49,7 +50,7 @@ public class Driver {
         executor.open();
         executor.close();
         if (executor.getClass() == ResultExec.class) {
-            Utils.println("result:");
+            Utils.println("ok");
             Utils.println(((ResultExec) executor).result());
         }
     }

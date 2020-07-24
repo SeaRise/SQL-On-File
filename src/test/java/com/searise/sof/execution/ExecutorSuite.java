@@ -150,10 +150,11 @@ public class ExecutorSuite {
         LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(splits.size() - 1));
         LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
-        ResultExec executor = (ResultExec) new Builder(context).build(physicalPlan);
-        executor.open();
-        executor.close();
-        String result = StringUtils.trim(executor.result());
+        ResultExec resultExec = (ResultExec) new Builder(context).build(physicalPlan);
+        TestExecutor testExecutor = new TestExecutor(resultExec.child, resultExec.context);
+        testExecutor.open();
+        testExecutor.close();
+        String result = StringUtils.trim(testExecutor.result());
         Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
     }
 }
