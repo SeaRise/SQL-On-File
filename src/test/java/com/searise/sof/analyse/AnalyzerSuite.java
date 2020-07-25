@@ -1,6 +1,8 @@
 package com.searise.sof.analyse;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.Driver;
+import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.Context;
 import com.searise.sof.parser.SqlParser;
@@ -82,8 +84,9 @@ public class AnalyzerSuite {
     }
 
     private void testAnalyse(String sql, String expect) {
-        SqlParser sqlParser = new SqlParser(new Context());
-        Analyzer analyzer = new Analyzer(new TestCatalog());
+        Catalog catalog = new TestCatalog();
+        SqlParser sqlParser = new SqlParser(new Context(catalog, new Driver()));
+        Analyzer analyzer = new Analyzer(catalog);
         LogicalPlan parsePlan = sqlParser.parsePlan(sql);
         String result = StringUtils.trim(analyzer.analyse(parsePlan).visitToString());
         Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));

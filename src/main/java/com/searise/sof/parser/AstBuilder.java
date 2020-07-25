@@ -12,11 +12,10 @@ import com.searise.sof.expression.ScalarFunction;
 import com.searise.sof.expression.attribute.Alias;
 import com.searise.sof.expression.attribute.UnresolvedAttribute;
 import com.searise.sof.plan.logic.*;
-import com.searise.sof.plan.runnable.CreateTable;
-import com.searise.sof.plan.runnable.SetCommand;
-import com.searise.sof.plan.runnable.ShowTable;
+import com.searise.sof.plan.runnable.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +24,7 @@ import java.util.Optional;
 import static com.searise.sof.type.DataType.*;
 
 public class AstBuilder extends SqlBaseBaseVisitor<Object> {
+    private static final String DEFAULT_SEPARATOR = ",";
     private final Context context;
 
     public AstBuilder(Context context) {
@@ -42,6 +42,22 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
     }
 
     @Override
+    public LogicalPlan visitCreateTableAsSelect(SqlBaseParser.CreateTableAsSelectContext ctx) {
+        String table = ctx.tablenName.getText();
+        Pair<String, String> fileMeta = visitFileMetaClause(ctx.fileMetaClause());
+        String filePath = fileMeta.getLeft();
+        String separator = fileMeta.getRight();
+        LogicalPlan query = typedVisit(ctx.selectStatement());
+        return new CreateTableAsSelect(context, table, filePath, separator, query);
+    }
+
+    @Override
+    public LogicalPlan visitInsertOverwrite(SqlBaseParser.InsertOverwriteContext ctx) {
+        LogicalPlan query = typedVisit(ctx.selectStatement());
+        return new InsertOverwrite(context, ctx.tablenName.getText(), query);
+    }
+
+    @Override
     public LogicalPlan visitSetConf(SqlBaseParser.SetConfContext ctx) {
         String key = ctx.key.getText();
         String value = ctx.value.getText();
@@ -52,8 +68,6 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
     public LogicalPlan visitShowTable(SqlBaseParser.ShowTableContext ctx) {
         return new ShowTable(context);
     }
-
-    private static final String DEFAULT_SEPARATOR = ",";
 
     @Override
     public LogicalPlan visitCreateStatement(SqlBaseParser.CreateStatementContext ctx) {
@@ -68,13 +82,20 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
             structTypeBuilder.add(structField);
         }
 
-        SqlBaseParser.FileMetaClauseContext fileMeta = ctx.fileMetaClause();
-        String filePath = removeQuotation(fileMeta.filePathClause().path.getText());
-        String separator = Objects.isNull(fileMeta.separatorClause()) ?
-                DEFAULT_SEPARATOR : removeQuotation(fileMeta.separatorClause().separator.getText());
+        Pair<String, String> fileMeta = visitFileMetaClause(ctx.fileMetaClause());
+        String filePath = fileMeta.getLeft();
+        String separator = fileMeta.getRight();
 
         CatalogTable catalogTable = new CatalogTable(tableName, structTypeBuilder.build(), filePath, separator);
         return new CreateTable(catalogTable, context);
+    }
+
+    @Override
+    public Pair<String, String> visitFileMetaClause(SqlBaseParser.FileMetaClauseContext fileMeta) {
+        String filePath = removeQuotation(fileMeta.filePathClause().path.getText());
+        String separator = Objects.isNull(fileMeta.separatorClause()) ?
+                DEFAULT_SEPARATOR : removeQuotation(fileMeta.separatorClause().separator.getText());
+        return Pair.of(filePath, separator);
     }
 
     @Override

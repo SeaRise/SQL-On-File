@@ -14,25 +14,23 @@ import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
 import com.searise.sof.plan.runnable.RunnableCommand;
 
-import java.io.IOException;
-
 import static com.searise.sof.optimize.Optimizer.newOptimizer;
 
 public class Driver {
-    private final Catalog catalog = new BuiltInCatalog();
-    private final Context context = new Context();
-    private final SqlParser sqlParser = new SqlParser(context);
-    private final Analyzer analyzer = new Analyzer(catalog);
-    private final Optimizer optimizer = newOptimizer();
-    private final Builder builder = new Builder(context);
+    public final Catalog catalog = new BuiltInCatalog();
+    public final Context context = new Context(catalog, this);
+    public final SqlParser sqlParser = new SqlParser(context);
+    public final Analyzer analyzer = new Analyzer(catalog);
+    public final Optimizer optimizer = newOptimizer();
+    public final Builder builder = new Builder(context);
 
-    public void compile(String sqls) throws IOException {
+    public void compile(String sqls) throws Exception {
         for (String sql : Utils.split(Utils.removeComments(sqls))) {
             doCompile(sql);
         }
     }
 
-    private void doCompile(String sql) {
+    private void doCompile(String sql) throws Exception {
         LogicalPlan parsePlan = sqlParser.parsePlan(sql);
         if (parsePlan instanceof RunnableCommand) {
             RunnableCommand command = (RunnableCommand) parsePlan;
@@ -47,11 +45,13 @@ public class Driver {
     }
 
     private void execute(Executor executor) {
+        if (executor.getClass() != ResultExec.class) {
+            executor = new ResultExec(executor, context);
+        }
+
         executor.open();
         executor.close();
-        if (executor.getClass() == ResultExec.class) {
-            Utils.println("ok");
-            Utils.println(((ResultExec) executor).result());
-        }
+        Utils.println("ok");
+        Utils.println(((ResultExec) executor).result());
     }
 }

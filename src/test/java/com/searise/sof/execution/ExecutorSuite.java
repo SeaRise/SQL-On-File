@@ -1,6 +1,7 @@
 package com.searise.sof.execution;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.Driver;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
@@ -19,7 +20,7 @@ import static com.searise.sof.optimize.Optimizer.newOptimizer;
 
 public class ExecutorSuite {
     @Test
-    public void test() {
+    public void test() throws Exception {
         testExec("select a as a, b as b from a",
                 "1.0,2.0\n" +
                         "5.0,6.0\n" +
@@ -135,9 +136,9 @@ public class ExecutorSuite {
                         "11.0");
     }
 
-    private void testExec(String sql, String expect) {
-        Context context = new Context();
+    private void testExec(String sql, String expect) throws Exception {
         Catalog catalog = new TestCatalog();
+        Context context = new Context(catalog, new Driver());
         List<String> splits = Utils.split(sql);
         for (int i = 0; i < splits.size() - 1; i++) {
             LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(i));
@@ -150,8 +151,8 @@ public class ExecutorSuite {
         LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(splits.size() - 1));
         LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
-        ResultExec resultExec = (ResultExec) new Builder(context).build(physicalPlan);
-        TestExecutor testExecutor = new TestExecutor(resultExec.child, resultExec.context);
+        Executor executor = new Builder(context).build(physicalPlan);
+        TestExecutor testExecutor = new TestExecutor(executor, context);
         testExecutor.open();
         testExecutor.close();
         String result = StringUtils.trim(testExecutor.result());

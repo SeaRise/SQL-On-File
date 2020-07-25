@@ -5,10 +5,20 @@ singleStatement
     ;
 
 statement
-    : selectStatement    #QueryStatement
-    | createStatement    #createTableStatement
-    | showTable          #showTableStatement
-    | setConf            #setConfStatement
+    : selectStatement            #QueryStatement
+    | createStatement            #createTableStatement
+    | createTableAsSelect        #createTableAsSelectStatement
+    | insertOverwrite            #insertOverwriteStatement
+    | showTable                  #showTableStatement
+    | setConf                    #setConfStatement
+    ;
+
+insertOverwrite
+    : INSERT OVERWRITE TABLE tablenName=tableIdentifier selectStatement
+    ;
+
+createTableAsSelect
+    : CREATE TABLE tablenName=tableIdentifier fileMetaClause AS selectStatement
     ;
 
 setConf
@@ -139,6 +149,7 @@ FROM  : 'FROM';
 WHERE : 'WHERE';
 JOIN : 'JOIN';
 INSERT: 'INSERT';
+OVERWRITE: 'OVERWRITE';
 INTO  : 'INTO';
 VALUES: 'VALUES';
 DELETE: 'DELETE';

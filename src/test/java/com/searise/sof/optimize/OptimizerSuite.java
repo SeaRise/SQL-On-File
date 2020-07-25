@@ -1,6 +1,7 @@
 package com.searise.sof.optimize;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.Driver;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
@@ -19,7 +20,7 @@ import static com.searise.sof.optimize.Optimizer.newOptimizer;
 
 public class OptimizerSuite {
     @Test
-    public void test() {
+    public void test() throws Exception {
         doTest("select a as a, b as b from a",
                 "PhysicalScan [DoubleType:exprId->0:index->0,DoubleType:exprId->1:index->1] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)");
 
@@ -109,9 +110,9 @@ public class OptimizerSuite {
         );
     }
 
-    private void doTest(String sql, String expect) {
-        Context context = new Context();
+    private void doTest(String sql, String expect) throws Exception {
         Catalog catalog = new TestCatalog();
+        Context context = new Context(catalog, new Driver());
         List<String> splits = Utils.split(sql);
         for (int i = 0; i < splits.size() - 1; i++) {
             LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(i));

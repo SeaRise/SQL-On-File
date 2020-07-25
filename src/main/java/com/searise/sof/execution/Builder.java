@@ -12,9 +12,7 @@ public class Builder {
     }
 
     public Executor build(PhysicalPlan physicalPlan) {
-        Executor topExecutor = doBuild(physicalPlan);
-        topExecutor = new ResultExec(topExecutor, context);
-        return topExecutor;
+        return doBuild(physicalPlan);
     }
 
     private Executor doBuild(PhysicalPlan physicalPlan) {

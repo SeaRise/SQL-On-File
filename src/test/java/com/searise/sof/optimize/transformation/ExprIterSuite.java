@@ -1,6 +1,7 @@
 package com.searise.sof.optimize.transformation;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.Driver;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.Context;
@@ -44,7 +45,7 @@ public class ExprIterSuite {
     }
 
     private void doTestSql(String sql, Pattern pattern, int count) {
-        LogicalPlan parsePlan = new SqlParser(new Context()).parsePlan(sql);
+        LogicalPlan parsePlan = new SqlParser(new Context(new TestCatalog(), new Driver())).parsePlan(sql);
         LogicalPlan logicalPlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
         for (PreprocessRule preprocessRule : PreprocessRule.preprocessRules) {
             logicalPlan = preprocessRule.apply(logicalPlan);
