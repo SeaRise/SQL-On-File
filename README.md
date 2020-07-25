@@ -1,5 +1,5 @@
 # SQL-On-File
-####用sql操作文件
+#### 用sql操作文件
 
 ```
            |------|                               |--------|                             
@@ -12,14 +12,14 @@
                                         |-------|                            |---------|
 ```
 
-####编译
+#### 编译
 ```
 mvn clean package
 然后把生成的SQL-On-File-1.0-SNAPSHOT-jar-with-dependencies.jar放到bin目录下面,和sof.cmd同一目录.
 ```
 
-####快速使用:
-######在bin目录下面, 执行sof.cmd
+#### 快速使用:
+###### 在bin目录下面, 执行sof.cmd
 - 首先执行ddl语句,创建实例表,表对应的txt文件在bin/example/example.txt
 ```
 create table example (a int, b double, c bool, d string) path 'example\example.txt';
