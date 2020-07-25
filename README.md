@@ -16,7 +16,6 @@
 ```
 mvn clean package
 然后把生成的SQL-On-File-1.0-SNAPSHOT-jar-with-dependencies.jar放到bin目录下面,和sof.cmd同一目录.
-ps: 已经预先生成好SQL-On-File-1.0-SNAPSHOT-jar-with-dependencies.jar.
 ```
 
 快速使用:
