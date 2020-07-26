@@ -35,8 +35,8 @@ for outer-row : outer-table {
 #### schema
 ```
 类似tidb inline-project的做法.
-对于join/filter,conditions用到的attribute不一定要导出.所以executor有schemaProjection,在join/filter执行完后,做一次筛选.
-ps: 虽然在非向量执行下,这个的效果不大,可能还是负效果.
+对于join/filter,conditions用到的attribute不一定要导出.
+所以executor有schemaProjection,在join/filter执行完后,做一次筛选.
 ```
 
 #### expression
