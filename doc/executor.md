@@ -49,7 +49,7 @@ expression-tree的执行方式, 会带来大量递归调用,虚函数调用等�
 所以这里用codegen生成expression,消除children.eval调用.
 
 参考spark-sql expression codegen的实现,用字符串拼接出代码,然后用janino生成CodegenExpression.
-每个expression会直线codegen接口,最终在CodeGenerator生成CodegenExpression.
+每个expression会实现codegen接口,最终在CodeGenerator生成CodegenExpression.
 
 executor的codegen还没想好咋搞...
 ```
