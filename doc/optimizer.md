@@ -11,7 +11,7 @@ cascade planner的介绍可以看:https://pingcap.com/blog-cn/tidb-cascades-plan
                    |----------|                       |-------|    
 `logical plan` --> |preprocess|--> `logical plan` --> |explore| --> `group` -+
                    |----------|                       |-------|              |
-																             |
+									     |
                        |------------|                         |---------|    |
    `physical plan` <-- |afterprocess| <-- `physical plan` <-- |implement| <--+
                        |------------|                         |---------|
