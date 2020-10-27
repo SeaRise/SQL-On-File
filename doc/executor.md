@@ -58,14 +58,5 @@ expression-tree的执行方式, 会带来大量递归调用,虚函数调用等�
 参考spark-sql expression codegen的实现,用字符串拼接出代码,然后用janino生成CodegenExpression.
 每个expression会实现codegen接口,最终在CodeGenerator生成CodegenExpression.
 
-executor的codegen还没想好咋搞...
-```
-
-##### whole stage codegen
-```
-for row : input {
-    Row input1 = exec1.doExecute(row)
-    Row input2 = exec2.doExecute(input1)
-    Row input3 = exec3.doExecute(input2)
-}
+executor的codegen基本也差不多, 目前只有Filter和Projection实现了Codegen接口.
 ```
