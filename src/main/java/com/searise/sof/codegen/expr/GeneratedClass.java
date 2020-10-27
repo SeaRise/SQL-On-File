@@ -1,4 +1,4 @@
-package com.searise.sof.codegen;
+package com.searise.sof.codegen.expr;
 
 import com.searise.sof.expression.Expression;
 import com.searise.sof.type.DataType;

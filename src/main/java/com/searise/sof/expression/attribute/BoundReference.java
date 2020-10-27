@@ -1,8 +1,8 @@
 package com.searise.sof.expression.attribute;
 
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.codegen.CodegenContext;
-import com.searise.sof.codegen.ExprCode;
+import com.searise.sof.codegen.expr.CodegenContext;
+import com.searise.sof.codegen.expr.ExprCode;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.Expression;

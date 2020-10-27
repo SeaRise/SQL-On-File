@@ -1,7 +1,12 @@
 package com.searise.sof.execution;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.row.InternalRow;
+
+import java.util.List;
+import java.util.Objects;
 
 import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 
@@ -56,5 +61,16 @@ public class ResultExec implements Executor {
     @Override
     public void close() {
         child.close();
+    }
+
+    @Override
+    public List<Executor> children() {
+        return ImmutableList.of(child);
+    }
+
+    @Override
+    public Executor copyWithNewChildren(List<Executor> children) {
+        Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 1);
+        return new ResultExec(child, context);
     }
 }

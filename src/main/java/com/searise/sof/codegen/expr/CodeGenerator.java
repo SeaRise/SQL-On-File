@@ -1,4 +1,4 @@
-package com.searise.sof.codegen;
+package com.searise.sof.codegen.expr;
 
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.Literal;
@@ -37,7 +37,7 @@ public class CodeGenerator {
                     "}";
 
     public static Expression gen(ExprCode exprCode) throws IOException, Scanner.ScanException, Parser.ParseException, CompileException {
-        String importCode = genImportCode(exprCode.importClass);
+        String importCode = genImportCode(exprCode.importClasses);
 
         String codeBody = exprCode.code;
         for (int i = 0; i < exprCode.paramNames.size(); i++) {

@@ -1,5 +1,6 @@
 package com.searise.sof.execution;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.SofException;
@@ -108,6 +109,17 @@ public class ScanExec implements Executor {
                 throw new SofException(e.getMessage());
             }
         }
+    }
+
+    @Override
+    public List<Executor> children() {
+        return ImmutableList.of();
+    }
+
+    @Override
+    public Executor copyWithNewChildren(List<Executor> children) {
+        Preconditions.checkArgument(Objects.nonNull(children) && children.isEmpty());
+        return this;
     }
 
     private class FileLineReader {

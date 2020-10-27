@@ -2,6 +2,8 @@ package com.searise.sof.execution;
 
 import com.searise.sof.core.row.InternalRow;
 
+import java.util.List;
+
 public interface Executor {
     void open();
 
@@ -10,4 +12,8 @@ public interface Executor {
     InternalRow next();
 
     void close();
+
+    List<Executor> children();
+
+    Executor copyWithNewChildren(List<Executor> children);
 }

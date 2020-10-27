@@ -1,5 +1,7 @@
 package com.searise.sof.execution;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
 import com.searise.sof.core.*;
@@ -11,6 +13,7 @@ import com.searise.sof.expression.attribute.BoundReference;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 
@@ -37,6 +40,17 @@ public class HashJoinExec implements Executor {
         this.predication = new Predication(otherConditions, context);
         streamKeyProjection = new MutableProjection(streamJoinKeys, context);
         buildKeyProjection = new MutableProjection(buildJoinKeys, context);
+    }
+
+    private HashJoinExec(Executor stream, Executor build, Predication predication, Projection schemaProjection,
+                         MutableProjection streamKeyProjection, MutableProjection buildKeyProjection, Context context) {
+        this.stream = stream;
+        this.build = build;
+        this.predication = predication;
+        this.schemaProjection = schemaProjection;
+        this.streamKeyProjection = streamKeyProjection;
+        this.buildKeyProjection = buildKeyProjection;
+        this.context = context;
     }
 
     @Override
@@ -125,5 +139,16 @@ public class HashJoinExec implements Executor {
     public void close() {
         stream.close();
         build.close();
+    }
+
+    @Override
+    public List<Executor> children() {
+        return ImmutableList.of(stream, build);
+    }
+
+    @Override
+    public Executor copyWithNewChildren(List<Executor> children) {
+        Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
+        return new HashJoinExec(stream, build, predication, schemaProjection, streamKeyProjection, buildKeyProjection, context);
     }
 }

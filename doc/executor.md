@@ -60,3 +60,12 @@ expression-tree的执行方式, 会带来大量递归调用,虚函数调用等�
 
 executor的codegen还没想好咋搞...
 ```
+
+##### whole stage codegen
+```
+for row : input {
+    Row input1 = exec1.doExecute(row)
+    Row input2 = exec2.doExecute(input1)
+    Row input3 = exec3.doExecute(input2)
+}
+```

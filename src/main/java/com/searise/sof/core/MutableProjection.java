@@ -1,6 +1,6 @@
 package com.searise.sof.core;
 
-import com.searise.sof.codegen.CodeGenerator;
+import com.searise.sof.codegen.expr.CodeGenerator;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.InternalRowWriter;
 import com.searise.sof.expression.Expression;

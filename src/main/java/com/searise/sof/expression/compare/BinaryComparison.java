@@ -1,9 +1,9 @@
 package com.searise.sof.expression.compare;
 
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.codegen.CodeGenerator;
-import com.searise.sof.codegen.CodegenContext;
-import com.searise.sof.codegen.ExprCode;
+import com.searise.sof.codegen.expr.CodeGenerator;
+import com.searise.sof.codegen.expr.CodegenContext;
+import com.searise.sof.codegen.expr.ExprCode;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.Binary;
@@ -65,7 +65,10 @@ public abstract class BinaryComparison extends Binary {
                 return super.doGenCode(codegenContext);
             case StringType:
             case BooleanType:
-                //遇到StringType和BooleanType就替换codegen的children.
+                // 遇到StringType和BooleanType就替换codegen的children.
+                // boolean和string的compare没办法直接用BinaryComparison的op.
+                // 如true > false.
+                // 这里为了方便,就只codegen children.
                 return withCodegenChildren(codegenContext);
             default:
                 throw new SofException(String.format("unsupported dataType[%s] in %s", dataType(), getClass().getSimpleName()));

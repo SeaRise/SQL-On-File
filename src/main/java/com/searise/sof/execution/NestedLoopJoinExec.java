@@ -1,5 +1,7 @@
 package com.searise.sof.execution;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Predication;
 import com.searise.sof.core.Projection;
@@ -11,6 +13,7 @@ import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 
@@ -29,6 +32,14 @@ public class NestedLoopJoinExec implements Executor {
         InternalRow output = new ArrayRow(schema.size());
         this.predication = new Predication(conditions, context);
         this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output, context);
+    }
+
+    private NestedLoopJoinExec(Executor stream, Executor build, Predication predication, Projection schemaProjection, Context context) {
+        this.stream = stream;
+        this.build = build;
+        this.predication = predication;
+        this.schemaProjection = schemaProjection;
+        this.context = context;
     }
 
     @Override
@@ -88,5 +99,16 @@ public class NestedLoopJoinExec implements Executor {
     public void close() {
         stream.close();
         build.close();
+    }
+
+    @Override
+    public List<Executor> children() {
+        return ImmutableList.of(stream, build);
+    }
+
+    @Override
+    public Executor copyWithNewChildren(List<Executor> children) {
+        Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
+        return new NestedLoopJoinExec(stream, build, predication, schemaProjection, context);
     }
 }

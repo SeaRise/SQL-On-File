@@ -15,6 +15,9 @@ public class Conf {
     public static final String CODEGEN_EXPRESSION = "sof_codegen_expression";
     public static final String CODEGEN_EXPRESSION_DEFAULT_VALUE = "true";
 
+    public static final String CODEGEN_EXECUTOR = "sof_codegen_executor";
+    public static final String CODEGEN_EXECUTOR_DEFAULT_VALUE = "true";
+
     public static final String WRITE_FLUSH_THRESHOLD = "sof_write_flush_threshold";
     public static final String WRITE_FLUSH_THRESHOLD_DEFAULT_VALUE = "100"; // 1000 bytes.
 
@@ -22,6 +25,7 @@ public class Conf {
         setConf(FORCE_JOIN_TYPE, FORCE_JOIN_TYPE_DEFAULT_VALUE);
         setConf(AUTO_HASH_JOIN_THRESHOLD, AUTO_HASH_JOIN_THRESHOLD_DEFAULT_VALUE);
         setConf(CODEGEN_EXPRESSION, CODEGEN_EXPRESSION_DEFAULT_VALUE);
+        setConf(CODEGEN_EXECUTOR, CODEGEN_EXECUTOR_DEFAULT_VALUE);
         setConf(WRITE_FLUSH_THRESHOLD, WRITE_FLUSH_THRESHOLD_DEFAULT_VALUE);
     }
 

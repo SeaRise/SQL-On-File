@@ -1,6 +1,8 @@
 package com.searise.sof.codegen;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.codegen.expr.CodeGenerator;
+import com.searise.sof.codegen.expr.CodegenContext;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.InternalRowWriter;
