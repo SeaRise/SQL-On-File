@@ -6,7 +6,7 @@
 	- 失败重试?
 - shuffle
 	- map文件分配?hash?
-	- reduce的数目如何确定?
+	- reduce的数目如何确定?conf.numShufflePartitions
 - dag_schedule
     - 把physical plan划分为多个stage, 不同stage之间用shuffle来划分(join)
     - 每一个stage会有getSplits()方法获取splits.每一个split和一个task对应, split就是task的输入.

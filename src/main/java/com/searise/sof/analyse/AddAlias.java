@@ -13,7 +13,7 @@ import java.util.List;
 import static com.searise.sof.analyse.AnalysisHelper.isEqualTo;
 
 // 给project所有的func加上alias,用于后面resolve index.
-public class AddAlias implements Rule {
+public class AddAlias implements Rule<LogicalPlan> {
     private final AddAliasApplicable addAliasApplicable = new AddAliasApplicable();
 
     @Override

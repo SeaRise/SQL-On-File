@@ -17,7 +17,7 @@ import static com.searise.sof.analyse.AnalysisHelper.isEqualTo;
 import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 import static com.searise.sof.expression.Expression.getBooleanLiteralValue;
 
-public class FoldExpression implements Rule {
+public class FoldExpression implements Rule<LogicalPlan> {
     @Override
     public LogicalPlan apply(LogicalPlan plan) {
         return plan.transformUp((Applicable<LogicalPlan>) p -> {

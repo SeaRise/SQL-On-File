@@ -18,7 +18,7 @@ import java.util.Optional;
 
 import static com.searise.sof.analyse.AnalysisHelper.isEqualTo;
 
-public class ResolveAttribute implements Rule {
+public class ResolveAttribute implements Rule<LogicalPlan> {
     @Override
     public LogicalPlan apply(LogicalPlan plan) {
         return plan.transformUp((Applicable<LogicalPlan>) p -> {

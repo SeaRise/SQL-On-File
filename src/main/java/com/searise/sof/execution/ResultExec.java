@@ -73,4 +73,9 @@ public class ResultExec implements Executor {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 1);
         return new ResultExec(child, context);
     }
+
+    @Override
+    public void bindPartition(int partition) {
+        child.bindPartition(partition);
+    }
 }

@@ -3,6 +3,7 @@ package com.searise.sof.optimize;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
+import com.searise.sof.optimize.afterprocess.AddExchange;
 import com.searise.sof.optimize.implementation.ImplementationRule;
 import com.searise.sof.optimize.iter.Iterator;
 import com.searise.sof.optimize.preprocess.PreprocessRule;
@@ -142,11 +143,10 @@ public class Optimizer {
         });
     }
 
-
     private PhysicalPlan onPhaseAfterprocessing(PhysicalPlan physicalPlan) {
         physicalPlan.prune(ImmutableList.of(), true);
         physicalPlan.resolveIndex();
         physicalPlan.removeAlias();
-        return physicalPlan;
+        return new AddExchange().apply(physicalPlan);
     }
 }

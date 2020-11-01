@@ -7,7 +7,7 @@ import com.searise.sof.plan.QueryPlan;
 
 import java.util.List;
 
-public interface LogicalPlan extends QueryPlan<LogicalPlan>, AnalysisHelper<LogicalPlan> {
+public interface LogicalPlan extends QueryPlan<LogicalPlan> {
     default List<Attribute> schema() {
         return ImmutableList.of();
     }

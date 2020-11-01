@@ -1,5 +1,6 @@
 package com.searise.sof.plan.physics;
 
+import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.BoundReference;
 import com.searise.sof.optimize.afterprocess.ReferenceResolveHelper;
 import com.searise.sof.optimize.afterprocess.RemoveAliasHelper;
@@ -20,5 +21,20 @@ public interface PhysicalPlan extends QueryPlan<PhysicalPlan>, ReferenceResolveH
         for (PhysicalPlan child : children()) {
             child.removeAlias();
         }
+    }
+
+    default int partitions() {
+        if (children().isEmpty()) {
+            return 0;
+        }
+
+        int partitions = children().get(0).partitions();
+        for (int i = 1; i < children().size(); i++) {
+            int childPartitions = children().get(i).partitions();
+            Utils.checkArgument(partitions != childPartitions,
+                    String.format("children(0).partitions(%s) != children(%s).partitions(%s)",
+                            partitions, i, childPartitions));
+        }
+        return partitions;
     }
 }

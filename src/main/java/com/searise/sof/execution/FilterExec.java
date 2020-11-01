@@ -42,6 +42,11 @@ public class FilterExec extends Codegen implements Executor {
     }
 
     @Override
+    public void bindPartition(int partition) {
+        child.bindPartition(partition);
+    }
+
+    @Override
     public void open() {
         child.open();
     }

@@ -144,4 +144,9 @@ public class ScanExec implements Executor {
             fileReader.close();
         }
     }
+
+    @Override
+    public void bindPartition(int partition) {
+        // todo bindPartition
+    }
 }

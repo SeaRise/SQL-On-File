@@ -5,7 +5,7 @@ import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.logic.Relation;
 import com.searise.sof.plan.logic.UnresolvedRelation;
 
-public class ResolveRelation implements Rule {
+public class ResolveRelation implements Rule<LogicalPlan> {
     private final Catalog catalog;
 
     public ResolveRelation(Catalog catalog) {

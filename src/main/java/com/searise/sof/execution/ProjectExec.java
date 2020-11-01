@@ -99,4 +99,9 @@ public class ProjectExec extends Codegen implements Executor {
         builder.addAll(t2);
         return builder.build();
     }
+
+    @Override
+    public void bindPartition(int partition) {
+        child.bindPartition(partition);
+    }
 }

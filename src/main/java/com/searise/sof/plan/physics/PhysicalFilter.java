@@ -1,5 +1,6 @@
 package com.searise.sof.plan.physics;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
@@ -10,6 +11,7 @@ import com.searise.sof.optimize.afterprocess.SchemaPruneHelper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class PhysicalFilter implements PhysicalPlan {
@@ -58,5 +60,11 @@ public class PhysicalFilter implements PhysicalPlan {
     public void prune(List<BoundReference> father, boolean isTop) {
         schema = isTop ? SchemaPruneHelper.copy(schema) : SchemaPruneHelper.copy(father);
         child.prune(Utils.combineDistinct(SchemaPruneHelper.extractUseSchema(conditions), schema), false);
+    }
+
+    @Override
+    public PhysicalFilter copyWithNewChildren(List<PhysicalPlan> children) {
+        Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 1);
+        return new PhysicalFilter(schema, conditions, children.get(0), context);
     }
 }

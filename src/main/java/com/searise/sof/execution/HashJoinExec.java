@@ -151,4 +151,10 @@ public class HashJoinExec implements Executor {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
         return new HashJoinExec(stream, build, predication, schemaProjection, streamKeyProjection, buildKeyProjection, context);
     }
+
+    @Override
+    public void bindPartition(int partition) {
+        build.bindPartition(partition);
+        stream.bindPartition(partition);
+    }
 }
