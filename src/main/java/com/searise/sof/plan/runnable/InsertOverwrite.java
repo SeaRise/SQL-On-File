@@ -10,6 +10,7 @@ import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.execution.Executor;
+import com.searise.sof.execution.RowIterator;
 import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
@@ -73,16 +74,17 @@ public class InsertOverwrite implements LogicalPlan, RunnableCommand {
         Executor queryExec = compileQuery(target, resolvedQuery);
         File tmpFile = genTmpFile(target);
 
-        queryExec.open();
-        while (queryExec.hasNext()) {
-            InternalRow row = queryExec.next();
+        RowIterator rowIterator = queryExec.compute(0);
+        rowIterator.open();
+        while (rowIterator.hasNext()) {
+            InternalRow row = rowIterator.next();
             if (row == EMPTY_ROW) {
                 continue;
             }
 
             appendOrFlush(target, tmpFile, row);
         }
-        queryExec.close();
+        rowIterator.close();
         flush(tmpFile);
 
         moveFile(tmpFile, target);

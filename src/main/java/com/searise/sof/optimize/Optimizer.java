@@ -147,6 +147,7 @@ public class Optimizer {
         physicalPlan.prune(ImmutableList.of(), true);
         physicalPlan.resolveIndex();
         physicalPlan.removeAlias();
-        return new AddExchange().apply(physicalPlan);
+//        return new AddExchange().apply(physicalPlan);
+        return physicalPlan;
     }
 }

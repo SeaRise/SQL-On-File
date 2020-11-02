@@ -20,85 +20,89 @@ import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 public class NestedLoopJoinExec implements Executor {
     private final Executor stream;
     private final Executor build;
-    private final Predication predication;
-    private final Projection schemaProjection;
-    private InternalRow streamRow = EMPTY_ROW;
+    public final List<Expression> conditions;
+    public final List<BoundReference> schema;
     public final Context context;
 
     public NestedLoopJoinExec(Executor stream, Executor build, List<Expression> conditions, List<BoundReference> schema, Context context) {
         this.stream = stream;
         this.build = build;
-        this.context = context;
-        InternalRow output = new ArrayRow(schema.size());
-        this.predication = new Predication(conditions, context);
-        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output, context);
-    }
-
-    private NestedLoopJoinExec(Executor stream, Executor build, Predication predication, Projection schemaProjection, Context context) {
-        this.stream = stream;
-        this.build = build;
-        this.predication = predication;
-        this.schemaProjection = schemaProjection;
+        this.conditions = conditions;
+        this.schema = schema;
         this.context = context;
     }
 
     @Override
-    public void open() {
-        stream.open();
-        build.open();
-        while (stream.hasNext()) {
-            streamRow = stream.next();
-            if (streamRow != EMPTY_ROW) {
-                return;
-            }
-        }
-    }
+    public RowIterator compute(int partition) {
+        RowIterator streamRowIterator = stream.compute(partition);
+        RowIterator buildRowIterator = build.compute(partition);
 
-    @Override
-    public boolean hasNext() {
-        return streamRow != EMPTY_ROW;
-    }
+        return new RowIterator() {
+            private Predication predication = new Predication(conditions, context);
+            private Projection schemaProjection = new Projection(
+                    Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)),
+                    new ArrayRow(schema.size()), context);
+            private InternalRow streamRow = EMPTY_ROW;
 
-    @Override
-    public InternalRow next() {
-        if (streamRow == EMPTY_ROW) {
-            return EMPTY_ROW;
-        }
-
-        if (!build.hasNext()) {
-            while (stream.hasNext()) {
-                streamRow = stream.next();
-                if (streamRow == EMPTY_ROW) {
-                    continue;
+            @Override
+            public void open() {
+                streamRowIterator.open();
+                buildRowIterator.open();
+                while (streamRowIterator.hasNext()) {
+                    streamRow = streamRowIterator.next();
+                    if (streamRow != EMPTY_ROW) {
+                        return;
+                    }
                 }
-                // reset build
-                build.close();
-                build.open();
-                return next();
             }
-            streamRow = EMPTY_ROW;
-            return EMPTY_ROW;
-        }
 
-        InternalRow buildRow = build.next();
-        while (buildRow == EMPTY_ROW && build.hasNext()) {
-            buildRow = build.next();
-        }
-        if (buildRow == EMPTY_ROW) {
-            return EMPTY_ROW;
-        }
+            @Override
+            public boolean hasNext() {
+                return streamRow != EMPTY_ROW;
+            }
 
-        JoinRow joinRow = new JoinRow(streamRow, buildRow);
-        if (!predication.apply(joinRow)) {
-            return EMPTY_ROW;
-        }
-        return schemaProjection.apply(joinRow);
-    }
+            @Override
+            public InternalRow next() {
+                if (streamRow == EMPTY_ROW) {
+                    return EMPTY_ROW;
+                }
 
-    @Override
-    public void close() {
-        stream.close();
-        build.close();
+                if (!buildRowIterator.hasNext()) {
+                    while (streamRowIterator.hasNext()) {
+                        streamRow = streamRowIterator.next();
+                        if (streamRow == EMPTY_ROW) {
+                            continue;
+                        }
+                        // reset build
+                        buildRowIterator.close();
+                        buildRowIterator.open();
+                        return next();
+                    }
+                    streamRow = EMPTY_ROW;
+                    return EMPTY_ROW;
+                }
+
+                InternalRow buildRow = buildRowIterator.next();
+                while (buildRow == EMPTY_ROW && buildRowIterator.hasNext()) {
+                    buildRow = buildRowIterator.next();
+                }
+                if (buildRow == EMPTY_ROW) {
+                    return EMPTY_ROW;
+                }
+
+                JoinRow joinRow = new JoinRow(streamRow, buildRow);
+                if (!predication.apply(joinRow)) {
+                    return EMPTY_ROW;
+                }
+                return schemaProjection.apply(joinRow);
+            }
+
+            @Override
+            public void close() {
+                streamRowIterator.close();
+                buildRowIterator.close();
+            }
+        };
     }
 
     @Override
@@ -109,12 +113,6 @@ public class NestedLoopJoinExec implements Executor {
     @Override
     public Executor copyWithNewChildren(List<Executor> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
-        return new NestedLoopJoinExec(stream, build, predication, schemaProjection, context);
-    }
-
-    @Override
-    public void bindPartition(int partition) {
-        build.bindPartition(partition);
-        stream.bindPartition(partition);
+        return new NestedLoopJoinExec(stream, build, conditions, schema, context);
     }
 }

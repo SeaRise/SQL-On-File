@@ -153,8 +153,9 @@ public class ExecutorSuite {
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
         Executor executor = new Builder(context).build(physicalPlan);
         TestExecutor testExecutor = new TestExecutor(executor, context);
-        testExecutor.open();
-        testExecutor.close();
+        RowIterator rowIterator = testExecutor.compute(0);
+        rowIterator.open();
+        rowIterator.close();
         String result = StringUtils.trim(testExecutor.result());
         Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
     }

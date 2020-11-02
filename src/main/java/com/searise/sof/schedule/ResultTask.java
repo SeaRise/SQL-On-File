@@ -1,22 +1,28 @@
 package com.searise.sof.schedule;
 
-import com.searise.sof.execution.Executor;
+import com.searise.sof.core.row.InternalRow;
+import com.searise.sof.execution.RowIterator;
 import com.searise.sof.schedule.dag.ResultHandle;
+
+import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 
 public class ResultTask extends Task {
     private final ResultHandle resultHandle;
 
-    public ResultTask(int stageId, int partition, Executor executor, ResultHandle resultHandle) {
-        super(stageId, partition, executor);
+    public ResultTask(int stageId, int partition, RowIterator rowIterator, ResultHandle resultHandle) {
+        super(stageId, partition, rowIterator);
         this.resultHandle = resultHandle;
     }
 
     @Override
     public void runTask() {
-        executor.open();
-        while (executor.hasNext()) {
-            resultHandle.handle(executor.next());
+        rowIterator.open();
+        while (rowIterator.hasNext()) {
+            InternalRow row = rowIterator.next();
+            if (row != EMPTY_ROW) {
+                resultHandle.handle(row);
+            }
         }
-        executor.close();
+        rowIterator.close();
     }
 }

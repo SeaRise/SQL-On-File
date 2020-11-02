@@ -5,7 +5,9 @@ import com.google.common.collect.ImmutableList;
 import com.searise.sof.codegen.exec.Codegen;
 import com.searise.sof.codegen.exec.CodegenContext;
 import com.searise.sof.codegen.exec.ExecCode;
+import com.searise.sof.codegen.exec.ParamGenerator;
 import com.searise.sof.core.Context;
+import com.searise.sof.core.Predication;
 import com.searise.sof.core.Projection;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.ArrayRow;
@@ -21,46 +23,49 @@ import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 public class ProjectExec extends Codegen implements Executor {
 
     private final Executor child;
-    private final Projection projection;
+    private final List<Expression> projectList;
+    private final List<BoundReference> schema;
     public final Context context;
 
     public ProjectExec(Executor child, List<Expression> projectList, List<BoundReference> schema, Context context) {
         this.context = context;
         Utils.checkArgument(projectList.size() == schema.size(), "projectList.size must equal to schema.size");
         this.child = child;
-        InternalRow output = new ArrayRow(schema.size());
-        projection = new Projection(projectList, output, context);
-    }
-
-    private ProjectExec(Executor child, Projection projection, Context context) {
-        this.child = child;
-        this.projection = projection;
-        this.context = context;
+        this.projectList = projectList;
+        this.schema = schema;
     }
 
     @Override
-    public void open() {
-        child.open();
-    }
+    public RowIterator compute(int partition) {
+        RowIterator childRowIterator = child.compute(partition);
+        return new RowIterator() {
+            private final Projection projection = new Projection(projectList, new ArrayRow(schema.size()), context);
 
-    @Override
-    public boolean hasNext() {
-        return child.hasNext();
-    }
+            @Override
+            public void open() {
+                childRowIterator.open();
+            }
 
-    @Override
-    public InternalRow next() {
-        InternalRow input = child.next();
-        if (input == EMPTY_ROW) {
-            return EMPTY_ROW;
-        }
+            @Override
+            public boolean hasNext() {
+                return childRowIterator.hasNext();
+            }
 
-        return projection.apply(input);
-    }
+            @Override
+            public InternalRow next() {
+                InternalRow input = childRowIterator.next();
+                if (input == EMPTY_ROW) {
+                    return EMPTY_ROW;
+                }
 
-    @Override
-    public void close() {
-        child.close();
+                return projection.apply(input);
+            }
+
+            @Override
+            public void close() {
+                childRowIterator.close();
+            }
+        };
     }
 
     @Override
@@ -71,14 +76,26 @@ public class ProjectExec extends Codegen implements Executor {
     @Override
     public Executor copyWithNewChildren(List<Executor> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 1);
-        return new ProjectExec(child, projection, context);
+        return new ProjectExec(child, projectList, schema, context);
     }
 
     @Override
     public ExecCode genCode(CodegenContext context, ExecCode child) {
-        List<Object> params = combine(projection, child.params);
-        List<String> paramNames = combine(context.genVar(variablePrefix, "projection"), child.paramNames);
-        List<Class> paramClasses = combine(Projection.class, child.paramClasses);
+        List<ParamGenerator> paramGenerators = combine(new ParamGenerator() {
+            private final String name = context.genVar(variablePrefix, "projection");
+            @Override
+            public String name() {
+                return name;
+            }
+            @Override
+            public Class clazz() {
+                return Projection.class;
+            }
+            @Override
+            public Object gen() {
+                return new Projection(projectList, new ArrayRow(schema.size()), ProjectExec.this.context);
+            }
+        }, child.paramGenerators);
 
         String input = child.output;
         String output = context.genVar(variablePrefix, "output");
@@ -90,7 +107,7 @@ public class ProjectExec extends Codegen implements Executor {
                 "%s = projection.apply(%s)\n";
         String code = String.format(codeTemplate, input, output, input);
 
-        return new ExecCode(code, output, params, paramNames, paramClasses, child.paramClasses);
+        return new ExecCode(code, output, paramGenerators, child.importClasses);
     }
 
     private static <T> List<T> combine(T t1, List<T> t2) {
@@ -98,10 +115,5 @@ public class ProjectExec extends Codegen implements Executor {
         builder.add(t1);
         builder.addAll(t2);
         return builder.build();
-    }
-
-    @Override
-    public void bindPartition(int partition) {
-        child.bindPartition(partition);
     }
 }

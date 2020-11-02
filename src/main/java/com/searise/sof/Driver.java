@@ -8,6 +8,7 @@ import com.searise.sof.core.Utils;
 import com.searise.sof.execution.Builder;
 import com.searise.sof.execution.Executor;
 import com.searise.sof.execution.ResultExec;
+import com.searise.sof.execution.RowIterator;
 import com.searise.sof.optimize.Optimizer;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
@@ -49,8 +50,9 @@ public class Driver {
             executor = new ResultExec(executor, context);
         }
 
-        executor.open();
-        executor.close();
+        RowIterator rowIterator = executor.compute(0);
+        rowIterator.open();
+        rowIterator.close();
         Utils.println("ok");
         Utils.println(((ResultExec) executor).result());
     }

@@ -4,24 +4,14 @@ import com.searise.sof.core.row.InternalRow;
 
 import java.util.Iterator;
 
-import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
-
-public class RowIterator implements Iterator<InternalRow> {
-    public void open() {
-
-    }
+public interface RowIterator extends Iterator<InternalRow> {
+    void open();
 
     @Override
-    public boolean hasNext() {
-        return false;
-    }
+    boolean hasNext();
 
     @Override
-    public InternalRow next() {
-        return EMPTY_ROW;
-    }
+    InternalRow next();
 
-    public void close() {
-
-    }
+    void close();
 }

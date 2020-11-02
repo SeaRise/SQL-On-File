@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.SofException;
+import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.InternalRowWriter;
@@ -19,63 +20,74 @@ import java.util.List;
 import java.util.Objects;
 
 public class ScanExec implements Executor {
-
     private final List<BoundReference> schema;
     private final String filePath;
     private final String separator;
-    private FileLineReader fileLineReader;
-    private String curLine;
-    private final InternalRow output;
-    private final List<InternalRowWriter> writers;
     public final Context context;
 
     public ScanExec(List<BoundReference> schema, String filePath, String separator, Context context) {
         this.schema = schema;
         this.filePath = filePath;
         this.separator = separator;
-        this.output = new ArrayRow(schema.size());
         this.context = context;
-        ImmutableList.Builder<InternalRowWriter> writerBuilder = ImmutableList.builder();
-        for (int index = 0; index < schema.size(); index++) {
-            writerBuilder.add(InternalRow.getWriter(index, schema.get(index).dataType));
-        }
-        this.writers = writerBuilder.build();
     }
 
     @Override
-    public void open() {
-        try {
-            this.fileLineReader = new FileLineReader(filePath);
-            curLine = fileLineReader.readLine();
-        } catch (FileNotFoundException e) {
-            throw new SofException(String.format("ScanExec can not open file: %s", filePath));
-        }
+    public RowIterator compute(int partition) {
+        return new RowIterator() {
+            private FileLineReader fileLineReader;
+            private String curLine;
+            private final InternalRow output = new ArrayRow(schema.size());
+            private final List<InternalRowWriter> writers = Utils.toImmutableList(
+                    Utils.zip(schema).stream().map(pair -> InternalRow.getWriter(pair.getLeft(), pair.getRight().dataType)));
+
+            @Override
+            public void open() {
+                try {
+                    this.fileLineReader = new FileLineReader(filePath);
+                    curLine = fileLineReader.readLine();
+                } catch (FileNotFoundException e) {
+                    throw new SofException(String.format("ScanExec can not open file: %s", filePath));
+                }
+            }
+
+            @Override
+            public boolean hasNext() {
+                return StringUtils.isNotBlank(curLine);
+            }
+
+            @Override
+            public InternalRow next() {
+                String[] splits = StringUtils.split(curLine, separator);
+                if (Objects.isNull(splits) || splits.length < schema.size()) {
+                    throwFileFormatException(curLine);
+                }
+
+                for (int index = 0; index < schema.size(); index++) {
+                    BoundReference reference = schema.get(index);
+                    String str = getString(splits, reference.index(), curLine);
+                    writers.get(index).apply(output, convertDataType(str, reference.dataType));
+                }
+
+                curLine = fileLineReader.readLine();
+                return output;
+            }
+
+            @Override
+            public void close() {
+                if (Objects.nonNull(fileLineReader)) {
+                    try {
+                        fileLineReader.close();
+                    } catch (IOException e) {
+                        throw new SofException(e.getMessage());
+                    }
+                }
+            }
+        };
     }
 
-    @Override
-    public boolean hasNext() {
-        return StringUtils.isNotBlank(curLine);
-    }
-
-    private void throwFileFormatException() {
-        throw new SofException(String.format("file line format is illegal: %s", curLine));
-    }
-
-    @Override
-    public InternalRow next() {
-        String[] splits = StringUtils.split(curLine, separator);
-        if (Objects.isNull(splits) || splits.length < schema.size()) {
-            throwFileFormatException();
-        }
-
-        for (int index = 0; index < schema.size(); index++) {
-            BoundReference reference = schema.get(index);
-            String str = getString(splits, reference.index());
-            writers.get(index).apply(output, convertDataType(str, reference.dataType));
-        }
-
-        curLine = fileLineReader.readLine();
-        return output;
+    private void throwFileFormatException(String line) {
+        throw new SofException(String.format("file line format is illegal: %s", line));
     }
 
     private Object convertDataType(String str, DataType dataType) {
@@ -93,22 +105,11 @@ public class ScanExec implements Executor {
         }
     }
 
-    private String getString(String[] splits, int index) {
+    private String getString(String[] splits, int index, String line) {
         if (splits.length <= index) {
-            throwFileFormatException();
+            throwFileFormatException(line);
         }
         return splits[index];
-    }
-
-    @Override
-    public void close() {
-        if (Objects.nonNull(fileLineReader)) {
-            try {
-                fileLineReader.close();
-            } catch (IOException e) {
-                throw new SofException(e.getMessage());
-            }
-        }
     }
 
     @Override
@@ -143,10 +144,5 @@ public class ScanExec implements Executor {
             bufferedReader.close();
             fileReader.close();
         }
-    }
-
-    @Override
-    public void bindPartition(int partition) {
-        // todo bindPartition
     }
 }
