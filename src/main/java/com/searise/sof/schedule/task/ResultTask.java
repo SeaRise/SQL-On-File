@@ -1,4 +1,4 @@
-package com.searise.sof.schedule;
+package com.searise.sof.schedule.task;
 
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.execution.RowIterator;
@@ -9,7 +9,7 @@ import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 public class ResultTask extends Task {
     private final ResultHandle resultHandle;
 
-    public ResultTask(int stageId, int partition, RowIterator rowIterator, ResultHandle resultHandle) {
+    public ResultTask(long stageId, int partition, RowIterator rowIterator, ResultHandle resultHandle) {
         super(stageId, partition, rowIterator);
         this.resultHandle = resultHandle;
     }

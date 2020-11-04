@@ -52,4 +52,9 @@ public class PhysicalScan implements PhysicalPlan {
     public Context context() {
         return context;
     }
+
+    @Override
+    public int partitions() {
+        return 1;
+    }
 }

@@ -2,7 +2,6 @@ package com.searise.sof.schedule.task;
 
 import com.searise.sof.core.Conf;
 import com.searise.sof.core.Context;
-import com.searise.sof.schedule.Task;
 
 import java.util.LinkedList;
 import java.util.Objects;
@@ -85,7 +84,7 @@ public class TaskExecutor {
             doRun(task);
 
             // reUseCurThread().ifPresent(task1 -> newRunnable(task1).run());
-            // 会造成oom, 因为因为jvm没有尾递归优化, 方法栈会一直增长.
+            // 会造成oom, 因为jvm没有尾递归优化, 方法栈会一直增长.
             Optional<Task> next = reUseCurThread();
             while (next.isPresent()) {
                 doRun(next.get());
@@ -97,9 +96,9 @@ public class TaskExecutor {
     private void doRun(Task task) {
         try {
             task.runTask();
-            taskScheduler.statusUpdate();
-        } catch (Exception e) {
-            taskScheduler.statusUpdate();
+            taskScheduler.statusUpdate(TaskResult.success(task.stageId, task.partition));
+        } catch (Throwable e) {
+            taskScheduler.statusUpdate(TaskResult.fail(e, task.stageId, task.partition));
         } finally {
             synchronized (this) {
                 runningNum--;

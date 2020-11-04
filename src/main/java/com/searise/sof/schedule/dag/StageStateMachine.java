@@ -1,18 +1,21 @@
 package com.searise.sof.schedule.dag;
 
 import com.searise.sof.core.Utils;
-import com.searise.sof.schedule.stage.Stage;
+import com.searise.sof.schedule.dag.stage.Stage;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class StageStateMachine {
     private Map<Long, Stage> stageIdToStage = new HashMap<>();
     private Set<Long> waitingStageIds = new HashSet<>();
     private Set<Long> runningStageIds = new HashSet<>();
     private Set<Long> completeStageIds = new HashSet<>();
+
+    public List<Stage> getByParentStageId(long parentStageId) {
+        return Utils.toImmutableList(stageIdToStage.entrySet().stream().
+                filter(p -> p.getValue().parentStageIds.contains(parentStageId)).
+                map(Map.Entry::getValue));
+    }
 
     public void addStage(Stage stage) {
         Utils.checkArgument(!stageIdToStage.containsKey(stage.stageId),
