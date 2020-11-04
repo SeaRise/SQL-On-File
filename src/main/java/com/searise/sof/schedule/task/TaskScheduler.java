@@ -30,4 +30,8 @@ public class TaskScheduler {
     public void stop() {
         taskExecutor.stop();
     }
+
+    public void clear() {
+        taskExecutor.clear();
+    }
 }

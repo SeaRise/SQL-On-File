@@ -15,7 +15,7 @@ public class ShuffleMapTask extends Task {
     }
 
     @Override
-    public void runTask() {
+    public void runTask() throws Exception {
         rowIterator.open();
         while (rowIterator.hasNext()) {
             InternalRow row = rowIterator.next();

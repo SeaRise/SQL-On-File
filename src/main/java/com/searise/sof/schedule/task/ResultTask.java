@@ -4,6 +4,8 @@ import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.execution.RowIterator;
 import com.searise.sof.schedule.dag.ResultHandle;
 
+import java.util.Iterator;
+
 import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 
 public class ResultTask extends Task {
@@ -15,14 +17,21 @@ public class ResultTask extends Task {
     }
 
     @Override
-    public void runTask() {
-        rowIterator.open();
-        while (rowIterator.hasNext()) {
-            InternalRow row = rowIterator.next();
-            if (row != EMPTY_ROW) {
-                resultHandle.handle(row);
+    public void runTask() throws Exception {
+        resultHandle.handle(partition, new Iterator<InternalRow>() {
+            private InternalRow row = EMPTY_ROW;
+            @Override
+            public boolean hasNext() {
+                while (rowIterator.hasNext() && row == EMPTY_ROW) {
+                    row = rowIterator.next();
+                }
+                return row != EMPTY_ROW;
             }
-        }
+            @Override
+            public InternalRow next() {
+                return row;
+            }
+        });
         rowIterator.close();
     }
 }

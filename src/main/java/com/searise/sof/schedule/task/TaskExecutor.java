@@ -110,4 +110,10 @@ public class TaskExecutor {
         pendingQueue.clear();
         executor.shutdownNow();
     }
+
+    public synchronized void clear() {
+        pendingQueue.clear();
+        executor.shutdownNow();
+        executor = Executors.newCachedThreadPool();
+    }
 }

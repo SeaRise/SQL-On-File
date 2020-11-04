@@ -5,15 +5,15 @@ import com.searise.sof.catalog.BuiltInCatalog;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
+import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.execution.Builder;
-import com.searise.sof.execution.Executor;
-import com.searise.sof.execution.ResultExec;
-import com.searise.sof.execution.RowIterator;
 import com.searise.sof.optimize.Optimizer;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
 import com.searise.sof.plan.runnable.RunnableCommand;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.searise.sof.optimize.Optimizer.newOptimizer;
 
@@ -41,19 +41,36 @@ public class Driver {
         }
         LogicalPlan analyzePlan = analyzer.analyse(parsePlan);
         PhysicalPlan physicalPlan = optimizer.optimize(analyzePlan);
-        Executor executor = builder.build(physicalPlan);
-        execute(executor);
+        execute(physicalPlan);
     }
 
-    private void execute(Executor executor) {
-        if (executor.getClass() != ResultExec.class) {
-            executor = new ResultExec(executor, context);
-        }
+    private void execute(PhysicalPlan plan) {
+        StringBuffer resultBuilder = new StringBuffer();
+        AtomicInteger totalRowCount = new AtomicInteger(0);
+        long start = System.currentTimeMillis();
 
-        RowIterator rowIterator = executor.compute(0);
-        rowIterator.open();
-        rowIterator.close();
+        context.runPlan(plan, (partition, iterator) -> {
+            StringBuilder partitionResultBuilder = new StringBuilder();
+            int rowCount = 0;
+            while (iterator.hasNext()) {
+                InternalRow row = iterator.next();
+                for (int index = 0; index < row.numFields() - 1; index++) {
+                    partitionResultBuilder.append(row.getValue(index)).append("\t");
+                }
+                partitionResultBuilder.append(row.getValue(row.numFields() - 1)).append("\n");
+                rowCount++;
+            }
+            totalRowCount.addAndGet(rowCount);
+            resultBuilder.append(partitionResultBuilder.toString());
+        });
+
+        long end = System.currentTimeMillis();
+        long useSecond = (end - start) / 1000;
+        resultBuilder.append("Time taken: ").append(useSecond).
+                append(" seconds, Fetched: ").append(totalRowCount.get()).
+                append(" row(s)");
+
         Utils.println("ok");
-        Utils.println(((ResultExec) executor).result());
+        Utils.println(resultBuilder.toString());
     }
 }

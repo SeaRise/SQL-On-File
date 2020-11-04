@@ -76,6 +76,9 @@ public class Builder {
             case "PhysicalScan":
                 PhysicalScan scan = (PhysicalScan) physicalPlan;
                 return new ScanExec(scan.schema, scan.filePath, scan.separator, context);
+            case "Exchange":
+                Exchange exchange = (Exchange) physicalPlan;
+                return new ExchangeExec(exchange.shuffleId, context);
             default:
                 throw new SofException(String.format("unsupported plan type `%s` in Builder", planType));
         }

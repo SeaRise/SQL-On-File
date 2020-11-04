@@ -22,57 +22,79 @@ import com.searise.sof.shuffle.MapOutputTracker;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 // Thread unsafe.
 // 一次只能跑一个plan.
 public class DagScheduler {
     private final TaskScheduler taskScheduler;
-    private long nextStageId = 0;
-    private StageStateMachine stageStateMachine = new StageStateMachine();
+    private final AtomicLong nextStageId = new AtomicLong(0L);
+    private final StageStateMachine stageStateMachine = new StageStateMachine();
     private final Builder builder;
 
     private final MapOutputTracker mapOutputTracker;
 
-    private CountDownLatch planLatch;
-    private ResultStage finalStage;
+    private volatile CountDownLatch planLatch;
+    private volatile ResultStage finalStage;
 
+    // 专门处理event的单线程.
     private final ExecutorService loopThread;
     private volatile boolean isRunning = true;
     private final BlockingDeque<Event> pendingQueue = new LinkedBlockingDeque<>();
 
+    private volatile PlanExecResult planExecResult = null;
+
     public DagScheduler(Context context) {
         this.taskScheduler = new TaskScheduler(context, this);
         builder = new Builder(context);
-        mapOutputTracker = new MapOutputTracker(context);
+        mapOutputTracker = context.mapOutputTracker;
 
         loopThread = Executors.newSingleThreadExecutor();
         loopThread.submit(() -> {
             while (isRunning) {
-                Event event;
                 try {
-                    event = Utils.checkNotNull(pendingQueue.take(), "taskResult is null");
-                } catch (Exception e) {
-                    continue;
-                }
-                if (event instanceof TaskStatusUpdate) {
-                    TaskStatusUpdate taskStatusUpdate = (TaskStatusUpdate) event;
-                    doStatusUpdate(taskStatusUpdate.taskResult);
-                } else if (event instanceof StageSubmit) {
-                    StageSubmit stageSubmit = (StageSubmit) event;
-                    submitStage(stageSubmit.stage);
-                } else {
-                    throw new SofException("unknown event: " + event.getClass().getSimpleName());
+                    Event event = Utils.checkNotNull(pendingQueue.take(), "taskResult is null");
+                    if (event instanceof TaskStatusUpdate) {
+                        TaskStatusUpdate taskStatusUpdate = (TaskStatusUpdate) event;
+                        doStatusUpdate(taskStatusUpdate.taskResult);
+                    } else if (event instanceof StageSubmit) {
+                        StageSubmit stageSubmit = (StageSubmit) event;
+                        submitStage(stageSubmit.stage);
+                    } else {
+                        throw new SofException("unknown event: " + event.getClass().getSimpleName());
+                    }
+                } catch (Throwable e) {
+                    planFail(e);
                 }
             }
         });
     }
 
-    public void runPlan(PhysicalPlan plan, ResultHandle resultHandle) throws InterruptedException {
-        planLatch = new CountDownLatch(1);
-        finalStage = createFinalStage(plan, resultHandle);
-        pendingQueue.add(new StageSubmit(finalStage));
-        planLatch.await();
-        reset();
+    private void planSuccess() {
+        clear();
+        planExecResult = PlanExecResult.success();
+        planLatch.countDown();
+    }
+
+    private void planFail(Throwable e) {
+        clear();
+        planExecResult = PlanExecResult.fail(e);
+        planLatch.countDown();
+    }
+
+    public void runPlan(PhysicalPlan plan, ResultHandle resultHandle) {
+        try {
+            planLatch = new CountDownLatch(1);
+            finalStage = createFinalStage(plan, resultHandle);
+            pendingQueue.add(new StageSubmit(finalStage));
+            planLatch.await();
+
+            Utils.checkNotNull(planExecResult, "planExecResult is null").execResult();
+
+            resetVolatile();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void statusUpdate(TaskResult taskResult) {
@@ -94,21 +116,32 @@ public class DagScheduler {
     }
 
     private void handleTaskSuccess(long stageId, int partition) {
+        // ShuffleMapTask会把结果写到mapOutputTracker里.
+        // 只有finalStage是ResultStage.
         if (stageId == finalStage.stageId) {
             finalStage.success(partition);
         }
 
         if (finalStage.isSuccess()) {
-            // plan success
-            planLatch.countDown();
+            planSuccess();
+            return;
         }
 
-        // doNext
-        submitNext(stageStateMachine.stage(stageId));
+        Stage stage = stageStateMachine.stage(stageId);
+        if (stage.getMissPartitions().isEmpty()) {
+            if (stage instanceof ShuffleMapStage) {
+                mapOutputTracker.removeShuffle(((ShuffleMapStage) stage).shuffleId);
+            }
+            // doNext
+            submitNext(stage);
+        }
     }
 
     private void handleTaskFail(long stageId, int partition, Throwable throwable) {
-
+        Exception e = new SofException(
+                String.format("plan fail because task(stageId: %s, partition: %s) fail",
+                        stageId, partition), throwable);
+        planFail(e);
     }
 
     private void submitMissingTasks(Stage stage) {
@@ -116,6 +149,7 @@ public class DagScheduler {
         if (partitionsToCompute.isEmpty()) {
             stageStateMachine.stateToComplete(stage.stageId);
             submitNext(stage);
+            return;
         }
 
         Executor executor =  builder.build(stage.plan);
@@ -190,19 +224,28 @@ public class DagScheduler {
     }
 
     private long nextStageId() {
-        return nextStageId++;
+        return nextStageId.getAndIncrement();
     }
 
     public void stop() {
         isRunning = false;
         loopThread.shutdownNow();
         taskScheduler.stop();
-        reset();
+        resetVolatile();
     }
 
-    private void reset() {
+    // thread unsafe
+    private void clear() {
+        taskScheduler.clear();
+        pendingQueue.clear();
         stageStateMachine.clear();
+        mapOutputTracker.clear();
+    }
+
+    private void resetVolatile() {
         planLatch = null;
         finalStage = null;
+        planExecResult = null;
+        nextStageId.set(0L);
     }
 }

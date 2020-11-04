@@ -13,5 +13,5 @@ public abstract class Task {
         this.rowIterator = rowIterator;
     }
 
-    public abstract void runTask();
+    public abstract void runTask() throws Exception;
 }

@@ -14,11 +14,13 @@ import com.searise.sof.execution.RowIterator;
 import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
+import com.searise.sof.schedule.dag.ResultHandle;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +30,6 @@ public class InsertOverwrite implements LogicalPlan, RunnableCommand {
     public final Context context;
     public final String targetTable;
     public final LogicalPlan query;
-    private final StringBuilder rowBuilder = new StringBuilder();
     private final int flushThreshold;
 
     public InsertOverwrite(Context context, String targetTable, LogicalPlan query) {
@@ -44,7 +45,7 @@ public class InsertOverwrite implements LogicalPlan, RunnableCommand {
     }
 
     @Override
-    public void run(Catalog catalog) throws IOException {
+    public void run(Catalog catalog) {
         CatalogTable target = catalog.getTable(targetTable);
         LogicalPlan resolvedQuery = resolve(target, query);
 
@@ -70,41 +71,34 @@ public class InsertOverwrite implements LogicalPlan, RunnableCommand {
         return resolvedQuery;
     }
 
-    void doRun(CatalogTable target, LogicalPlan resolvedQuery) throws IOException {
-        Executor queryExec = compileQuery(target, resolvedQuery);
-        File tmpFile = genTmpFile(target);
-
-        RowIterator rowIterator = queryExec.compute(0);
-        rowIterator.open();
-        while (rowIterator.hasNext()) {
-            InternalRow row = rowIterator.next();
-            if (row == EMPTY_ROW) {
-                continue;
+    void doRun(CatalogTable target, LogicalPlan resolvedQuery) {
+        PhysicalPlan physicalPlan = context.driver.optimizer.optimize(resolvedQuery);
+        context.runPlan(physicalPlan, (partition, iterator) -> {
+            File tmpFile = genTmpFile(target, partition);
+            StringBuilder rowBuilder = new StringBuilder();
+            while (iterator.hasNext()) {
+                appendOrFlush(rowBuilder, target, tmpFile, iterator.next());
             }
-
-            appendOrFlush(target, tmpFile, row);
-        }
-        rowIterator.close();
-        flush(tmpFile);
-
-        moveFile(tmpFile, target);
+            flush(rowBuilder, tmpFile);
+            moveFile(tmpFile, target);
+        });
     }
 
-    private void appendOrFlush(CatalogTable catalogTable, File file, InternalRow internalRow) throws IOException {
-        appendText(catalogTable, internalRow);
+    private void appendOrFlush(StringBuilder rowBuilder, CatalogTable catalogTable, File file, InternalRow internalRow) throws IOException {
+        appendText(rowBuilder, catalogTable, internalRow);
         if (rowBuilder.length() > flushThreshold) {
-            flush(file);
+            flush(rowBuilder, file);
         }
     }
 
-    private void appendText(CatalogTable target, InternalRow row) {
+    private void appendText(StringBuilder rowBuilder, CatalogTable target, InternalRow row) {
         for (int index = 0; index < row.numFields() - 1; index++) {
             rowBuilder.append(row.getValue(index)).append(target.separator);
         }
         rowBuilder.append(row.getValue(row.numFields()-1)).append("\n");
     }
 
-    private void flush(File file) throws IOException {
+    private void flush(StringBuilder rowBuilder, File file) throws IOException {
         FileUtils.writeStringToFile(file, rowBuilder.toString(), "utf-8", true);
         rowBuilder.setLength(0);
     }
@@ -120,7 +114,7 @@ public class InsertOverwrite implements LogicalPlan, RunnableCommand {
         Utils.println(String.format("overwrite %d bytes to %s", file.length(), file.getAbsolutePath()));
     }
 
-    private File genTmpFile(CatalogTable table) {
+    private File genTmpFile(CatalogTable table, int partition) {
         String[] splits = StringUtils.split(table.filePath, File.separatorChar);
 
         StringBuilder absoluteTmpFileNameBuilder = new StringBuilder();

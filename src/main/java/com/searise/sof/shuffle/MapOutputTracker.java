@@ -11,13 +11,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 // thread safe
 public class MapOutputTracker {
-    public final Context context;
-
     // shuffleId, MapStatus[]
     private final Map<Long, MapStatus[]> tracker = new ConcurrentHashMap<>();
 
-    public MapOutputTracker(Context context) {
-        this.context = context;
+    public MapOutputTracker() {
     }
 
     public void registerShuffle(long shuffleId, int mapNum) {
@@ -65,5 +62,9 @@ public class MapOutputTracker {
     private MapStatus[] getShuffle(long shuffleId) {
         return Utils.checkNotNull(tracker.get(shuffleId),
                 String.format("shuffle(%s) has not register!", shuffleId));
+    }
+
+    public void clear() {
+        tracker.clear();
     }
 }
