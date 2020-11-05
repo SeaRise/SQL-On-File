@@ -21,13 +21,13 @@ import java.util.Objects;
 
 public class ScanExec implements Executor {
     private final List<BoundReference> schema;
-    private final String filePath;
+    private final List<String> splits;
     private final String separator;
     public final Context context;
 
-    public ScanExec(List<BoundReference> schema, String filePath, String separator, Context context) {
+    public ScanExec(List<BoundReference> schema, List<String> splits, String separator, Context context) {
         this.schema = schema;
-        this.filePath = filePath;
+        this.splits = splits;
         this.separator = separator;
         this.context = context;
     }
@@ -43,11 +43,12 @@ public class ScanExec implements Executor {
 
             @Override
             public void open() {
+                String file = splits.get(partition);
                 try {
-                    this.fileLineReader = new FileLineReader(filePath);
+                    this.fileLineReader = new FileLineReader(file);
                     curLine = fileLineReader.readLine();
                 } catch (FileNotFoundException e) {
-                    throw new SofException(String.format("ScanExec can not open file: %s", filePath));
+                    throw new SofException(String.format("ScanExec can not open file: %s", file));
                 }
             }
 

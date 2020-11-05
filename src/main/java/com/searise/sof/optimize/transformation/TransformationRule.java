@@ -5,7 +5,10 @@ import com.google.common.collect.ImmutableMap;
 import com.searise.sof.optimize.GroupExpr;
 import com.searise.sof.optimize.Operand;
 import com.searise.sof.optimize.transformation.rule.*;
-import com.searise.sof.optimize.transformation.rule.join.*;
+import com.searise.sof.optimize.transformation.rule.join.GreedyJoinReorder;
+import com.searise.sof.optimize.transformation.rule.join.MergeJoinOneSideMultiJoin;
+import com.searise.sof.optimize.transformation.rule.join.MergeJoinTwoSideMultiJoin;
+import com.searise.sof.optimize.transformation.rule.join.TransformLeafJoinToMultiJoin;
 
 import java.util.List;
 import java.util.Map;

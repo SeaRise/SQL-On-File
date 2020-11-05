@@ -19,15 +19,15 @@ public class MapOutputTracker {
 
     public void registerShuffle(long shuffleId, int mapNum) {
         MapStatus[] mapStatuses = new MapStatus[mapNum];
-        if (mapStatuses != tracker.putIfAbsent(shuffleId, mapStatuses)) {
-            throw new SofException("shuffle(%s) has registered!");
+        if (Objects.nonNull(tracker.putIfAbsent(shuffleId, mapStatuses))) {
+            throw new SofException(String.format("shuffle(%s) has registered!", shuffleId));
         }
     }
 
     public void unregisterShuffle(long shuffleId) {
         MapStatus[] mapStatuses = removeShuffle(shuffleId);
         synchronized (mapStatuses) {
-            for (MapStatus mapStatus : getShuffle(shuffleId)) {
+            for (MapStatus mapStatus : mapStatuses) {
                 mapStatus.cleanUp();
             }
         }

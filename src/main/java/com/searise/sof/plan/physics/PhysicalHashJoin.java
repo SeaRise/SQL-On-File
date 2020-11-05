@@ -1,13 +1,10 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
-import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.expression.attribute.BoundReference;
-import com.searise.sof.expression.compare.EqualTo;
 import com.searise.sof.optimize.afterprocess.ReferenceResolveHelper;
 import com.searise.sof.optimize.afterprocess.SchemaPruneHelper;
 import org.apache.commons.lang3.tuple.Pair;

@@ -18,6 +18,7 @@ public class ResultTask extends Task {
 
     @Override
     public void runTask() throws Exception {
+        rowIterator.open();
         resultHandle.handle(partition, new Iterator<InternalRow>() {
             private InternalRow row = EMPTY_ROW;
             @Override
@@ -29,7 +30,9 @@ public class ResultTask extends Task {
             }
             @Override
             public InternalRow next() {
-                return row;
+                InternalRow cur = row;
+                row = EMPTY_ROW;
+                return cur;
             }
         });
         rowIterator.close();

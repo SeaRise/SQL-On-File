@@ -18,7 +18,11 @@ public interface QueryPlan<T extends QueryPlan> extends AnalysisHelper<T> {
 
     default String visitToString(String preString) {
         String nextPreString = preString + "  ";
-        return preString + toString() + "\n" + children().stream().map(child -> child.visitToString(nextPreString)).collect(Collectors.joining());
+        return preString + toString() + "\n" + toStringChildren().stream().map(child -> child.visitToString(nextPreString)).collect(Collectors.joining());
+    }
+
+    default List<T> toStringChildren() {
+        return children();
     }
 
     Context context();

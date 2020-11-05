@@ -10,7 +10,6 @@ import org.codehaus.janino.Scanner;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CodeGenerator {
     private static final String codeTemplate =

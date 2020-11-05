@@ -9,18 +9,19 @@ import com.searise.sof.execution.Executor;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.plan.physics.Exchange;
 import com.searise.sof.plan.physics.PhysicalPlan;
+import com.searise.sof.schedule.dag.stage.ResultStage;
+import com.searise.sof.schedule.dag.stage.ShuffleMapStage;
+import com.searise.sof.schedule.dag.stage.Stage;
 import com.searise.sof.schedule.dag.stage.event.Event;
 import com.searise.sof.schedule.dag.stage.event.StageSubmit;
 import com.searise.sof.schedule.dag.stage.event.TaskStatusUpdate;
 import com.searise.sof.schedule.task.Task;
-import com.searise.sof.schedule.dag.stage.ResultStage;
-import com.searise.sof.schedule.dag.stage.ShuffleMapStage;
-import com.searise.sof.schedule.dag.stage.Stage;
 import com.searise.sof.schedule.task.TaskResult;
 import com.searise.sof.schedule.task.TaskScheduler;
 import com.searise.sof.shuffle.MapOutputTracker;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -54,6 +55,7 @@ public class DagScheduler {
             while (isRunning) {
                 try {
                     Event event = Utils.checkNotNull(pendingQueue.take(), "taskResult is null");
+                    System.out.println(event);
                     if (event instanceof TaskStatusUpdate) {
                         TaskStatusUpdate taskStatusUpdate = (TaskStatusUpdate) event;
                         doStatusUpdate(taskStatusUpdate.taskResult);
@@ -83,6 +85,10 @@ public class DagScheduler {
     }
 
     public void runPlan(PhysicalPlan plan, ResultHandle resultHandle) {
+        if (plan.partitions() <= 0) {
+            return;
+        }
+
         try {
             planLatch = new CountDownLatch(1);
             finalStage = createFinalStage(plan, resultHandle);

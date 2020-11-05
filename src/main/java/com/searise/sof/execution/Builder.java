@@ -10,12 +10,6 @@ import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.plan.physics.*;
 import org.apache.commons.lang3.tuple.Pair;
-import org.codehaus.janino.CompileException;
-import org.codehaus.janino.Parser;
-import org.codehaus.janino.Scanner;
-
-import java.io.IOException;
-import java.util.stream.Collectors;
 
 public class Builder {
     public final Context context;
@@ -75,7 +69,7 @@ public class Builder {
                 return new ProjectExec(child, project.projectList, project.schema, context);
             case "PhysicalScan":
                 PhysicalScan scan = (PhysicalScan) physicalPlan;
-                return new ScanExec(scan.schema, scan.filePath, scan.separator, context);
+                return new ScanExec(scan.schema, scan.splits, scan.separator, context);
             case "Exchange":
                 Exchange exchange = (Exchange) physicalPlan;
                 return new ExchangeExec(exchange.shuffleId, context);

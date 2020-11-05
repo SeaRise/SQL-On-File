@@ -1,5 +1,6 @@
 package com.searise.sof.plan.physics;
 
+import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Conf;
 import com.searise.sof.core.Context;
 import com.searise.sof.expression.Expression;
@@ -53,14 +54,27 @@ public class Exchange implements PhysicalPlan {
     }
 
     @Override
+    public List<PhysicalPlan> toStringChildren() {
+        return ImmutableList.of(mapPlan);
+    }
+
+    @Override
     public Exchange copyWithNewChildren(List<PhysicalPlan> children) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public int partitions() {
+        if (mapPlan.partitions() <= 0) {
+            return 0;
+        }
+
         // 对于没有key的,只有一个partition.
         if (Objects.isNull(keys) || keys.size() <= 0) {
+            return 1;
+        }
+        // 对于常量值的keys, 只有一个partition.
+        if (keys.stream().allMatch(Expression::foldable)) {
             return 1;
         }
         return context.conf.getIntConf(Conf.MAX_PARALLELISM);

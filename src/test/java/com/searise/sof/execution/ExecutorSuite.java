@@ -7,6 +7,7 @@ import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
+import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
@@ -151,12 +152,25 @@ public class ExecutorSuite {
         LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(splits.size() - 1));
         LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
-        Executor executor = new Builder(context).build(physicalPlan);
-        TestExecutor testExecutor = new TestExecutor(executor, context);
-        RowIterator rowIterator = testExecutor.compute(0);
-        rowIterator.open();
-        rowIterator.close();
-        String result = StringUtils.trim(testExecutor.result());
+
+        Preconditions.checkArgument(physicalPlan.partitions() >  0);
+
+        StringBuffer resultBuilder = new StringBuffer();
+        context.runPlan(physicalPlan, (partition, iterator) -> {
+            StringBuilder partitionResultBuilder = new StringBuilder();
+            while (iterator.hasNext()) {
+                InternalRow row = iterator.next();
+                for (int index = 0; index < row.numFields() - 1; index++) {
+                    partitionResultBuilder.append(row.getValue(index)).append(",");
+                }
+                partitionResultBuilder.append(row.getValue(row.numFields() - 1)).append("\n");
+            }
+            resultBuilder.append(partitionResultBuilder.toString());
+        });
+
+        String result = StringUtils.trim(resultBuilder.toString());
         Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
+        context.stop();
+        System.out.println(sql);
     }
 }

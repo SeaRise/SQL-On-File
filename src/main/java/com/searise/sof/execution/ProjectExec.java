@@ -7,7 +7,6 @@ import com.searise.sof.codegen.exec.CodegenContext;
 import com.searise.sof.codegen.exec.ExecCode;
 import com.searise.sof.codegen.exec.ParamGenerator;
 import com.searise.sof.core.Context;
-import com.searise.sof.core.Predication;
 import com.searise.sof.core.Projection;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.ArrayRow;

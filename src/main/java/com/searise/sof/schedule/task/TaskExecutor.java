@@ -98,6 +98,7 @@ public class TaskExecutor {
             task.runTask();
             taskScheduler.statusUpdate(TaskResult.success(task.stageId, task.partition));
         } catch (Throwable e) {
+            System.out.println(e.getMessage());
             taskScheduler.statusUpdate(TaskResult.fail(e, task.stageId, task.partition));
         } finally {
             synchronized (this) {

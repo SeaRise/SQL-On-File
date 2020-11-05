@@ -10,21 +10,16 @@ import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.execution.Executor;
-import com.searise.sof.execution.RowIterator;
 import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
-import com.searise.sof.schedule.dag.ResultHandle;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-
-import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 
 public class InsertOverwrite implements LogicalPlan, RunnableCommand {
     public final Context context;

@@ -24,14 +24,15 @@ public interface PhysicalPlan extends QueryPlan<PhysicalPlan>, ReferenceResolveH
     }
 
     default int partitions() {
-        if (children().isEmpty()) {
+        List<PhysicalPlan> children = children();
+        if (children.isEmpty()) {
             return 0;
         }
 
-        int partitions = children().get(0).partitions();
-        for (int i = 1; i < children().size(); i++) {
-            int childPartitions = children().get(i).partitions();
-            Utils.checkArgument(partitions != childPartitions,
+        int partitions = children.get(0).partitions();
+        for (int i = 1; i < children.size(); i++) {
+            int childPartitions = children.get(i).partitions();
+            Utils.checkArgument(partitions == childPartitions,
                     String.format("children(0).partitions(%s) != children(%s).partitions(%s)",
                             partitions, i, childPartitions));
         }
