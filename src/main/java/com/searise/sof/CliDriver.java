@@ -20,12 +20,14 @@ public class CliDriver {
         while (true) {
             String cmd = waitForCmd(in);
             if (StringUtils.equalsAnyIgnoreCase("exit", cmd)) {
+                driver.stop();
                 return;
             }
 
             try {
                 driver.compile(cmd);
             } catch (Exception e) {
+                driver.stop();
                 System.out.println(e.getMessage());
             }
         }

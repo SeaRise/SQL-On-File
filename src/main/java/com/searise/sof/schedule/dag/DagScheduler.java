@@ -130,7 +130,7 @@ public class DagScheduler {
         Stage stage = stageStateMachine.stage(stageId);
         if (stage.getMissPartitions().isEmpty()) {
             if (stage instanceof ShuffleMapStage) {
-                mapOutputTracker.removeShuffle(((ShuffleMapStage) stage).shuffleId);
+                mapOutputTracker.unregisterShuffle(((ShuffleMapStage) stage).shuffleId);
             }
             // doNext
             submitNext(stage);

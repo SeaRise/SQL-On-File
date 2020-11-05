@@ -73,4 +73,8 @@ public class Driver {
         Utils.println("ok");
         Utils.println(resultBuilder.toString());
     }
+
+    public void stop() {
+
+    }
 }

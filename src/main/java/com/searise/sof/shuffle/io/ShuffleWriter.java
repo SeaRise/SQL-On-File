@@ -25,7 +25,8 @@ public class ShuffleWriter {
 
     public void write(InternalRow row) {
         int reduceId = hashKey(row);
-        shuffleStore.write(reduceId, row);
+        // row需要copy, 因为写入的internalRow可能还有其他地方修改.
+        shuffleStore.write(reduceId, row.copy());
     }
 
     private int hashKey(InternalRow row) {

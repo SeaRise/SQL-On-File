@@ -1,6 +1,6 @@
 package com.searise.sof.shuffle;
 
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.InternalRow;
 
@@ -18,11 +18,14 @@ public class MapOutputTracker {
     }
 
     public void registerShuffle(long shuffleId, int mapNum) {
-        tracker.put(shuffleId, new MapStatus[mapNum]);
+        MapStatus[] mapStatuses = new MapStatus[mapNum];
+        if (mapStatuses != tracker.putIfAbsent(shuffleId, mapStatuses)) {
+            throw new SofException("shuffle(%s) has registered!");
+        }
     }
 
-    public void removeShuffle(long shuffleId) {
-        MapStatus[] mapStatuses = getShuffle(shuffleId);
+    public void unregisterShuffle(long shuffleId) {
+        MapStatus[] mapStatuses = removeShuffle(shuffleId);
         synchronized (mapStatuses) {
             for (MapStatus mapStatus : getShuffle(shuffleId)) {
                 mapStatus.cleanUp();
@@ -61,7 +64,12 @@ public class MapOutputTracker {
 
     private MapStatus[] getShuffle(long shuffleId) {
         return Utils.checkNotNull(tracker.get(shuffleId),
-                String.format("shuffle(%s) has not register!", shuffleId));
+                String.format("shuffle(%s) has not registered!", shuffleId));
+    }
+
+    private MapStatus[] removeShuffle(long shuffleId) {
+        return Utils.checkNotNull(tracker.remove(shuffleId),
+                String.format("shuffle(%s) has not registered!", shuffleId));
     }
 
     public void clear() {

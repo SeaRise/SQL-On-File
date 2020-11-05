@@ -6,6 +6,7 @@ import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Exchange implements PhysicalPlan {
@@ -58,6 +59,10 @@ public class Exchange implements PhysicalPlan {
 
     @Override
     public int partitions() {
+        // 对于没有key的,只有一个partition.
+        if (Objects.isNull(keys) || keys.size() <= 0) {
+            return 1;
+        }
         return context.conf.getIntConf(Conf.MAX_PARALLELISM);
     }
 }

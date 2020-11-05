@@ -32,4 +32,8 @@ public class Context {
     public void runPlan(PhysicalPlan plan, ResultHandle resultHandle) {
         dagScheduler.runPlan(plan, resultHandle);
     }
+
+    public void stop() {
+        dagScheduler.stop();
+    }
 }
