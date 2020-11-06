@@ -8,4 +8,10 @@ public class TaskStatusUpdate implements Event {
     public TaskStatusUpdate(TaskResult taskResult) {
         this.taskResult = taskResult;
     }
+
+    @Override
+    public String toString() {
+        return String.format("TaskStatusUpdate(stageId=%s,partition=%s,taskStatus=%s)",
+                taskResult.stageId, taskResult.partition, taskResult.taskStatus);
+    }
 }

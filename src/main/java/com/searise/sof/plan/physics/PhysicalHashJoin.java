@@ -13,7 +13,6 @@ import org.apache.commons.lang3.tuple.Triple;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PhysicalHashJoin extends PhysicalJoin {
@@ -24,9 +23,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
     public PhysicalHashJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build, Context context) {
         super(schema, stream, build, context);
 
-        Set<Long> streamIds = stream.schema().stream().map(r -> r.exprId).collect(Collectors.toSet());
-        Set<Long> buildIds = build.schema().stream().map(r -> r.exprId).collect(Collectors.toSet());
-        Triple<List<Expression>, List<Expression>, List<Expression>> splits = splits(conditions, streamIds, buildIds);
+        Triple<List<Expression>, List<Expression>, List<Expression>> splits = splits(conditions);
         streamJoinKeys = splits.getLeft();
         buildJoinKeys = splits.getMiddle();
         otherConditions = splits.getRight();
@@ -52,11 +49,9 @@ public class PhysicalHashJoin extends PhysicalJoin {
         stream.resolveIndex();
         build.resolveIndex();
 
-        Map<Long, Integer> streamInputs = Utils.zip(index -> stream.schema().get(index).exprId, stream.schema().size());
-        this.streamJoinKeys = ReferenceResolveHelper.resolveExpression(streamJoinKeys, streamInputs);
-
-        Map<Long, Integer> buildInputs = Utils.zip(index -> build.schema().get(index).exprId, build.schema().size());
-        this.buildJoinKeys = ReferenceResolveHelper.resolveExpression(buildJoinKeys, buildInputs);
+        Pair<List<Expression>, List<Expression>> resolveKeys = resolveJoinKeys(streamJoinKeys, buildJoinKeys);
+        this.streamJoinKeys = resolveKeys.getLeft();
+        this.buildJoinKeys = resolveKeys.getRight();
 
         List<BoundReference> childSchema = Utils.combineDistinct(stream.schema(), build.schema());
         Map<Long, Integer> inputs = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
@@ -85,14 +80,6 @@ public class PhysicalHashJoin extends PhysicalJoin {
         );
         pruneChild(stream, useSchema);
         pruneChild(build, useSchema);
-    }
-
-    private void pruneChild(PhysicalPlan child, List<BoundReference> useSchema) {
-        List<BoundReference> childSchema = child.schema();
-        Map<Long, Integer> childMap = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
-        List<BoundReference> conditionsUseSchema = Utils.toImmutableList(useSchema.stream().filter(r -> childMap.containsKey(r.exprId)));
-        List<BoundReference> parentUseSchema = Utils.toImmutableList(schema.stream().filter(r -> childMap.containsKey(r.exprId)));
-        child.prune(Utils.combineDistinct(conditionsUseSchema, parentUseSchema), false);
     }
 
     @Override

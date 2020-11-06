@@ -8,4 +8,9 @@ public class StageSubmit implements Event {
     public StageSubmit(Stage stage) {
         this.stage = stage;
     }
+
+    @Override
+    public String toString() {
+        return String.format("StageSubmit(stageId=%s)", stage.stageId);
+    }
 }

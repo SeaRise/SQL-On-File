@@ -18,16 +18,38 @@ import java.util.stream.Collectors;
 
 public class PhysicalNestedLoopJoin extends PhysicalJoin {
     public List<Expression> conditions;
+    private List<Expression> streamJoinKeys;
+    private List<Expression> buildJoinKeys;
 
     public PhysicalNestedLoopJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build, Context context) {
         super(schema, stream, build, context);
         this.conditions = conditions;
+
+        Triple<List<Expression>, List<Expression>, List<Expression>> splits = splits(conditions);
+        streamJoinKeys = splits.getLeft();
+        buildJoinKeys = splits.getMiddle();
+    }
+
+    private PhysicalNestedLoopJoin(
+            List<BoundReference> schema, List<Expression> conditions,
+            List<Expression> streamJoinKeys, List<Expression> buildJoinKeys,
+            PhysicalPlan stream, PhysicalPlan build, Context context) {
+        super(schema, stream, build, context);
+        this.conditions = conditions;
+
+        this.streamJoinKeys = streamJoinKeys;
+        this.buildJoinKeys = buildJoinKeys;
     }
 
     @Override
     public void resolveIndex() {
         stream.resolveIndex();
         build.resolveIndex();
+
+        Pair<List<Expression>, List<Expression>> resolveKeys = resolveJoinKeys(streamJoinKeys, buildJoinKeys);
+        this.streamJoinKeys = resolveKeys.getLeft();
+        this.buildJoinKeys = resolveKeys.getRight();
+
         List<BoundReference> childSchema = Utils.combineDistinct(stream.schema(), build.schema());
         Map<Long, Integer> inputs = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
         this.conditions = ReferenceResolveHelper.resolveExpression(conditions, inputs);
@@ -48,26 +70,14 @@ public class PhysicalNestedLoopJoin extends PhysicalJoin {
         pruneChild(build, useSchema);
     }
 
-    private void pruneChild(PhysicalPlan child, List<BoundReference> useSchema) {
-        List<BoundReference> childSchema = child.schema();
-        Map<Long, Integer> childMap = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
-        List<BoundReference> conditionsUseSchema = Utils.toImmutableList(useSchema.stream().filter(r -> childMap.containsKey(r.exprId)));
-        List<BoundReference> parentUseSchema = Utils.toImmutableList(schema.stream().filter(r -> childMap.containsKey(r.exprId)));
-        child.prune(Utils.combineDistinct(conditionsUseSchema, parentUseSchema), false);
-    }
-
     @Override
     public PhysicalNestedLoopJoin copyWithNewChildren(List<PhysicalPlan> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
-        return new PhysicalNestedLoopJoin(schema, conditions, children.get(0), children.get(1), context);
+        return new PhysicalNestedLoopJoin(schema, conditions, streamJoinKeys, buildJoinKeys, children.get(0), children.get(1), context);
     }
-
 
     @Override
     public Pair<List<Expression>, List<Expression>> joinKeys() {
-        Set<Long> streamIds = stream.schema().stream().map(r -> r.exprId).collect(Collectors.toSet());
-        Set<Long> buildIds = build.schema().stream().map(r -> r.exprId).collect(Collectors.toSet());
-        Triple<List<Expression>, List<Expression>, List<Expression>> splits = splits(conditions, streamIds, buildIds);
-        return Pair.of(splits.getLeft(), splits.getMiddle());
+        return Pair.of(streamJoinKeys, buildJoinKeys);
     }
 }

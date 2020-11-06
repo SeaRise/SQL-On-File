@@ -61,7 +61,7 @@ public class DagScheduler {
                         doStatusUpdate(taskStatusUpdate.taskResult);
                     } else if (event instanceof StageSubmit) {
                         StageSubmit stageSubmit = (StageSubmit) event;
-                        submitStage(stageSubmit.stage);
+                        submitStageInternal(stageSubmit.stage);
                     } else {
                         throw new SofException("unknown event: " + event.getClass().getSimpleName());
                     }
@@ -128,16 +128,21 @@ public class DagScheduler {
             finalStage.success(partition);
         }
 
-        if (finalStage.isSuccess()) {
+        if (finalStage.getMissPartitions().isEmpty()) {
             planSuccess();
             return;
         }
 
         Stage stage = stageStateMachine.stage(stageId);
         if (stage.getMissPartitions().isEmpty()) {
-            if (stage instanceof ShuffleMapStage) {
-                mapOutputTracker.unregisterShuffle(((ShuffleMapStage) stage).shuffleId);
+            // unregister all parent shuffle output
+            for (Long parentStageId : stage.parentStageIds) {
+                Stage parent = stageStateMachine.stage(parentStageId);
+                if (parent instanceof ShuffleMapStage) {
+                    mapOutputTracker.unregisterShuffle(((ShuffleMapStage) parent).shuffleId);
+                }
             }
+            stageStateMachine.stateToComplete(stageId);
             // doNext
             submitNext(stage);
         }
@@ -172,6 +177,10 @@ public class DagScheduler {
     }
 
     private void submitStage(Stage stage) {
+        pendingQueue.add(new StageSubmit(stage));
+    }
+
+    private void submitStageInternal(Stage stage) {
         Utils.checkNotNull(stage, "submit null stage");
 
         if (stageStateMachine.isRunning(stage.stageId) ||
@@ -220,6 +229,7 @@ public class DagScheduler {
                 parentStageIdBuilder.addAll(createParentStages(child));
             } else if (child.children().isEmpty() && child instanceof Exchange) {
                 Exchange exchange = (Exchange) child;
+                System.out.println(partitions);
                 Stage parentStage = createShuffleMapStage(exchange.mapPlan, exchange.shuffleId, exchange.keys, partitions);
                 parentStageIdBuilder.add(parentStage.stageId);
             } else {

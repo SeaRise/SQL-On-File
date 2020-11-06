@@ -19,6 +19,7 @@ public class AddExchange implements Rule<PhysicalPlan> {
             if (p instanceof PhysicalJoin) {
                 PhysicalJoin join = (PhysicalJoin) p;
                 Pair<List<Expression>, List<Expression>> joinKeys = join.joinKeys();
+                System.out.println(joinKeys);
                 PhysicalPlan newStream = newExchange(join.stream, join.context, joinKeys.getLeft());
                 PhysicalPlan newBuild = newExchange(join.build, join.context, joinKeys.getRight());
                 return join.copyWithNewChildren(ImmutableList.of(newStream, newBuild));

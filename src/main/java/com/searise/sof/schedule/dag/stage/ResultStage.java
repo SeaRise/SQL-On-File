@@ -35,8 +35,4 @@ public class ResultStage extends Stage {
     public void success(int partition) {
         missPartitions.remove(partition);
     }
-
-    public boolean isSuccess() {
-        return missPartitions.isEmpty();
-    }
 }

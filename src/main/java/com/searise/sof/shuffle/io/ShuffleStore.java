@@ -7,7 +7,7 @@ import com.searise.sof.core.row.InternalRow;
 import java.util.Iterator;
 
 public class ShuffleStore {
-    private Multimap<Integer, InternalRow> storeMap = HashMultimap.create();
+    public final Multimap<Integer, InternalRow> storeMap = HashMultimap.create();
 
     public void write(int partition, InternalRow internalRow) {
         storeMap.put(partition, internalRow);

@@ -24,7 +24,17 @@ public class ExchangeExec implements Executor {
     public RowIterator compute(int partition) {
         MapOutputTracker tracker = context.mapOutputTracker;
         ShuffleReader shuffleReader = new ShuffleReader(tracker, shuffleId, partition);
+        Iterator<InternalRow> iter = shuffleReader.iterator();
+
+        System.out.println(shuffleId + "_" + partition);
+        while (iter.hasNext()) {
+            System.out.println(iter.next());
+        }
+        System.out.println();
+
+        shuffleReader = new ShuffleReader(tracker, shuffleId, partition);
         Iterator<InternalRow> iterator = shuffleReader.iterator();
+
         return new RowIterator() {
             @Override
             public void open() {

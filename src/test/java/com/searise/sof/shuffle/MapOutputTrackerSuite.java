@@ -24,19 +24,20 @@ public class MapOutputTrackerSuite {
     public void test() throws InterruptedException {
         MapOutputTracker tracker = new MapOutputTracker();
         long shuffleId = 0;
-        int partitions = 500;
+        int mapPartitions = 500;
+        int reducePartitions = 300;
 
         List<Expression> keys = keys();
 
-        tracker.registerShuffle(shuffleId, partitions);
+        tracker.registerShuffle(shuffleId, mapPartitions);
 
         Set<String> set = new ConcurrentSkipListSet<>();
 
-        CountDownLatch mapLatch = new CountDownLatch(partitions);
-        for (int mapId = 0; mapId < partitions; mapId++) {
+        CountDownLatch mapLatch = new CountDownLatch(mapPartitions);
+        for (int mapId = 0; mapId < mapPartitions; mapId++) {
             int finalMapId = mapId;
             new Thread(() -> {
-                ShuffleWriter writer = new ShuffleWriter(keys, shuffleId, finalMapId, tracker, partitions);
+                ShuffleWriter writer = new ShuffleWriter(keys, shuffleId, finalMapId, tracker, reducePartitions);
                 for (int i = 0; i < 5; i++) {
                     writer.write(createRow(finalMapId, i));
                     String key = finalMapId + "_" + i;
@@ -48,10 +49,10 @@ public class MapOutputTrackerSuite {
         }
         mapLatch.await();
 
-        Preconditions.checkArgument(set.size() == partitions * 5);
+        Preconditions.checkArgument(set.size() == mapPartitions * 5);
 
-        CountDownLatch reduceLatch = new CountDownLatch(partitions);
-        for (int reduceId = 0; reduceId < partitions; reduceId++) {
+        CountDownLatch reduceLatch = new CountDownLatch(reducePartitions);
+        for (int reduceId = 0; reduceId < reducePartitions; reduceId++) {
             final int finalReduceId = reduceId;
             new Thread(() -> {
                 ShuffleReader reader = new ShuffleReader(tracker, shuffleId, finalReduceId);
