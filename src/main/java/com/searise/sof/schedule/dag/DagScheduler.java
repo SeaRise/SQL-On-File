@@ -55,7 +55,7 @@ public class DagScheduler {
             while (isRunning) {
                 try {
                     Event event = Utils.checkNotNull(pendingQueue.take(), "taskResult is null");
-                    System.out.println(event);
+//                    System.out.println(event);
                     if (event instanceof TaskStatusUpdate) {
                         TaskStatusUpdate taskStatusUpdate = (TaskStatusUpdate) event;
                         doStatusUpdate(taskStatusUpdate.taskResult);
@@ -122,11 +122,7 @@ public class DagScheduler {
     }
 
     private void handleTaskSuccess(long stageId, int partition) {
-        // ShuffleMapTask会把结果写到mapOutputTracker里.
-        // 只有finalStage是ResultStage.
-        if (stageId == finalStage.stageId) {
-            finalStage.success(partition);
-        }
+        stageStateMachine.stage(stageId).success(partition);
 
         if (finalStage.getMissPartitions().isEmpty()) {
             planSuccess();
@@ -229,7 +225,6 @@ public class DagScheduler {
                 parentStageIdBuilder.addAll(createParentStages(child));
             } else if (child.children().isEmpty() && child instanceof Exchange) {
                 Exchange exchange = (Exchange) child;
-                System.out.println(partitions);
                 Stage parentStage = createShuffleMapStage(exchange.mapPlan, exchange.shuffleId, exchange.keys, partitions);
                 parentStageIdBuilder.add(parentStage.stageId);
             } else {

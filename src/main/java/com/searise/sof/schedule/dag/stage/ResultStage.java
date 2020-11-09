@@ -1,6 +1,7 @@
 package com.searise.sof.schedule.dag.stage;
 
 import com.google.common.collect.ImmutableList;
+import com.searise.sof.core.Utils;
 import com.searise.sof.execution.Executor;
 import com.searise.sof.plan.physics.PhysicalPlan;
 import com.searise.sof.schedule.dag.ResultHandle;
@@ -13,10 +14,12 @@ import java.util.Set;
 
 public class ResultStage extends Stage {
     public final ResultHandle resultHandle;
-    private final Set<Integer> missPartitions = new HashSet<>();
+    private final Set<Integer> missPartitions;
+
     public ResultStage(long stageId, Set<Long> parentStageIds, PhysicalPlan plan, ResultHandle resultHandle) {
         super(stageId, parentStageIds, plan);
         this.resultHandle = resultHandle;
+        missPartitions = new HashSet<>();
         for (int partition = 0; partition < partitions; partition++) {
             missPartitions.add(partition);
         }
@@ -32,7 +35,10 @@ public class ResultStage extends Stage {
         return ImmutableList.copyOf(missPartitions);
     }
 
+    @Override
     public void success(int partition) {
-        missPartitions.remove(partition);
+        checkRange(partition);
+        Utils.checkArgument(missPartitions.remove(partition),
+                String.format("partition(%s) has success", partition));
     }
 }

@@ -13,16 +13,16 @@ public class Conf {
     private static final String AUTO_HASH_JOIN_THRESHOLD_DEFAULT_VALUE = "1000"; // 1000 bytes.
 
     public static final String CODEGEN_EXPRESSION = "sof_codegen_expression";
-    private static final String CODEGEN_EXPRESSION_DEFAULT_VALUE = "true";
+    private static final String CODEGEN_EXPRESSION_DEFAULT_VALUE = "false";
 
     public static final String CODEGEN_EXECUTOR = "sof_codegen_executor";
-    private static final String CODEGEN_EXECUTOR_DEFAULT_VALUE = "true";
+    private static final String CODEGEN_EXECUTOR_DEFAULT_VALUE = "false";
 
     public static final String WRITE_FLUSH_THRESHOLD = "sof_write_flush_threshold";
     private static final String WRITE_FLUSH_THRESHOLD_DEFAULT_VALUE = "100"; // 1000 bytes.
 
     public static final String MAX_PARALLELISM = "sof_max_parallelism";
-    private static final String MAX_PARALLELISM_DEFAULT_VALUE = "20";
+    private static final String MAX_PARALLELISM_DEFAULT_VALUE = "2";
 
     public Conf() {
         setConf(FORCE_JOIN_TYPE, FORCE_JOIN_TYPE_DEFAULT_VALUE);

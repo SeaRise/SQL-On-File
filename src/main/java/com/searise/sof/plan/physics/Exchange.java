@@ -49,8 +49,8 @@ public class Exchange implements PhysicalPlan {
 
     @Override
     public String toString() {
-        return String.format("Exchange [%s] [%s]", schemaToString(),
-                keys.stream().map(Object::toString).collect(Collectors.joining(", ")));
+        return String.format("Exchange [%s] [%s] [%s]", schemaToString(),
+                keys.stream().map(Object::toString).collect(Collectors.joining(", ")), shuffleId);
     }
 
     @Override

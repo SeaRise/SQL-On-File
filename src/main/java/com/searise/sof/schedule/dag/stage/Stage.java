@@ -1,5 +1,6 @@
 package com.searise.sof.schedule.dag.stage;
 
+import com.searise.sof.core.Utils;
 import com.searise.sof.execution.Executor;
 import com.searise.sof.plan.physics.PhysicalPlan;
 import com.searise.sof.schedule.task.Task;
@@ -24,4 +25,11 @@ public abstract class Stage {
     public abstract Task buildTask(Executor executor, int partition);
 
     public abstract List<Integer> getMissPartitions();
+
+    public abstract void success(int partition);
+
+    protected void checkRange(int partition) {
+        Utils.checkArgument(partition >= 0 && partition < partitions,
+                String.format("partition must in [0, %s]", partitions));
+    }
 }

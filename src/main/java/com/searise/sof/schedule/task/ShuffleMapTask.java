@@ -24,6 +24,5 @@ public class ShuffleMapTask extends Task {
             }
         }
         rowIterator.close();
-        shuffleWriter.commit();
     }
 }
