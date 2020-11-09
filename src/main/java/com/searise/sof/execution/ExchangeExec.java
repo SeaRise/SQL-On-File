@@ -33,7 +33,7 @@ public class ExchangeExec implements Executor {
 
             @Override
             public boolean hasNext() {
-                return iterator.hasNext();
+                return Objects.nonNull(iterator) && iterator.hasNext();
             }
 
             @Override

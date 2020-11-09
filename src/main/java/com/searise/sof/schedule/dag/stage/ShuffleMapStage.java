@@ -32,6 +32,7 @@ public class ShuffleMapStage extends Stage {
 
     @Override
     public Task buildTask(Executor executor, int partition) {
+        checkRange(partition);
         ShuffleWriter shuffleWriter = new ShuffleWriter(shuffleKeys, shuffleId, partition, mapOutputTracker, reduceNum);
         this.shuffleWriters[partition] = shuffleWriter;
         return new ShuffleMapTask(stageId, partition, executor.compute(partition), shuffleWriter);

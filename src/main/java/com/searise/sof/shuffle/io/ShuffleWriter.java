@@ -6,6 +6,7 @@ import com.searise.sof.shuffle.MapOutputTracker;
 import com.searise.sof.shuffle.MapStatus;
 
 import java.util.List;
+import java.util.Objects;
 
 public class ShuffleWriter {
     private final List<Expression> shuffleKeys;
@@ -33,7 +34,7 @@ public class ShuffleWriter {
         int hashCode = 1;
         for (Expression shuffleKey : shuffleKeys) {
             Object value = shuffleKey.eval(row);
-            hashCode = 31 * hashCode + (value==null ? 0 : value.hashCode());
+            hashCode = 31 * hashCode + (Objects.isNull(value) ? 0 : value.hashCode());
         }
         return hashCode % reduceNum;
     }

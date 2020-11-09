@@ -202,31 +202,28 @@ public class DagScheduler {
 
     private ResultStage createFinalStage(PhysicalPlan plan, ResultHandle resultHandle) {
         Set<Long> parentStageIds = createParentStages(plan);
-        long stageId = nextStageId();
-        ResultStage finalStage = new ResultStage(stageId, parentStageIds, plan, resultHandle);
+        ResultStage finalStage = new ResultStage(nextStageId(), parentStageIds, plan, resultHandle);
         stageStateMachine.addStage(finalStage);
         return finalStage;
     }
 
     private Stage createShuffleMapStage(PhysicalPlan plan, long shuffleId, List<Expression> shuffleKeys, int reduceNum) {
         Set<Long> parentStageIds = createParentStages(plan);
-        long stageId = nextStageId();
-        ShuffleMapStage shuffleMapStage = new ShuffleMapStage(stageId, parentStageIds, plan, shuffleId, mapOutputTracker, shuffleKeys, reduceNum);
+        ShuffleMapStage shuffleMapStage = new ShuffleMapStage(nextStageId(), parentStageIds, plan, shuffleId, mapOutputTracker, shuffleKeys, reduceNum);
         stageStateMachine.addStage(shuffleMapStage);
         mapOutputTracker.registerShuffle(shuffleId, shuffleMapStage.partitions);
         return shuffleMapStage;
     }
 
     private Set<Long> createParentStages(PhysicalPlan plan) {
-        int partitions = plan.partitions();
         ImmutableSet.Builder<Long> parentStageIdBuilder = ImmutableSet.builder();
         for (PhysicalPlan child : plan.children()) {
             if (!child.children().isEmpty()) {
                 parentStageIdBuilder.addAll(createParentStages(child));
             } else if (child.children().isEmpty() && child instanceof Exchange) {
                 Exchange exchange = (Exchange) child;
-                Stage parentStage = createShuffleMapStage(exchange.mapPlan, exchange.shuffleId, exchange.keys, partitions);
-                parentStageIdBuilder.add(parentStage.stageId);
+                Stage shuffleMapStage = createShuffleMapStage(exchange.mapPlan, exchange.shuffleId, exchange.keys, exchange.partitions());
+                parentStageIdBuilder.add(shuffleMapStage.stageId);
             } else {
                 // just else
             }

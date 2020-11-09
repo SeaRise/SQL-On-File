@@ -22,7 +22,8 @@ public class TaskExecutor {
     private final TaskScheduler taskScheduler;
 
     public TaskExecutor(Context context, TaskScheduler taskScheduler) {
-        this.maxRunningNum = context.conf.getIntConf(Conf.MAX_PARALLELISM);
+//        this.maxRunningNum = context.conf.getIntConf(Conf.MAX_PARALLELISM);
+        this.maxRunningNum = 1;
         this.taskScheduler = taskScheduler;
     }
 

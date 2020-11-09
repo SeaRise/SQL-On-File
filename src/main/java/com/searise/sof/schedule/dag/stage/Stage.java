@@ -28,8 +28,9 @@ public abstract class Stage {
 
     public abstract void success(int partition);
 
-    protected void checkRange(int partition) {
+    protected int checkRange(int partition) {
         Utils.checkArgument(partition >= 0 && partition < partitions,
                 String.format("partition must in [0, %s]", partitions));
+        return partition;
     }
 }

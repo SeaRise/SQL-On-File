@@ -10,6 +10,9 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 // thread safe
+// shuffleId是shuffle的标识,exchange一一对应
+// mapId是写入的task的partition.
+// reduceId是读取的task的partition..
 public class MapOutputTracker {
     // shuffleId, MapStatus[]
     private final Map<Long, MapStatus[]> tracker = new ConcurrentHashMap<>();
@@ -27,8 +30,10 @@ public class MapOutputTracker {
     public void unregisterShuffle(long shuffleId) {
         MapStatus[] mapStatuses = removeShuffle(shuffleId);
         synchronized (mapStatuses) {
-            for (MapStatus mapStatus : mapStatuses) {
+            for (int mapId = 0; mapId < mapStatuses.length; mapId++) {
+                MapStatus mapStatus = mapStatuses[mapId];
                 mapStatus.cleanUp();
+                mapStatuses[mapId] = null;
             }
         }
     }
@@ -36,6 +41,8 @@ public class MapOutputTracker {
     public void registerMapOutput(long shuffleId, int mapIndex, MapStatus mapStatus) {
         MapStatus[] mapStatuses = getShuffle(shuffleId);
         synchronized (mapStatuses) {
+            Utils.checkArgument(Objects.isNull(mapStatuses[mapIndex]),
+                    String.format("mapOutput(shuffleId=%s, mapId=%s) has registered", shuffleId, mapIndex));
             mapStatuses[mapIndex] = mapStatus;
         }
     }

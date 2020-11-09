@@ -27,7 +27,7 @@ public class ResultStage extends Stage {
 
     @Override
     public Task buildTask(Executor executor, int partition) {
-        return new ResultTask(stageId, partition, executor.compute(partition), resultHandle);
+        return new ResultTask(stageId, partition, executor.compute(checkRange(partition)), resultHandle);
     }
 
     @Override
