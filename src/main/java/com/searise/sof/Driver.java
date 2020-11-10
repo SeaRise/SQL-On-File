@@ -75,6 +75,6 @@ public class Driver {
     }
 
     public void stop() {
-
+        context.stop();
     }
 }
