@@ -20,9 +20,9 @@ mvn clean package
 
 #### 快速使用:
 ###### 在bin目录下面, 执行sof.cmd
-- 首先执行ddl语句,创建实例表,表对应的txt文件在bin/example/example.txt
+- 首先执行ddl语句,创建实例表,表对应的txt文件在bin/example/input
 ```
-create table example (a int, b double, c bool, d string) path 'example\example.txt';
+create table example (a int, b double, c bool, d string) path 'example\input';
 ```
 - 查看表是否建好
 ```
@@ -36,7 +36,7 @@ select t1.a, t2.a, t1.b, t2.b, t1.c, t2.c, t1.d, t2.d from
 (select a, b, c, d from example where a > 90) t1 join 
 (select a, b, c, d  from example where a < 10) t2 on (t1.a%10) = t2.a;
 
-create table output path 'example\output.txt' as 
+create table output path 'example\output' as 
 select t1.a, t1.b, t1.c, t1.d from 
 (select a, b, c, d from example where a > 90) t1 join 
 (select a, b, c, d  from example where a < 10) t2 on (t1.a%10) = t2.a;
