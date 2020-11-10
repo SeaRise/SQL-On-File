@@ -43,6 +43,8 @@ public class ShuffleWriter {
         return hashKey;
     }
 
+    // hashKey必须在[0, reduceNum).
+    // 和reduceId的范围对应.
     public static int hashKey(InternalRow row, List<Expression> shuffleKeys, int reduceNum) {
         int hashCode = 1;
         for (Expression shuffleKey : shuffleKeys) {

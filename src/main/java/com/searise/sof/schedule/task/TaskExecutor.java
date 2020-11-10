@@ -11,6 +11,9 @@ import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * task的执行线程池.
+ * */
 public class TaskExecutor {
     private final Queue<Task> pendingQueue = new LinkedList<>();
 

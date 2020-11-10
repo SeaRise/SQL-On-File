@@ -35,6 +35,7 @@ public class DagScheduler {
 
     private final MapOutputTracker mapOutputTracker;
 
+    // 用于阻塞主线程,直到plan执行完成.
     private volatile CountDownLatch planLatch;
     private volatile ResultStage finalStage;
 
