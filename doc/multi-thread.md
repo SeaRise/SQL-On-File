@@ -1,23 +1,18 @@
 - aim
-    - 通过提高input-split和shuffle-split的数目就可以提高执行的并行度,而不是对每一个executor实现多线程版本
+    - 通过提高input-partition和shuffle-partition的数目就可以提高执行的并行度,而不是对每一个executor实现多线程版本
 - task_schedule
     - 一个统一的线程池来执行task
         - 设置线程池大小可以设定最大并行度.
 	- 失败重试?
 - shuffle
 	- map文件分配?hash?
-	- reduce的数目如何确定?
+	- reduce的数目如何确定?conf.numShufflePartitions
 - dag_schedule
     - 把physical plan划分为多个stage, 不同stage之间用shuffle来划分(join)
-    - 每一个stage会有getSplits()方法获取splits.每一个split和一个task对应, split就是task的输入.
-- split
-    - shuffle split
-    - file split
+    - 每一个stage会有getPartitions()方法获取partition每一个partitiont和一个task对应.
 - planner
     - addExchange(), 用于添加map-reduce-shuffle算子, 同时也是stage划分的界限.
     - Exchange最后会被分成shuffle-map和shuffle-reduce, 前者用于写map文件,后者用于读取map文件.
 - executor
     - 基本所有的executor都不需要修改.
-    - 增加shuffle-reduce-executor和shuffle-reduce-executor
-        - 这俩executor可以实现codegen接口,避免函数回调的开销.
-    - join可以增加broadcast-join
+    - 增加Exchange-executor

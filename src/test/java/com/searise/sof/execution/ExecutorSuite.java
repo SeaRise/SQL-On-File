@@ -1,12 +1,14 @@
 package com.searise.sof.execution;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.searise.sof.Driver;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
+import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
 import com.searise.sof.plan.physics.PhysicalPlan;
@@ -151,11 +153,41 @@ public class ExecutorSuite {
         LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(splits.size() - 1));
         LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
-        Executor executor = new Builder(context).build(physicalPlan);
-        TestExecutor testExecutor = new TestExecutor(executor, context);
-        testExecutor.open();
-        testExecutor.close();
-        String result = StringUtils.trim(testExecutor.result());
-        Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
+
+        Preconditions.checkArgument(physicalPlan.partitions() >  0);
+
+        StringBuffer resultBuilder = new StringBuffer();
+        context.runPlan(physicalPlan, (partition, iterator) -> {
+            StringBuilder partitionResultBuilder = new StringBuilder();
+            while (iterator.hasNext()) {
+                InternalRow row = iterator.next();
+                for (int index = 0; index < row.numFields() - 1; index++) {
+                    partitionResultBuilder.append(row.getValue(index)).append(",");
+                }
+                partitionResultBuilder.append(row.getValue(row.numFields() - 1)).append("\n");
+            }
+            resultBuilder.append(partitionResultBuilder.toString());
+        });
+
+        String result = StringUtils.trim(resultBuilder.toString());
+        Preconditions.checkArgument(compareResult(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
+        context.stop();
+    }
+
+    private boolean compareResult(String result, String expect) {
+        if (StringUtils.isBlank(result) && StringUtils.isBlank(expect)) {
+            return true;
+        } else if (StringUtils.isBlank(result)) {
+            return false;
+        } else if (StringUtils.isBlank(expect)) {
+            return false;
+        } else {
+            List<String> results = ImmutableList.copyOf(StringUtils.split(result, "\n"));
+            List<String> expects = ImmutableList.copyOf(StringUtils.split(expect, "\n"));
+            if (results.size() != expects.size()) {
+                return false;
+            }
+            return expects.containsAll(results);
+        }
     }
 }

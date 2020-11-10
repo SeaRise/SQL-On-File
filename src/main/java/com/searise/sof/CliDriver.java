@@ -1,5 +1,6 @@
 package com.searise.sof;
 
+import com.searise.sof.core.Utils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Scanner;
@@ -20,13 +21,15 @@ public class CliDriver {
         while (true) {
             String cmd = waitForCmd(in);
             if (StringUtils.equalsAnyIgnoreCase("exit", cmd)) {
+                driver.stop();
                 return;
             }
 
             try {
                 driver.compile(cmd);
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                driver.stop();
+                Utils.println(e.getMessage());
             }
         }
     }

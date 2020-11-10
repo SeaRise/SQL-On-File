@@ -1,51 +1,54 @@
 package com.searise.sof.plan.physics;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Preconditions;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
 import com.searise.sof.optimize.afterprocess.ReferenceResolveHelper;
 import com.searise.sof.optimize.afterprocess.SchemaPruneHelper;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class PhysicalNestedLoopJoin implements PhysicalPlan {
-    public List<BoundReference> schema;
+public class PhysicalNestedLoopJoin extends PhysicalJoin {
     public List<Expression> conditions;
-    public final PhysicalPlan stream;
-    public final PhysicalPlan build;
-    public final Context context;
+    private List<Expression> streamJoinKeys;
+    private List<Expression> buildJoinKeys;
 
     public PhysicalNestedLoopJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build, Context context) {
-        this.schema = schema;
+        super(schema, stream, build, context);
         this.conditions = conditions;
-        this.stream = stream;
-        this.build = build;
-        this.context = context;
+
+        Triple<List<Expression>, List<Expression>, List<Expression>> splits = splits(conditions);
+        streamJoinKeys = splits.getLeft();
+        buildJoinKeys = splits.getMiddle();
     }
 
-    @Override
-    public List<BoundReference> schema() {
-        return schema;
-    }
+    private PhysicalNestedLoopJoin(
+            List<BoundReference> schema, List<Expression> conditions,
+            List<Expression> streamJoinKeys, List<Expression> buildJoinKeys,
+            PhysicalPlan stream, PhysicalPlan build, Context context) {
+        super(schema, stream, build, context);
+        this.conditions = conditions;
 
-    @Override
-    public List<PhysicalPlan> children() {
-        return ImmutableList.of(stream, build);
-    }
-
-    @Override
-    public Context context() {
-        return context;
+        this.streamJoinKeys = streamJoinKeys;
+        this.buildJoinKeys = buildJoinKeys;
     }
 
     @Override
     public void resolveIndex() {
         stream.resolveIndex();
         build.resolveIndex();
+
+        Pair<List<Expression>, List<Expression>> resolveKeys = resolveJoinKeys(streamJoinKeys, buildJoinKeys);
+        this.streamJoinKeys = resolveKeys.getLeft();
+        this.buildJoinKeys = resolveKeys.getRight();
+
         List<BoundReference> childSchema = Utils.combineDistinct(stream.schema(), build.schema());
         Map<Long, Integer> inputs = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
         this.conditions = ReferenceResolveHelper.resolveExpression(conditions, inputs);
@@ -66,11 +69,14 @@ public class PhysicalNestedLoopJoin implements PhysicalPlan {
         pruneChild(build, useSchema);
     }
 
-    private void pruneChild(PhysicalPlan child, List<BoundReference> useSchema) {
-        List<BoundReference> childSchema = child.schema();
-        Map<Long, Integer> childMap = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
-        List<BoundReference> conditionsUseSchema = Utils.toImmutableList(useSchema.stream().filter(r -> childMap.containsKey(r.exprId)));
-        List<BoundReference> parentUseSchema = Utils.toImmutableList(schema.stream().filter(r -> childMap.containsKey(r.exprId)));
-        child.prune(Utils.combineDistinct(conditionsUseSchema, parentUseSchema), false);
+    @Override
+    public PhysicalNestedLoopJoin copyWithNewChildren(List<PhysicalPlan> children) {
+        Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
+        return new PhysicalNestedLoopJoin(schema, conditions, streamJoinKeys, buildJoinKeys, children.get(0), children.get(1), context);
+    }
+
+    @Override
+    public Pair<List<Expression>, List<Expression>> joinKeys() {
+        return Pair.of(streamJoinKeys, buildJoinKeys);
     }
 }

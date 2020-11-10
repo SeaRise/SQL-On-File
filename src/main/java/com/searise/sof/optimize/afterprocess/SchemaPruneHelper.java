@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface SchemaPruneHelper {
+    // isTop用来指代是否最顶端的plan.
+    // 因为最顶端的plan是不需要剪枝的.
     void prune(List<BoundReference> father, boolean isTop);
 
     static List<BoundReference> extractUseSchema(List<Expression> exprs) {

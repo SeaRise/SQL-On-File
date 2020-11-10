@@ -21,7 +21,7 @@ import static com.searise.sof.analyse.AnalysisHelper.isEqualTo;
 import static com.searise.sof.expression.Function.*;
 import static com.searise.sof.type.DataType.*;
 
-public class ResolveScalarFunction implements Rule {
+public class ResolveScalarFunction implements Rule<LogicalPlan> {
     @Override
     public LogicalPlan apply(LogicalPlan plan) {
         return plan.transformUp((Applicable<LogicalPlan>) p -> {

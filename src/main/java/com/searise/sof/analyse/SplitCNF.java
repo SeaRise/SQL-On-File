@@ -10,7 +10,7 @@ import com.searise.sof.plan.logic.LogicalPlan;
 
 import java.util.List;
 
-public class SplitCNF implements Rule {
+public class SplitCNF implements Rule<LogicalPlan> {
     @Override
     public LogicalPlan apply(LogicalPlan plan) {
         return plan.transformUp((Applicable<LogicalPlan>) p -> {

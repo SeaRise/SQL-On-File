@@ -1,90 +1,47 @@
 package com.searise.sof.plan.physics;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Preconditions;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
-import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.expression.attribute.BoundReference;
-import com.searise.sof.expression.compare.EqualTo;
 import com.searise.sof.optimize.afterprocess.ReferenceResolveHelper;
 import com.searise.sof.optimize.afterprocess.SchemaPruneHelper;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class PhysicalHashJoin implements PhysicalPlan {
-    public List<BoundReference> schema;
+public class PhysicalHashJoin extends PhysicalJoin {
     public List<Expression> otherConditions;
     public List<Expression> streamJoinKeys;
     public List<Expression> buildJoinKeys;
-    public final PhysicalPlan stream;
-    public final PhysicalPlan build;
-    public final Context context;
 
     public PhysicalHashJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build, Context context) {
-        this.schema = schema;
-        this.stream = stream;
-        this.build = build;
-        this.context = context;
+        super(schema, stream, build, context);
 
-        Set<Long> streamIds = stream.schema().stream().map(r -> r.exprId).collect(Collectors.toSet());
-        Set<Long> buildIds = build.schema().stream().map(r -> r.exprId).collect(Collectors.toSet());
-        Triple<List<Expression>, List<Expression>, List<Expression>> splits = splits(conditions, streamIds, buildIds);
+        Triple<List<Expression>, List<Expression>, List<Expression>> splits = splits(conditions);
         streamJoinKeys = splits.getLeft();
         buildJoinKeys = splits.getMiddle();
         otherConditions = splits.getRight();
         Utils.checkArgument(streamJoinKeys.size() == buildJoinKeys.size(), "streamJoinKeys.size must equal to buildJoinKeys.size");
     }
 
-    // streamKeys, buildKeys, otherConditions
-    private Triple<List<Expression>, List<Expression>, List<Expression>> splits(List<Expression> conditions, Set<Long> streamIds, Set<Long> buildIds) {
-        ImmutableList.Builder<Expression> otherCondBuilder = ImmutableList.builder();
-        ImmutableList.Builder<Expression> streamKeyBuilder = ImmutableList.builder();
-        ImmutableList.Builder<Expression> buildKeyBuilder = ImmutableList.builder();
-        for (Expression condition : conditions) {
-            boolean isOtherCond = true;
-            if (condition.getClass() == EqualTo.class) {
-                EqualTo equalTo = (EqualTo) condition;
-                if (equalTo.left.getClass() == Attribute.class && equalTo.right.getClass() == Attribute.class) {
-                    Attribute attr1 = (Attribute) equalTo.left;
-                    Attribute attr2 = (Attribute) equalTo.right;
-                    if (streamIds.contains(attr1.exprId) && buildIds.contains(attr2.exprId)) {
-                        streamKeyBuilder.add(attr1);
-                        buildKeyBuilder.add(attr2);
-                        isOtherCond = false;
-                    } else if (streamIds.contains(attr2.exprId) && buildIds.contains(attr1.exprId)) {
-                        streamKeyBuilder.add(attr2);
-                        buildKeyBuilder.add(attr1);
-                        isOtherCond = false;
-                    } else {
-                        // just else.
-                    }
-                }
-            }
-            if (isOtherCond) {
-                otherCondBuilder.add(condition);
-            }
-        }
-        return Triple.of(streamKeyBuilder.build(), buildKeyBuilder.build(), otherCondBuilder.build());
-    }
-
-    @Override
-    public Context context() {
-        return context;
-    }
-
-    @Override
-    public List<BoundReference> schema() {
-        return schema;
-    }
-
-    @Override
-    public List<PhysicalPlan> children() {
-        return ImmutableList.of(stream, build);
+    private PhysicalHashJoin(
+            List<BoundReference> schema,
+            PhysicalPlan stream,
+            PhysicalPlan build,
+            List<Expression> otherConditions,
+            List<Expression> streamJoinKeys,
+            List<Expression> buildJoinKeys,
+            Context context) {
+        super(schema, stream, build, context);
+        this.streamJoinKeys = streamJoinKeys;
+        this.buildJoinKeys = buildJoinKeys;
+        this.otherConditions = otherConditions;
     }
 
     @Override
@@ -92,11 +49,9 @@ public class PhysicalHashJoin implements PhysicalPlan {
         stream.resolveIndex();
         build.resolveIndex();
 
-        Map<Long, Integer> streamInputs = Utils.zip(index -> stream.schema().get(index).exprId, stream.schema().size());
-        this.streamJoinKeys = ReferenceResolveHelper.resolveExpression(streamJoinKeys, streamInputs);
-
-        Map<Long, Integer> buildInputs = Utils.zip(index -> build.schema().get(index).exprId, build.schema().size());
-        this.buildJoinKeys = ReferenceResolveHelper.resolveExpression(buildJoinKeys, buildInputs);
+        Pair<List<Expression>, List<Expression>> resolveKeys = resolveJoinKeys(streamJoinKeys, buildJoinKeys);
+        this.streamJoinKeys = resolveKeys.getLeft();
+        this.buildJoinKeys = resolveKeys.getRight();
 
         List<BoundReference> childSchema = Utils.combineDistinct(stream.schema(), build.schema());
         Map<Long, Integer> inputs = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
@@ -127,11 +82,14 @@ public class PhysicalHashJoin implements PhysicalPlan {
         pruneChild(build, useSchema);
     }
 
-    private void pruneChild(PhysicalPlan child, List<BoundReference> useSchema) {
-        List<BoundReference> childSchema = child.schema();
-        Map<Long, Integer> childMap = Utils.zip(index -> childSchema.get(index).exprId, childSchema.size());
-        List<BoundReference> conditionsUseSchema = Utils.toImmutableList(useSchema.stream().filter(r -> childMap.containsKey(r.exprId)));
-        List<BoundReference> parentUseSchema = Utils.toImmutableList(schema.stream().filter(r -> childMap.containsKey(r.exprId)));
-        child.prune(Utils.combineDistinct(conditionsUseSchema, parentUseSchema), false);
+    @Override
+    public PhysicalHashJoin copyWithNewChildren(List<PhysicalPlan> children) {
+        Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 2);
+        return new PhysicalHashJoin(schema, children.get(0), children.get(1), otherConditions, streamJoinKeys, buildJoinKeys, context);
+    }
+
+    @Override
+    public Pair<List<Expression>, List<Expression>> joinKeys() {
+        return Pair.of(streamJoinKeys, buildJoinKeys);
     }
 }

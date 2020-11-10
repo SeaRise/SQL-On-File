@@ -24,8 +24,8 @@ public class Analyzer {
     }
 
     public LogicalPlan analyse(LogicalPlan parsePlan) {
-        LogicalPlan preApplyPlan = parsePlan;
-        LogicalPlan applyingPlan = parsePlan;
+        AnalysisHelper preApplyPlan = parsePlan;
+        AnalysisHelper applyingPlan = parsePlan;
         for (List<Rule> batch : ruleBatches) {
             while (true) {
                 for (Rule rule : batch) {
@@ -37,7 +37,9 @@ public class Analyzer {
                 preApplyPlan = applyingPlan;
             }
         }
-        Utils.checkArgument(applyingPlan.resolved(), "logical plan has not yet resolved: \n" + applyingPlan.visitToString());
-        return applyingPlan;
+
+        LogicalPlan analyzedPlan = (LogicalPlan) applyingPlan;
+        Utils.checkArgument(applyingPlan.resolved(), "logical plan has not yet resolved: \n" + analyzedPlan.visitToString());
+        return analyzedPlan;
     }
 }

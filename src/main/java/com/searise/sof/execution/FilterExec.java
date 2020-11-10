@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.searise.sof.codegen.exec.Codegen;
 import com.searise.sof.codegen.exec.CodegenContext;
 import com.searise.sof.codegen.exec.ExecCode;
+import com.searise.sof.codegen.exec.ParamGenerator;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Predication;
 import com.searise.sof.core.Projection;
@@ -22,52 +23,55 @@ import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
 public class FilterExec extends Codegen implements Executor {
 
     private final Executor child;
-    private final Projection schemaProjection;
-    private final Predication predication;
+    private final List<Expression> conditions;
+    private final List<BoundReference> schema;
     public final Context context;
 
     public FilterExec(Executor child, List<Expression> conditions, List<BoundReference> schema, Context context) {
         this.child = child;
         this.context = context;
-        InternalRow output = new ArrayRow(schema.size());
-        this.schemaProjection = new Projection(Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)), output, context);
-        this.predication = new Predication(conditions, context);
-    }
-
-    private FilterExec(Executor child, Projection schemaProjection, Predication predication, Context context) {
-        this.child = child;
-        this.schemaProjection = schemaProjection;
-        this.predication = predication;
-        this.context = context;
+        this.conditions = conditions;
+        this.schema = schema;
     }
 
     @Override
-    public void open() {
-        child.open();
-    }
+    public RowIterator compute(int partition) {
+        RowIterator childRowIterator = child.compute(partition);
+        return new RowIterator() {
+            private final Projection schemaProjection = new Projection(
+                    Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)),
+                    new ArrayRow(schema.size()), context);
+            private final Predication predication = new Predication(conditions, context);
 
-    @Override
-    public boolean hasNext() {
-        return child.hasNext();
-    }
+            @Override
+            public void open() {
+                childRowIterator.open();
+            }
 
-    @Override
-    public InternalRow next() {
-        InternalRow input = child.next();
-        if (input == EMPTY_ROW) {
-            return EMPTY_ROW;
-        }
+            @Override
+            public boolean hasNext() {
+                return childRowIterator.hasNext();
+            }
 
-        if (!predication.apply(input)) {
-            return EMPTY_ROW;
-        }
+            @Override
+            public InternalRow next() {
+                InternalRow input = childRowIterator.next();
+                if (input == EMPTY_ROW) {
+                    return EMPTY_ROW;
+                }
 
-        return schemaProjection.apply(input);
-    }
+                if (!predication.apply(input)) {
+                    return EMPTY_ROW;
+                }
 
-    @Override
-    public void close() {
-        child.close();
+                return schemaProjection.apply(input);
+            }
+
+            @Override
+            public void close() {
+                childRowIterator.close();
+            }
+        };
     }
 
     @Override
@@ -78,33 +82,58 @@ public class FilterExec extends Codegen implements Executor {
     @Override
     public Executor copyWithNewChildren(List<Executor> children) {
         Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 1);
-        return new FilterExec(child, schemaProjection, predication, context);
+        return new FilterExec(child, conditions, schema, context);
     }
 
     @Override
     public ExecCode genCode(CodegenContext context, ExecCode child) {
-        List<Object> params = combine(schemaProjection, predication, child.params);
-        List<String> paramNames = combine(
-                context.genVar(variablePrefix, "schemaProjection"),
-                context.genVar(variablePrefix, "predication"),
-                child.paramNames);
-        List<Class> paramClasses = combine(Projection.class, Predication.class, child.paramClasses);
+        List<ParamGenerator> paramGenerators = combine(new ParamGenerator() {
+            private final String name = context.genVar(variablePrefix, "schemaProjection");
+            @Override
+            public String name() {
+                return name;
+            }
+            @Override
+            public Class clazz() {
+                return Projection.class;
+            }
+            @Override
+            public Object gen() {
+                return new Projection(
+                        Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)),
+                        new ArrayRow(schema.size()), FilterExec.this.context);
+            }
+        }, new ParamGenerator() {
+            private final String name = context.genVar(variablePrefix, "predication");
+            @Override
+            public String name() {
+                return name;
+            }
+            @Override
+            public Class clazz() {
+                return Predication.class;
+            }
+            @Override
+            public Object gen() {
+                return new Predication(conditions, FilterExec.this.context);
+            }
+        }, child.paramGenerators);
 
         String input = child.output;
         String output = context.genVar(variablePrefix, "output");
         String codeTemplate =
                 "if (%s == EMPTY_ROW) {\n" +
-                "    return EMPTY_ROW;\n" +
-                "}\n" +
-                "\n" +
-                "if (!predication.apply(%s)) {\n" +
-                "    return EMPTY_ROW;\n" +
-                "}" +
-                "\n" +
-                "%s = schemaProjection.apply(%s)\n";
+                        "    return EMPTY_ROW;\n" +
+                        "}\n" +
+                        "\n" +
+                        "if (!predication.apply(%s)) {\n" +
+                        "    return EMPTY_ROW;\n" +
+                        "}" +
+                        "\n" +
+                        "%s = schemaProjection.apply(%s)\n";
         String code = String.format(codeTemplate, input, input, output, input);
 
-        return new ExecCode(code, output, params, paramNames, paramClasses, child.paramClasses);
+        return new ExecCode(code, output, paramGenerators, child.importClasses);
     }
 
     private static <T> List<T> combine(T t1, T t2, List<T> t3) {

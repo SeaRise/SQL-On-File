@@ -112,4 +112,10 @@ public class PhysicalProject implements PhysicalPlan {
         this.projectList = RemoveAliasHelper.doRemoveAlias(projectList);
         child.removeAlias();
     }
+
+    @Override
+    public PhysicalProject copyWithNewChildren(List<PhysicalPlan> children) {
+        Preconditions.checkArgument(Objects.nonNull(children) && children.size() == 1);
+        return new PhysicalProject(schema, projectList, children.get(0), context);
+    }
 }

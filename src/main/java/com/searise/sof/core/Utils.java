@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
@@ -16,6 +17,18 @@ import java.util.stream.Stream;
 public class Utils {
     public static void println(String str) {
         System.out.println(str);
+    }
+
+    public static <T> List<Pair<Integer, T>> zip(List<T> list) {
+        if (Objects.isNull(list) || list.isEmpty()) {
+            return ImmutableList.of();
+        }
+
+        ImmutableList.Builder<Pair<Integer, T>> builder = ImmutableList.builder();
+        for (int i = 0; i < list.size(); i++) {
+            builder.add(Pair.of(i, list.get(i)));
+        }
+        return builder.build();
     }
 
     public static Map<Long, Integer> zip(ExprIdGetter exprIdGetter, int size) {
