@@ -42,18 +42,20 @@ public class OptimizerSuite {
         doTest(
                 "set sof_force_join_type=loop;select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a where a.d > 4.0 and b.c < 11.0",
                 "PhysicalNestedLoopJoin [DoubleType:exprId->0:index->0,DoubleType:exprId->5:index->3,DoubleType:exprId->2:index->1,DoubleType:exprId->7:index->4] [DoubleType:exprId->0:index->0 == DoubleType:exprId->4:index->2:BooleanType]\n" +
-                        "  PhysicalFilter [DoubleType:exprId->0:index->1,DoubleType:exprId->2:index->2] [DoubleType:exprId->3:index->0 > literal:4.0:DoubleType:BooleanType]\n" +
-                        "    PhysicalScan [DoubleType:exprId->3:index->3,DoubleType:exprId->0:index->0,DoubleType:exprId->2:index->2] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)\n" +
-                        "  PhysicalFilter [DoubleType:exprId->4:index->1,DoubleType:exprId->5:index->2,DoubleType:exprId->7:index->3] [DoubleType:exprId->6:index->0 < literal:11.0:DoubleType:BooleanType]\n" +
-                        "    PhysicalScan [DoubleType:exprId->6:index->2,DoubleType:exprId->4:index->0,DoubleType:exprId->5:index->1,DoubleType:exprId->7:index->3] [src\\test\\resources\\input.txt|,] (attribute:4:DoubleType,attribute:5:DoubleType,attribute:6:DoubleType,attribute:7:DoubleType)"
+                        "  Exchange [DoubleType:exprId->0:index->1,DoubleType:exprId->2:index->2] [DoubleType:exprId->0:index->0] [0]\n" +
+                        "    PhysicalFilter [DoubleType:exprId->0:index->1,DoubleType:exprId->2:index->2] [DoubleType:exprId->3:index->0 > literal:4.0:DoubleType:BooleanType]\n" +
+                        "      PhysicalScan [DoubleType:exprId->3:index->3,DoubleType:exprId->0:index->0,DoubleType:exprId->2:index->2] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)\n" +
+                        "  Exchange [DoubleType:exprId->4:index->1,DoubleType:exprId->5:index->2,DoubleType:exprId->7:index->3] [DoubleType:exprId->4:index->0] [1]\n" +
+                        "    PhysicalFilter [DoubleType:exprId->4:index->1,DoubleType:exprId->5:index->2,DoubleType:exprId->7:index->3] [DoubleType:exprId->6:index->0 < literal:11.0:DoubleType:BooleanType]\n" +
+                        "      PhysicalScan [DoubleType:exprId->6:index->2,DoubleType:exprId->4:index->0,DoubleType:exprId->5:index->1,DoubleType:exprId->7:index->3] [src\\test\\resources\\input.txt|,] (attribute:4:DoubleType,attribute:5:DoubleType,attribute:6:DoubleType,attribute:7:DoubleType)"
         );
         doTest(
                 "set sof_force_join_type=hash;select a.a, b.b, a.c, b.d from a as a join a as b on a.a = b.a where a.d > 4.0 and b.c < 11.0",
                 "PhysicalHashJoin [DoubleType:exprId->0:index->0,DoubleType:exprId->5:index->3,DoubleType:exprId->2:index->1,DoubleType:exprId->7:index->4], stream: [DoubleType:exprId->0:index->0], build: [DoubleType:exprId->4:index->0], others: [] \n" +
-                        "  Exchange [DoubleType:exprId->0:index->1,DoubleType:exprId->2:index->2] [DoubleType:exprId->0:index->0]\n" +
+                        "  Exchange [DoubleType:exprId->0:index->1,DoubleType:exprId->2:index->2] [DoubleType:exprId->0:index->0] [0]\n" +
                         "    PhysicalFilter [DoubleType:exprId->0:index->1,DoubleType:exprId->2:index->2] [DoubleType:exprId->3:index->0 > literal:4.0:DoubleType:BooleanType]\n" +
                         "      PhysicalScan [DoubleType:exprId->3:index->3,DoubleType:exprId->0:index->0,DoubleType:exprId->2:index->2] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)\n" +
-                        "  Exchange [DoubleType:exprId->4:index->1,DoubleType:exprId->5:index->2,DoubleType:exprId->7:index->3] [DoubleType:exprId->4:index->0]\n" +
+                        "  Exchange [DoubleType:exprId->4:index->1,DoubleType:exprId->5:index->2,DoubleType:exprId->7:index->3] [DoubleType:exprId->4:index->0] [1]\n" +
                         "    PhysicalFilter [DoubleType:exprId->4:index->1,DoubleType:exprId->5:index->2,DoubleType:exprId->7:index->3] [DoubleType:exprId->6:index->0 < literal:11.0:DoubleType:BooleanType]\n" +
                         "      PhysicalScan [DoubleType:exprId->6:index->2,DoubleType:exprId->4:index->0,DoubleType:exprId->5:index->1,DoubleType:exprId->7:index->3] [src\\test\\resources\\input.txt|,] (attribute:4:DoubleType,attribute:5:DoubleType,attribute:6:DoubleType,attribute:7:DoubleType)"
         );
@@ -103,13 +105,17 @@ public class OptimizerSuite {
         doTest(
                 "select a.a, b.a, c.a, d.a from a join b on a.a = b.b join c on c.c = b.b and c.c = a.a join d on d.a = a.a and d.a = c.c",
                 "PhysicalHashJoin [DoubleType:exprId->0:index->0,DoubleType:exprId->4:index->2,DoubleType:exprId->8:index->3,DoubleType:exprId->12:index->4], stream: [DoubleType:exprId->0:index->0, DoubleType:exprId->10:index->1], build: [DoubleType:exprId->12:index->0, DoubleType:exprId->12:index->0], others: [] \n" +
-                        "  Exchange [DoubleType:exprId->0:index->1,DoubleType:exprId->10:index->3,DoubleType:exprId->4:index->2,DoubleType:exprId->8:index->4] [DoubleType:exprId->0:index->0, DoubleType:exprId->10:index->1]\n" +
+                        "  Exchange [DoubleType:exprId->0:index->1,DoubleType:exprId->10:index->3,DoubleType:exprId->4:index->2,DoubleType:exprId->8:index->4] [DoubleType:exprId->0:index->0, DoubleType:exprId->10:index->1] [4]\n" +
                         "    PhysicalHashJoin [DoubleType:exprId->0:index->1,DoubleType:exprId->10:index->3,DoubleType:exprId->4:index->2,DoubleType:exprId->8:index->4], stream: [DoubleType:exprId->5:index->0, DoubleType:exprId->0:index->1], build: [DoubleType:exprId->10:index->0, DoubleType:exprId->10:index->0], others: [] \n" +
-                        "      PhysicalHashJoin [DoubleType:exprId->5:index->1,DoubleType:exprId->0:index->0,DoubleType:exprId->4:index->2], stream: [DoubleType:exprId->0:index->0], build: [DoubleType:exprId->5:index->0], others: [] \n" +
-                        "        PhysicalScan [DoubleType:exprId->0:index->0] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)\n" +
-                        "        PhysicalScan [DoubleType:exprId->5:index->1,DoubleType:exprId->4:index->0] [src\\test\\resources\\input.txt|,] (attribute:4:DoubleType,attribute:5:DoubleType,attribute:6:DoubleType,attribute:7:DoubleType)\n" +
-                        "      PhysicalScan [DoubleType:exprId->10:index->2,DoubleType:exprId->8:index->0] [src\\test\\resources\\input.txt|,] (attribute:8:DoubleType,attribute:9:DoubleType,attribute:10:DoubleType,attribute:11:DoubleType)\n" +
-                        "  Exchange [DoubleType:exprId->12:index->0] [DoubleType:exprId->12:index->0, DoubleType:exprId->12:index->0]\n" +
+                        "      Exchange [DoubleType:exprId->5:index->1,DoubleType:exprId->0:index->0,DoubleType:exprId->4:index->2] [DoubleType:exprId->5:index->0, DoubleType:exprId->0:index->1] [2]\n" +
+                        "        PhysicalHashJoin [DoubleType:exprId->5:index->1,DoubleType:exprId->0:index->0,DoubleType:exprId->4:index->2], stream: [DoubleType:exprId->0:index->0], build: [DoubleType:exprId->5:index->0], others: [] \n" +
+                        "          Exchange [DoubleType:exprId->0:index->0] [DoubleType:exprId->0:index->0] [0]\n" +
+                        "            PhysicalScan [DoubleType:exprId->0:index->0] [src\\test\\resources\\input.txt|,] (attribute:0:DoubleType,attribute:1:DoubleType,attribute:2:DoubleType,attribute:3:DoubleType)\n" +
+                        "          Exchange [DoubleType:exprId->5:index->1,DoubleType:exprId->4:index->0] [DoubleType:exprId->5:index->0] [1]\n" +
+                        "            PhysicalScan [DoubleType:exprId->5:index->1,DoubleType:exprId->4:index->0] [src\\test\\resources\\input.txt|,] (attribute:4:DoubleType,attribute:5:DoubleType,attribute:6:DoubleType,attribute:7:DoubleType)\n" +
+                        "      Exchange [DoubleType:exprId->10:index->2,DoubleType:exprId->8:index->0] [DoubleType:exprId->10:index->0, DoubleType:exprId->10:index->0] [3]\n" +
+                        "        PhysicalScan [DoubleType:exprId->10:index->2,DoubleType:exprId->8:index->0] [src\\test\\resources\\input.txt|,] (attribute:8:DoubleType,attribute:9:DoubleType,attribute:10:DoubleType,attribute:11:DoubleType)\n" +
+                        "  Exchange [DoubleType:exprId->12:index->0] [DoubleType:exprId->12:index->0, DoubleType:exprId->12:index->0] [5]\n" +
                         "    PhysicalScan [DoubleType:exprId->12:index->0] [src\\test\\resources\\input.txt|,] (attribute:12:DoubleType,attribute:13:DoubleType,attribute:14:DoubleType,attribute:15:DoubleType)"
         );
     }

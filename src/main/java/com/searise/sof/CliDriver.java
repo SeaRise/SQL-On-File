@@ -1,5 +1,6 @@
 package com.searise.sof;
 
+import com.searise.sof.core.Utils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Scanner;
@@ -28,7 +29,7 @@ public class CliDriver {
                 driver.compile(cmd);
             } catch (Exception e) {
                 driver.stop();
-                System.out.println(e.getMessage());
+                Utils.println(e.getMessage());
             }
         }
     }

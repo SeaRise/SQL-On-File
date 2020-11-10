@@ -1,5 +1,6 @@
 package com.searise.sof.shuffle.io;
 
+import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.shuffle.MapOutputTracker;
@@ -16,6 +17,8 @@ public class ShuffleWriter {
     private final ShuffleStore shuffleStore = new ShuffleStore();
     private final int reduceNum;
 
+    private volatile boolean isCommitted = false;
+
     public ShuffleWriter(List<Expression> shuffleKeys, long shuffleId, int mapId, MapOutputTracker tracker, int reduceNum) {
         this.shuffleKeys = shuffleKeys;
         this.shuffleId = shuffleId;
@@ -25,16 +28,19 @@ public class ShuffleWriter {
     }
 
     public void write(InternalRow row) {
+        Utils.checkArgument(!isCommitted, "shuffleWriter has committed");
+
         int reduceId = hashKey(row);
-//        System.out.println(shuffleKeys);
-//        System.out.println(reduceId);
-//        System.out.println(row);
         // row需要copy, 因为写入的internalRow可能还有其他地方修改.
         shuffleStore.write(reduceId, row.copy());
     }
 
     private int hashKey(InternalRow row) {
-        return hashKey(row, shuffleKeys, reduceNum);
+        int hashKey = hashKey(row, shuffleKeys, reduceNum);
+        Utils.checkArgument(hashKey >= 0 && hashKey < reduceNum,
+                String.format("shuffleId(%s), row(%s), keys(%s), hashKey (%s) < 0 || >= " + reduceNum,
+                        shuffleId, row, shuffleKeys, hashKey));
+        return hashKey;
     }
 
     public static int hashKey(InternalRow row, List<Expression> shuffleKeys, int reduceNum) {
@@ -43,10 +49,16 @@ public class ShuffleWriter {
             Object value = shuffleKey.eval(row);
             hashCode = 31 * hashCode + (Objects.isNull(value) ? 0 : value.hashCode());
         }
+        if (hashCode < 0) {
+            hashCode = -hashCode;
+        }
         return hashCode % reduceNum;
     }
 
     public void commit() {
+        Utils.checkArgument(!isCommitted, "shuffleWriter has committed");
+        isCommitted = true;
+
         MapStatus mapStatus = new MapStatus(shuffleStore, shuffleId, mapId);
         tracker.registerMapOutput(shuffleId, mapId, mapStatus);
     }

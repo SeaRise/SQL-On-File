@@ -55,7 +55,6 @@ public class DagScheduler {
             while (isRunning) {
                 try {
                     Event event = Utils.checkNotNull(pendingQueue.take(), "taskResult is null");
-//                    System.out.println(event);
                     if (event instanceof TaskStatusUpdate) {
                         TaskStatusUpdate taskStatusUpdate = (TaskStatusUpdate) event;
                         doStatusUpdate(taskStatusUpdate.taskResult);

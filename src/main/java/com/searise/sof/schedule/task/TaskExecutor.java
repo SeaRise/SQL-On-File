@@ -2,6 +2,7 @@ package com.searise.sof.schedule.task;
 
 import com.searise.sof.core.Conf;
 import com.searise.sof.core.Context;
+import com.searise.sof.core.Utils;
 
 import java.util.LinkedList;
 import java.util.Objects;
@@ -22,8 +23,7 @@ public class TaskExecutor {
     private final TaskScheduler taskScheduler;
 
     public TaskExecutor(Context context, TaskScheduler taskScheduler) {
-//        this.maxRunningNum = context.conf.getIntConf(Conf.MAX_PARALLELISM);
-        this.maxRunningNum = 1;
+        this.maxRunningNum = context.conf.getIntConf(Conf.MAX_PARALLELISM);
         this.taskScheduler = taskScheduler;
     }
 
@@ -99,7 +99,7 @@ public class TaskExecutor {
             task.runTask();
             taskScheduler.statusUpdate(TaskResult.success(task.stageId, task.partition));
         } catch (Throwable e) {
-            System.out.println(e.getMessage());
+            Utils.println(e.getMessage());
             taskScheduler.statusUpdate(TaskResult.fail(e, task.stageId, task.partition));
         } finally {
             synchronized (this) {

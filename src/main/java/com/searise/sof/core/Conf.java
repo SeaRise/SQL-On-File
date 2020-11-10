@@ -22,7 +22,7 @@ public class Conf {
     private static final String WRITE_FLUSH_THRESHOLD_DEFAULT_VALUE = "100"; // 1000 bytes.
 
     public static final String MAX_PARALLELISM = "sof_max_parallelism";
-    private static final String MAX_PARALLELISM_DEFAULT_VALUE = "2";
+    private static final String MAX_PARALLELISM_DEFAULT_VALUE = "10";
 
     public Conf() {
         setConf(FORCE_JOIN_TYPE, FORCE_JOIN_TYPE_DEFAULT_VALUE);
