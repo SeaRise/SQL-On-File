@@ -82,14 +82,17 @@ public class ProjectExec extends Codegen implements Executor {
     public ExecCode genCode(CodegenContext context, ExecCode child) {
         List<ParamGenerator> paramGenerators = combine(new ParamGenerator() {
             private final String name = context.genVar(variablePrefix, "projection");
+
             @Override
             public String name() {
                 return name;
             }
+
             @Override
             public Class clazz() {
                 return Projection.class;
             }
+
             @Override
             public Object gen() {
                 return new Projection(projectList, new ArrayRow(schema.size()), ProjectExec.this.context);
@@ -100,10 +103,10 @@ public class ProjectExec extends Codegen implements Executor {
         String output = context.genVar(variablePrefix, "output");
         String codeTemplate =
                 "if (%s == EMPTY_ROW) {\n" +
-                "    return EMPTY_ROW;\n" +
-                "}\n" +
-                "\n" +
-                "%s = projection.apply(%s)\n";
+                        "    return EMPTY_ROW;\n" +
+                        "}\n" +
+                        "\n" +
+                        "%s = projection.apply(%s)\n";
         String code = String.format(codeTemplate, input, output, input);
 
         return new ExecCode(code, output, paramGenerators, child.importClasses);

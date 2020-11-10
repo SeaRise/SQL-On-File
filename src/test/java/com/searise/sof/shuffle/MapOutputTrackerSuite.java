@@ -67,7 +67,7 @@ public class MapOutputTrackerSuite {
                     Iterator<InternalRow> iterator = reader.iterator();
                     while (iterator.hasNext()) {
                         InternalRow row = iterator.next();
-                        int parseReduceId =  ShuffleWriter.hashKey(row, keys, reducePartitions);
+                        int parseReduceId = ShuffleWriter.hashKey(row, keys, reducePartitions);
                         String key = expressions.get(0).eval(row) + "_" + parseReduceId;
                         synchronized (multiMap) {
                             Preconditions.checkArgument(parseReduceId == finalReduceId,

@@ -7,14 +7,30 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Stream;
 
 public class Utils {
+    public static List<File> listFiles(File dir) {
+        Utils.checkArgument(!dir.exists() || dir.isDirectory(),
+                String.format("path(%s) must be directory!", dir.getPath()));
+        if (!dir.exists()) {
+            return ImmutableList.of();
+        }
+
+        File[] files = dir.listFiles(Utils.fileFilter());
+        if (Objects.isNull(files) || files.length <= 0) {
+            return ImmutableList.of();
+        }
+        return ImmutableList.copyOf(files);
+    }
+
+    public static FilenameFilter fileFilter() {
+        return (dir, name) -> !StringUtils.startsWith(name, ".") &&
+                !StringUtils.startsWith(name, "_");
+    }
+
     public static void println(String str) {
         System.out.println(str);
     }

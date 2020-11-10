@@ -89,14 +89,17 @@ public class FilterExec extends Codegen implements Executor {
     public ExecCode genCode(CodegenContext context, ExecCode child) {
         List<ParamGenerator> paramGenerators = combine(new ParamGenerator() {
             private final String name = context.genVar(variablePrefix, "schemaProjection");
+
             @Override
             public String name() {
                 return name;
             }
+
             @Override
             public Class clazz() {
                 return Projection.class;
             }
+
             @Override
             public Object gen() {
                 return new Projection(
@@ -105,14 +108,17 @@ public class FilterExec extends Codegen implements Executor {
             }
         }, new ParamGenerator() {
             private final String name = context.genVar(variablePrefix, "predication");
+
             @Override
             public String name() {
                 return name;
             }
+
             @Override
             public Class clazz() {
                 return Predication.class;
             }
+
             @Override
             public Object gen() {
                 return new Predication(conditions, FilterExec.this.context);

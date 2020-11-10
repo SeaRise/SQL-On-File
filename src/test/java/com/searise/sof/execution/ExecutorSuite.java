@@ -154,7 +154,7 @@ public class ExecutorSuite {
         LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
 
-        Preconditions.checkArgument(physicalPlan.partitions() >  0);
+        Preconditions.checkArgument(physicalPlan.partitions() > 0);
 
         StringBuffer resultBuilder = new StringBuffer();
         context.runPlan(physicalPlan, (partition, iterator) -> {

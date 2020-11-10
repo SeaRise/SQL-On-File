@@ -1,6 +1,5 @@
 package com.searise.sof.plan.physics;
 
-import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.Attribute;
@@ -12,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class PhysicalScan implements PhysicalPlan {
@@ -30,31 +28,21 @@ public class PhysicalScan implements PhysicalPlan {
         this.filePath = filePath;
         this.separator = separator;
         this.context = context;
-        this.splits = getSplits(filePath);
+        this.splits = getSplits();
+    }
+
+    // filePath是一级目录
+    // 下面的都是文件.
+    private List<String> getSplits() {
+        Utils.checkArgument(StringUtils.isNotBlank(filePath), "filePath is blank!");
+        File file = new File(filePath);
+        Utils.checkArgument(!file.exists() || file.isDirectory(), String.format("path(%s) must be directory!", filePath));
+        return getSplits(filePath);
     }
 
     private List<String> getSplits(String filePath) {
-        File file = new File(filePath);
-        if (!file.exists()) {
-            return ImmutableList.of();
-        }
-
-        if (file.isFile()) {
-            return ImmutableList.of(filePath);
-        }
-
-        String[] children = file.list((dir, name) ->
-                !StringUtils.startsWith(name, ".") &&
-                        !StringUtils.startsWith(name, "_"));
-        if (Objects.isNull(children) || children.length <= 0) {
-            return ImmutableList.of();
-        }
-
-        ImmutableList.Builder<String> builder = ImmutableList.builder();
-        for (String child : children) {
-            builder.addAll(getSplits(child));
-        }
-        return builder.build();
+        return Utils.toImmutableList(Utils.listFiles(new File(filePath)).stream().
+                filter(f -> f.exists() && f.isFile()).map(File::getPath));
     }
 
     @Override

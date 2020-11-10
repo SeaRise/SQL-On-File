@@ -82,7 +82,10 @@ public class SizeInBytesStatsVisitor {
 
     private static Statistics visitRelation(Relation relation, List<Statistics> children) {
         String filePath = relation.catalogTable.filePath;
-        File file = new File(filePath);
-        return new Statistics(new BigInteger(file.length() + ""));
+        BigInteger sizeInBytes = new BigInteger("0");
+        for (File file : Utils.listFiles(new File(filePath))) {
+            sizeInBytes = sizeInBytes.add(new BigInteger(file.length() + ""));
+        }
+        return new Statistics(sizeInBytes);
     }
 }

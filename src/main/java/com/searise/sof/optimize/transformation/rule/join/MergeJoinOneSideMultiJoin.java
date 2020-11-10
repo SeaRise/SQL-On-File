@@ -17,7 +17,7 @@ import com.searise.sof.plan.logic.MultiJoin;
 import java.util.List;
 
 /**
- *      join                     multi-join
+ * join                     multi-join
  * |            \     ---->     |    |   \
  * multi-join    b              c    d    b
  * |     \

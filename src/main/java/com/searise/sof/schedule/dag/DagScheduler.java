@@ -159,7 +159,7 @@ public class DagScheduler {
             return;
         }
 
-        Executor executor =  builder.build(stage.plan);
+        Executor executor = builder.build(stage.plan);
         List<Task> tasks = Utils.toImmutableList(partitionsToCompute.stream().
                 map(partition -> stage.buildTask(executor, partition)));
         taskScheduler.submit(tasks);

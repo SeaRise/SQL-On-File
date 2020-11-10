@@ -14,6 +14,6 @@ public class TestCatalog implements Catalog {
                         , new StructField("c", DoubleType)
                         , new StructField("d", DoubleType)
                 ),
-                "src\\test\\resources\\input.txt", ",");
+                "src\\test\\resources\\in", ",");
     }
 }

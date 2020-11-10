@@ -86,7 +86,7 @@ public class CodeGenerator {
 
         return clazz.generate(child, execCode.paramGenerators);
     }
-    
+
     private static String genParamsCode(ExecCode execCode) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < execCode.paramGenerators.size(); i++) {

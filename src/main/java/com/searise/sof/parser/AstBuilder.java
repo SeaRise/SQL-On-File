@@ -17,6 +17,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,6 +47,7 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
         String table = ctx.tablenName.getText();
         Pair<String, String> fileMeta = visitFileMetaClause(ctx.fileMetaClause());
         String filePath = fileMeta.getLeft();
+        checkFilePath(filePath);
         String separator = fileMeta.getRight();
         LogicalPlan query = typedVisit(ctx.selectStatement());
         return new CreateTableAsSelect(context, table, filePath, separator, query);
@@ -85,9 +87,14 @@ public class AstBuilder extends SqlBaseBaseVisitor<Object> {
         Pair<String, String> fileMeta = visitFileMetaClause(ctx.fileMetaClause());
         String filePath = fileMeta.getLeft();
         String separator = fileMeta.getRight();
-
+        checkFilePath(filePath);
         CatalogTable catalogTable = new CatalogTable(tableName, structTypeBuilder.build(), filePath, separator);
         return new CreateTable(catalogTable, context);
+    }
+
+    private void checkFilePath(String filePath) {
+        File file = new File(filePath);
+        Utils.checkArgument(!file.exists() || file.isDirectory(), "filePath must be directory");
     }
 
     @Override

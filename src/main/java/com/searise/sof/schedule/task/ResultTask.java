@@ -21,6 +21,7 @@ public class ResultTask extends Task {
         rowIterator.open();
         resultHandle.handle(partition, new Iterator<InternalRow>() {
             private InternalRow row = EMPTY_ROW;
+
             @Override
             public boolean hasNext() {
                 while (rowIterator.hasNext() && row == EMPTY_ROW) {
@@ -28,6 +29,7 @@ public class ResultTask extends Task {
                 }
                 return row != EMPTY_ROW;
             }
+
             @Override
             public InternalRow next() {
                 InternalRow cur = row;

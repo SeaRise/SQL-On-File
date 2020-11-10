@@ -41,7 +41,7 @@ public class ShuffleStoreSuite {
             Iterator<InternalRow> iterator = shuffleStore.read(reduceId);
             while (iterator.hasNext()) {
                 InternalRow row = iterator.next();
-                int parseReduceId =  Integer.valueOf(keys.get(1).eval(row).toString());
+                int parseReduceId = Integer.valueOf(keys.get(1).eval(row).toString());
                 String value = keys.get(0).eval(row) + "_" + parseReduceId;
                 Preconditions.checkArgument(map.get(reduceId).contains(value));
                 map.remove(reduceId, value);
