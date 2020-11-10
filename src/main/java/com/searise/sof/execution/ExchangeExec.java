@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.row.InternalRow;
-import com.searise.sof.shuffle.MapOutputTracker;
 import com.searise.sof.shuffle.io.ShuffleReader;
 
 import java.util.Iterator;

@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong;
 // Thread unsafe.
 // 一次只能跑一个plan.
 public class DagScheduler {
-    private final TaskScheduler taskScheduler;
+    public final TaskScheduler taskScheduler;
     private final AtomicLong nextStageId = new AtomicLong(0L);
     private final StageStateMachine stageStateMachine = new StageStateMachine();
     private final Builder builder;

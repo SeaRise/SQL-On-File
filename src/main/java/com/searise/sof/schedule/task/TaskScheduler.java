@@ -34,4 +34,8 @@ public class TaskScheduler {
     public void clear() {
         taskExecutor.clear();
     }
+
+    public void setParallelism(int parallelism) {
+        taskExecutor.setMaxRunningNum(parallelism);
+    }
 }
