@@ -55,6 +55,9 @@ public class ShuffleWriter {
         return hashCode % reduceNum;
     }
 
+    // 这个方法只能在dag_scheduler中调用.
+    // 因为判断shuffleMapStage的partition完成依赖tracker.registerMapOutput.
+    // 在TaskExecutor中调用,会导致stage被错误判断完成.
     public void commit() {
         Utils.checkArgument(!isCommitted, "shuffleWriter has committed");
         isCommitted = true;

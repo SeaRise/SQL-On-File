@@ -74,15 +74,18 @@ ImplJoin会根据left-sizeInBytes和right-sizeInBytes选择join实现.
 
 #### afterprocess
 ```
-afterprocess做了三件事:
+afterprocess做了四件事:
 - prune columns
 - resolve index
 - remove alias
-这三件事的顺序不能颠倒.
+- add exchange
+这四件事的顺序不能颠倒.
 
 prune columns就是做列裁剪.
 resolve index是要把Attribute转为BoundReference.在执行的时候需要知道Attribute读取下层算子传来的row的哪个下标的值.
 remove alias把无用的Alias都消除掉,因为前面做resolve index需要用到alias,所以必须在resolve index之后做.
 
 afterprocess和preprocess都做了remove alias,但是preprocess只是remove Alias(Attribute).afterprocess remove所有Alias, 包括Alias(function).
+
+add exchange添加了exchange算子,用于划分stage.
 ```
