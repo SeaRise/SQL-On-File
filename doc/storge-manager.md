@@ -25,7 +25,7 @@
 	- Block: 无论MemoryManager还是diskManager分配返回的都是Block, 仅存储模式不同, 用于读写.
 ```
 +---------------------------------------------------------+
-|	                   storgeConsumer	                  |
+|                      storgeConsumer                     |
 |------------------+                     +----------------|
 |   MemoryManager  | ----------------->  |   diskManager  |
 |------------------+      spill          +----------------|
