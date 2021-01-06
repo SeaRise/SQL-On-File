@@ -56,8 +56,10 @@ public class MemoryManager implements AutoCloseable {
     }
 
     public void free(MemoryBlock block) {
-        allocator.free(block);
         memoryPool.release(block.allocatedSize);
+        if (block.isAllocated()) {
+            allocator.free(block);
+        }
     }
 
     public long getFreeSize() {

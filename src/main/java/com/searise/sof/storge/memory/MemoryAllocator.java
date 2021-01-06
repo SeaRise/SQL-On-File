@@ -33,7 +33,7 @@ public class MemoryAllocator implements AutoCloseable {
     }
 
     public void free(MemoryBlock block) {
-        int alignedSize = alignedSize(block.allocatedSize);
+        int alignedSize = block.byteBuffer.capacity();
         if (alignedSize >= POOLING_THRESHOLD_BYTES) {
             final LinkedList<WeakReference<ByteBuffer>> pool =
                     bufferPoolsBySize.getOrDefault(alignedSize, new LinkedList<>());
