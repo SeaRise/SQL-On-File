@@ -21,11 +21,11 @@
 		- memoryPool: 内存使用计数
 		- memoryAllocator: 分配内存块
 	- diskManager: 分配磁盘空间,读写数据.
-	- storgeConsumer: 使用存储的消费者,各个计算/shuffle用的数据结构如:shuffleStore等都会继承它.
+	- storageConsumer: 使用存储的消费者,各个计算/shuffle用的数据结构如:shuffleStore等都会继承它.
 	- Block: 无论MemoryManager还是diskManager分配返回的都是Block, 仅存储模式不同, 用于读写.
 ```
 +---------------------------------------------------------+
-|                      storgeConsumer                     |
+|                      storageConsumer                    |
 |------------------+                     +----------------|
 |   MemoryManager  | ----------------->  |   diskManager  |
 |------------------+      spill          +----------------|

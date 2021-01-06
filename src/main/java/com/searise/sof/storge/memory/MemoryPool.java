@@ -26,7 +26,7 @@ public class MemoryPool {
         return require;
     }
 
-    public void release(int used) {
+    public void release(long used) {
         Preconditions.checkArgument(used >= 0 && used <= memoryUsed);
         memoryUsed -= used;
     }

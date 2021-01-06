@@ -3,24 +3,25 @@ package com.searise.sof.storge.memory;
 import com.searise.sof.storge.Block;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 public class MemoryBlock implements Block {
     ByteBuffer byteBuffer;
-    private int length;
+    final int allocatedSize;
 
-    public MemoryBlock(ByteBuffer byteBuffer, int length) {
+    MemoryBlock(ByteBuffer byteBuffer, int allocatedSize) {
         this.byteBuffer = byteBuffer;
-        this.length = length;
-    }
-
-    void free() {
-        // just gc
-        this.byteBuffer = null;
-        this.length = 0;
+        this.allocatedSize = allocatedSize;
     }
 
     @Override
-    public int length() {
-        return length;
+    public int capacity() {
+        return Objects.isNull(byteBuffer) ? 0 : byteBuffer.capacity();
+    }
+
+    @Override
+    public void free() {
+        // just gc
+        this.byteBuffer = null;
     }
 }

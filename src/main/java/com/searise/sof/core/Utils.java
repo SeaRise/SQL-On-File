@@ -147,4 +147,14 @@ public class Utils {
         }
         return qsb.toString();
     }
+
+    public static int nonNegativeHash(Object obj) {
+        if (Objects.isNull(obj)) {
+            return 0;
+        }
+
+        int hash = obj.hashCode();
+        // math.abs fails for Int.MinValue
+        return Integer.MIN_VALUE != hash? Math.abs(hash) : 0;
+    }
 }
