@@ -23,7 +23,9 @@ public class MemoryBlock implements Block {
 
     @Override
     public int capacity() {
-        return Objects.isNull(byteBuffer) ? 0 : byteBuffer.capacity();
+        return isAllocated ?
+                (Objects.isNull(byteBuffer) ? 0 : byteBuffer.capacity()) :
+                allocatedSize;
     }
 
     @Override
