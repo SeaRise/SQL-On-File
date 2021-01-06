@@ -29,32 +29,27 @@ public class StorageManager implements AutoCloseable {
         storageConsumers.add(consumer);
     }
 
-    public DiskBlock allocateDiskBlock(StorageConsumer consumer) throws IOException {
+    public DiskBlock allocateDisk(StorageConsumer consumer) throws IOException {
         Preconditions.checkArgument(!storageConsumers.contains(consumer));
         return diskManager.allocate();
     }
 
-    public Optional<MemoryBlock> allocateMemoryBlockFully(int require, StorageConsumer consumer) {
+    public Optional<MemoryBlock> allocateMemoryFully(int require, StorageConsumer consumer, boolean shouldAllocated) {
         Preconditions.checkArgument(storageConsumers.contains(consumer));
-        return tryAllocateMemoryBlock(require);
+        return tryAllocateMemory(require, shouldAllocated);
     }
 
-    public Optional<MemoryBlock> allocateMemoryBlock(int require, StorageConsumer consumer) {
+    public Optional<MemoryBlock> allocateMemory(int require, StorageConsumer consumer, boolean shouldAllocated) {
         Preconditions.checkArgument(storageConsumers.contains(consumer));
-        Optional<MemoryBlock> tryMemory = tryAllocateMemoryBlock(require);
+        Optional<MemoryBlock> tryMemory = tryAllocateMemory(require, shouldAllocated);
         if (tryMemory.isPresent()) {
             return tryMemory;
         }
-        return memoryManager.allocateBlock(require);
+        return memoryManager.allocate(require, shouldAllocated);
     }
 
-    public boolean allocateMemoryFully(int require, StorageConsumer consumer) {
-        Preconditions.checkArgument(storageConsumers.contains(consumer));
-        return memoryManager.allocateFully(require);
-    }
-
-    private Optional<MemoryBlock> tryAllocateMemoryBlock(int require) {
-        Optional<MemoryBlock> tryMemory = memoryManager.allocateBlockFully(require);
+    private Optional<MemoryBlock> tryAllocateMemory(int require, boolean shouldAllocated) {
+        Optional<MemoryBlock> tryMemory = memoryManager.allocateFully(require, shouldAllocated);
         if (tryMemory.isPresent()) {
             return tryMemory;
         }
@@ -68,7 +63,7 @@ public class StorageManager implements AutoCloseable {
                 memoryManager.free(spilledBlock);
             }
 
-            tryMemory = memoryManager.allocateBlockFully(require);
+            tryMemory = memoryManager.allocateFully(require, shouldAllocated);
             if (tryMemory.isPresent()) {
                 return tryMemory;
             }

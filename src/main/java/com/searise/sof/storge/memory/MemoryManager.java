@@ -17,42 +17,39 @@ public class MemoryManager implements AutoCloseable {
         return 1;
     }
 
-    public Optional<MemoryBlock> allocateBlockFully(int require) {
-        if (!allocateFully(require)) {
+    public Optional<MemoryBlock> allocateFully(int require, boolean shouldAllocated) {
+        int acquired = memoryPool.acquire(require);
+        if (acquired < require) {
+            memoryPool.release(acquired);
             return Optional.empty();
         }
         try {
-            return Optional.of(allocator.allocate(require));
+            return Optional.of(shouldAllocated ?
+                    allocator.allocate(require) :
+                    MemoryBlock.createNoAllocated(require));
         } catch (OutOfMemoryError error) {
             // 说明实际内存分配和内存管理计数不匹配.
             // 内存管理计数算多了,所以多的那一部分就不统计.
             overflowSize += require;
-            return allocateBlockFully(require);
+            return allocateFully(require, shouldAllocated);
         }
     }
 
-    public Optional<MemoryBlock> allocateBlock(int require) {
+    public Optional<MemoryBlock> allocate(int require, boolean shouldAllocated) {
         int acquired = memoryPool.acquire(require);
         if (acquired <= 0) {
             return Optional.empty();
         }
         try {
-            return Optional.of(allocator.allocate(acquired));
+            return Optional.of(shouldAllocated ?
+                    allocator.allocate(require) :
+                    MemoryBlock.createNoAllocated(require));
         } catch (OutOfMemoryError error) {
             // 说明实际内存分配和内存管理计数不匹配.
             // 内存管理计数算多了,所以多的那一部分就不统计.
             overflowSize += acquired;
-            return allocateBlock(require);
+            return allocate(require, shouldAllocated);
         }
-    }
-
-    public boolean allocateFully(int require) {
-        int acquired = memoryPool.acquire(require);
-        if (acquired < require) {
-            memoryPool.release(acquired);
-            return false;
-        }
-        return true;
     }
 
     public void free(MemoryBlock block) {
