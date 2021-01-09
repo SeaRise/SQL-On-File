@@ -19,9 +19,9 @@ public class StorageManager implements AutoCloseable {
 
     private final Set<StorageConsumer> storageConsumers = new HashSet<>();
 
-    public StorageManager(MemoryManager memoryManager, DiskManager diskManager) {
-        this.memoryManager = memoryManager;
-        this.diskManager = diskManager;
+    public StorageManager() {
+        this.memoryManager = new MemoryManager();
+        this.diskManager = new DiskManager();
     }
 
     public void registerConsumer(StorageConsumer consumer) {
@@ -56,7 +56,8 @@ public class StorageManager implements AutoCloseable {
 
         // 先从占内存大的consumer开始spill.
         List<StorageConsumer> sortByMemoryUsed = storageConsumers.stream().
-                sorted((o1, o2) -> o2.memoryUsed() - o1.memoryUsed()).collect(Collectors.toList());
+                sorted((o1, o2) -> Long.compare(o2.memoryUsed(), o1.memoryUsed())).
+                collect(Collectors.toList());
         for (StorageConsumer c : sortByMemoryUsed) {
             int missing = require - Math.toIntExact(memoryManager.getFreeSize());
             for (MemoryBlock spilledBlock : c.spill(missing)) {

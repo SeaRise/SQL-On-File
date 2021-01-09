@@ -13,8 +13,17 @@ public class MemoryManager implements AutoCloseable {
         this.allocator = new MemoryAllocator();
     }
 
+    private static long RESERVED_SYSTEM_MEMORY_BYTES = 300 * 1024 * 1024;
+    private static double MEMORY_FRACTION = 0.6;
     private long computeMemoryPoolSize() {
-        return 1;
+        long systemMemory = Runtime.getRuntime().maxMemory();
+        long minSystemMemory = (long) (RESERVED_SYSTEM_MEMORY_BYTES * 1.5);
+        if (systemMemory < minSystemMemory) {
+            throw new IllegalArgumentException(
+                    String.format("System memory %s must be at least %s.",
+                    systemMemory, minSystemMemory));
+        }
+        return (long) ((systemMemory - RESERVED_SYSTEM_MEMORY_BYTES) * MEMORY_FRACTION);
     }
 
     public Optional<MemoryBlock> allocateFully(int require, boolean shouldAllocated) {

@@ -18,7 +18,7 @@ public abstract class StorageConsumer {
 
     public abstract List<MemoryBlock> spill(int require);
 
-    public abstract int memoryUsed();
+    public abstract long memoryUsed();
 
     public abstract List<Block> getAllBlocksForFree();
 }

@@ -6,8 +6,11 @@ import com.searise.sof.plan.physics.PhysicalPlan;
 import com.searise.sof.schedule.dag.DagScheduler;
 import com.searise.sof.schedule.dag.ResultHandle;
 import com.searise.sof.shuffle.MapOutputTracker;
+import com.searise.sof.storge.StorageManager;
 
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class Context {
     public final ExprIdBuilder exprIdBuilder = new ExprIdBuilder();
@@ -22,11 +25,14 @@ public class Context {
 
     public final DagScheduler dagScheduler;
 
+    public final StorageManager storageManager;
+
     public Context(Catalog catalog, Driver driver) {
         this.catalog = catalog;
         this.driver = driver;
         this.appId = UUID.randomUUID().toString();
         this.dagScheduler = new DagScheduler(this);
+        this.storageManager = new StorageManager();
     }
 
     public void runPlan(PhysicalPlan plan, ResultHandle resultHandle) {
@@ -35,5 +41,15 @@ public class Context {
 
     public void stop() {
         dagScheduler.stop();
+    }
+
+    private static Optional<Context> activeContext = Optional.empty();
+    public static Context getActive() {
+        return activeContext.orElseGet(() -> {
+            throw new SofException("");
+        });
+    }
+    public static void setActive(Context context) {
+        activeContext = Optional.of(context);
     }
 }

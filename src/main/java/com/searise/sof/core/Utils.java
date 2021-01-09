@@ -157,4 +157,19 @@ public class Utils {
         // math.abs fails for Int.MinValue
         return Integer.MIN_VALUE != hash? Math.abs(hash) : 0;
     }
+
+    public static long getSize(Object obj) {
+        if (obj instanceof Boolean) {
+            return 4;
+        } else if (obj instanceof String) {
+            return obj.toString().length();
+        } else if (obj instanceof Integer) {
+            return 4;
+        } else if (obj instanceof Double) {
+            return 8;
+        } else {
+            // unknown type
+            return obj.toString().length();
+        }
+    }
 }

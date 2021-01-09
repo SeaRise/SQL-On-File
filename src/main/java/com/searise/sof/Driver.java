@@ -25,6 +25,10 @@ public class Driver {
     public final Optimizer optimizer = newOptimizer();
     public final Builder builder = new Builder(context);
 
+    public Driver() {
+        Context.setActive(context);
+    }
+
     public void compile(String sqls) throws Exception {
         for (String sql : Utils.split(Utils.removeComments(sqls))) {
             doCompile(sql);
