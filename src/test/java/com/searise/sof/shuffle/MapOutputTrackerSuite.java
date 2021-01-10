@@ -31,7 +31,7 @@ public class MapOutputTrackerSuite {
         List<Expression> expressions = expressions();
         List<Expression> keys = ImmutableList.of(expressions.get(1));
 
-        tracker.registerShuffle(shuffleId, mapPartitions);
+        tracker.registerShuffle(shuffleId, mapPartitions, reducePartitions);
 
         Multimap<Integer, String> multiMap = HashMultimap.create();
 

@@ -29,9 +29,19 @@ public class StorageManager implements AutoCloseable {
         storageConsumers.add(consumer);
     }
 
-    public DiskBlock allocateDisk(StorageConsumer consumer) throws IOException {
-        Preconditions.checkArgument(!storageConsumers.contains(consumer));
-        return diskManager.allocate();
+    public void unregisterConsumer(StorageConsumer consumer) {
+        Preconditions.checkArgument(storageConsumers.contains(consumer));
+        storageConsumers.remove(consumer);
+        doFree(consumer);
+    }
+
+    public DiskBlock allocateDisk(StorageConsumer consumer) {
+        try {
+            Preconditions.checkArgument(storageConsumers.contains(consumer));
+            return diskManager.allocate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Optional<MemoryBlock> allocateMemoryFully(int require, StorageConsumer consumer, boolean shouldAllocated) {
@@ -75,15 +85,19 @@ public class StorageManager implements AutoCloseable {
     @Override
     public void close() throws Exception {
         for (StorageConsumer c : storageConsumers) {
-            for (Block block : c.getAllBlocksForFree()) {
-                if (block instanceof MemoryBlock) {
-                    memoryManager.free((MemoryBlock) block);
-                } else {
-                    diskManager.free((DiskBlock) block);
-                }
-            }
+           doFree(c);
         }
         memoryManager.close();
         diskManager.close();
+    }
+
+    private void doFree(StorageConsumer consumer) {
+        for (Block block : consumer.getAllBlocksForFree()) {
+            if (block instanceof MemoryBlock) {
+                memoryManager.free((MemoryBlock) block);
+            } else {
+                diskManager.free((DiskBlock) block);
+            }
+        }
     }
 }

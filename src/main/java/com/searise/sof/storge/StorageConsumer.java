@@ -4,7 +4,7 @@ import com.searise.sof.storge.memory.MemoryBlock;
 
 import java.util.List;
 
-public abstract class StorageConsumer {
+public abstract class StorageConsumer implements AutoCloseable {
     protected final StorageManager storageManager;
     public StorageConsumer(StorageManager storageManager) {
         this.storageManager = storageManager;
@@ -21,4 +21,9 @@ public abstract class StorageConsumer {
     public abstract long memoryUsed();
 
     public abstract List<Block> getAllBlocksForFree();
+
+    @Override
+    public void close() {
+        storageManager.unregisterConsumer(this);
+    }
 }

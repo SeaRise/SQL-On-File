@@ -24,7 +24,7 @@ public class ShuffleStoreSuite {
 
         List<Expression> keys = keys();
 
-        ShuffleStore shuffleStore = new ShuffleStore();
+        ShuffleStore shuffleStore = new ShuffleStore(reducePartitions);
 
         Multimap<Integer, String> map = HashMultimap.create();
         for (int mapId = 0; mapId < mapPartitions; mapId++) {

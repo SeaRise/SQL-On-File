@@ -158,7 +158,7 @@ public class Utils {
         return Integer.MIN_VALUE != hash? Math.abs(hash) : 0;
     }
 
-    public static long getSize(Object obj) {
+    public static int getSize(Object obj) {
         if (obj instanceof Boolean) {
             return 4;
         } else if (obj instanceof String) {

@@ -1,6 +1,5 @@
 package com.searise.sof.shuffle.io;
 
-import com.google.common.collect.Iterators;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.shuffle.MapOutputTracker;
 
@@ -18,7 +17,6 @@ public class ShuffleReader {
     }
 
     public Iterator<InternalRow> iterator() {
-        Iterator<InternalRow>[] iterators = tracker.getMapOutput(shuffleId, reduceId);
-        return Iterators.concat(iterators);
+        return tracker.getShuffleStore(shuffleId).read(reduceId);
     }
 }

@@ -1,10 +1,10 @@
 package com.searise.sof.shuffle;
 
+import com.google.common.base.Preconditions;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
-import com.searise.sof.core.row.InternalRow;
+import com.searise.sof.shuffle.io.ShuffleStore;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,26 +16,27 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MapOutputTracker {
     // shuffleId, MapStatus[]
     private final Map<Long, MapStatus[]> tracker = new ConcurrentHashMap<>();
+    private final Map<Long, ShuffleStore> shuffleOutputs = new ConcurrentHashMap<>();
 
     public MapOutputTracker() {
     }
 
-    public void registerShuffle(long shuffleId, int mapNum) {
+    public void registerShuffle(long shuffleId, int mapNum, int reduceNum) {
         MapStatus[] mapStatuses = new MapStatus[mapNum];
         if (Objects.nonNull(tracker.putIfAbsent(shuffleId, mapStatuses))) {
             throw new SofException(String.format("shuffle(%s) has registered!", shuffleId));
         }
+        shuffleOutputs.put(shuffleId, new ShuffleStore(reduceNum));
     }
 
     public void unregisterShuffle(long shuffleId) {
         MapStatus[] mapStatuses = removeShuffle(shuffleId);
         synchronized (mapStatuses) {
             for (int mapId = 0; mapId < mapStatuses.length; mapId++) {
-                MapStatus mapStatus = mapStatuses[mapId];
-                mapStatus.cleanUp();
                 mapStatuses[mapId] = null;
             }
         }
+        shuffleOutputs.remove(shuffleId).close();
     }
 
     public void registerMapOutput(long shuffleId, int mapIndex, MapStatus mapStatus) {
@@ -54,19 +55,8 @@ public class MapOutputTracker {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public Iterator<InternalRow>[] getMapOutput(long shuffleId, int reduceId) {
-        MapStatus[] mapStatuses = getShuffle(shuffleId);
-        synchronized (mapStatuses) {
-            if (mapStatuses.length <= 0) {
-                return new Iterator[0];
-            }
-            Iterator<InternalRow>[] iterators = new Iterator[mapStatuses.length];
-            for (int i = 0; i < mapStatuses.length; i++) {
-                iterators[i] = mapStatuses[i].shuffleStore.read(reduceId);
-            }
-            return iterators;
-        }
+    public ShuffleStore getShuffleStore(long shuffleId) {
+        return Preconditions.checkNotNull(shuffleOutputs.get(shuffleId));
     }
 
     private MapStatus[] getShuffle(long shuffleId) {

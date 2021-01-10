@@ -29,8 +29,8 @@ public interface InternalRow {
         return (double) getValue(ordinal);
     }
 
-    default long getSize() {
-        long size = 0L;
+    default int getSize() {
+        int size = 0;
         for (int i = 0; i < numFields(); i++) {
             size += Utils.getSize(getValue(i));
         }

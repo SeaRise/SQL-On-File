@@ -211,7 +211,7 @@ public class DagScheduler {
         Set<Long> parentStageIds = createParentStages(plan);
         ShuffleMapStage shuffleMapStage = new ShuffleMapStage(nextStageId(), parentStageIds, plan, shuffleId, mapOutputTracker, shuffleKeys, reduceNum);
         stageStateMachine.addStage(shuffleMapStage);
-        mapOutputTracker.registerShuffle(shuffleId, shuffleMapStage.partitions);
+        mapOutputTracker.registerShuffle(shuffleId, shuffleMapStage.partitions, reduceNum);
         return shuffleMapStage;
     }
 
