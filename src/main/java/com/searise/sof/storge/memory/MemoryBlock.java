@@ -1,6 +1,6 @@
 package com.searise.sof.storge.memory;
 
-import com.searise.sof.storge.Block;
+import com.searise.sof.storge.Block.Block;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;

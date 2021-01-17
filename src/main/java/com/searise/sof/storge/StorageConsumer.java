@@ -1,5 +1,6 @@
 package com.searise.sof.storge;
 
+import com.searise.sof.storge.Block.Block;
 import com.searise.sof.storge.memory.MemoryBlock;
 
 import java.util.List;

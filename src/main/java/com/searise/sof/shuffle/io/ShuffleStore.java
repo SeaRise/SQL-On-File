@@ -1,11 +1,10 @@
 package com.searise.sof.shuffle.io;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.row.InternalRow;
-import com.searise.sof.storge.Block;
+import com.searise.sof.storge.Block.Block;
 import com.searise.sof.storge.StorageConsumer;
 import com.searise.sof.storge.memory.MemoryBlock;
 
@@ -28,12 +27,14 @@ public class ShuffleStore extends StorageConsumer {
     public void write(int partition, InternalRow internalRow) {
         ShuffleBlock shuffleBlock = shuffleBlocks[partition];
         synchronized (shuffleBlock) {
-            int require = internalRow.getSize();
-            Preconditions.checkArgument(storageManager.allocateMemoryFully(
-                    require, this, false).isPresent());
-            memoryUsed.addAndGet(require);
-            // row需要copy, 因为保存的internalRow可能还有其他地方修改.
-            shuffleBlock.appendMemory(internalRow.copy());
+            int memoryRequire = internalRow.getJVMSize();
+            if (storageManager.allocateMemoryFully(memoryRequire, this, false).isPresent()) {
+                memoryUsed.addAndGet(memoryRequire);
+                // row需要copy, 因为保存的internalRow可能还有其他地方修改.
+                shuffleBlock.appendMemory(internalRow.copy());
+            } else {
+                shuffleBlock.appendDisk(internalRow);
+            }
         }
     }
 
@@ -43,13 +44,6 @@ public class ShuffleStore extends StorageConsumer {
             return shuffleBlock.iterator();
         }
     }
-
-//    public boolean isEmpty(int partition) {
-//        ShuffleBlock shuffleBlock = shuffleBlocks[partition];
-//        synchronized (shuffleBlock) {
-//            return false;
-//        }
-//    }
 
     @Override
     public String toString() {

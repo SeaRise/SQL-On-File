@@ -4,19 +4,27 @@ import com.searise.sof.core.SofException;
 import org.apache.commons.lang3.StringUtils;
 
 public enum DataType {
-    BooleanType(0, "bool", "Boolean"),
-    StringType(1, "string", "String"),
-    IntegerType(2, "int", "Integer"),
-    DoubleType(3, "double", "Double");
+    BooleanType((byte) 0, "bool", "Boolean"),
+    StringType((byte) 1, "string", "String"),
+    IntegerType((byte) 2, "int", "Integer"),
+    DoubleType((byte) 3, "double", "Double");
 
-    public final int priority;
+    private final byte flagAndPriority;
     public final String name;
     public final String javaType;
 
-    DataType(int priority, String name, String javaType) {
-        this.priority = priority;
+    DataType(byte flagAndPriority, String name, String javaType) {
+        this.flagAndPriority = flagAndPriority;
         this.name = name;
         this.javaType = javaType;
+    }
+
+    public final byte getPriority() {
+        return flagAndPriority;
+    }
+
+    public final byte getFlag() {
+        return flagAndPriority;
     }
 
     public static DataType getType(String name) {
@@ -26,5 +34,23 @@ public enum DataType {
             }
         }
         throw new SofException("no such data type: " + name);
+    }
+
+    public static DataType getType(byte flag) {
+        for (DataType dataType : values()) {
+            if (dataType.getFlag() == flag) {
+                return dataType;
+            }
+        }
+        throw new SofException("no such data type: " + flag);
+    }
+
+    public static DataType getType(Class<?> clazz) {
+        for (DataType dataType : values()) {
+            if (StringUtils.equals(dataType.javaType, clazz.getSimpleName())) {
+                return dataType;
+            }
+        }
+        throw new SofException("no such data type: " + clazz);
     }
 }

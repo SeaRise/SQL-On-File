@@ -158,18 +158,35 @@ public class Utils {
         return Integer.MIN_VALUE != hash? Math.abs(hash) : 0;
     }
 
-    public static int getSize(Object obj) {
-        if (obj instanceof Boolean) {
-            return 4;
-        } else if (obj instanceof String) {
-            return obj.toString().length();
-        } else if (obj instanceof Integer) {
-            return 4;
-        } else if (obj instanceof Double) {
-            return 8;
-        } else {
-            // unknown type
-            return obj.toString().length();
+    public static <T> Iterator<T> concat(List<Iterator<T>> iterators) {
+        return new Iterator<T>() {
+            private int index = 0;
+            @Override
+            public boolean hasNext() {
+                if (index >= iterators.size()) {
+                    return false;
+                }
+                while (!iterators.get(index).hasNext()) {
+                    index += 1;
+                    if (index >= iterators.size()) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public T next() {
+                return iterators.get(index).next();
+            }
+        };
+    }
+
+    public static <T> T throwRuntime(Any<T> any) {
+        try {
+            return any.any();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

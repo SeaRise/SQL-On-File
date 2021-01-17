@@ -10,7 +10,6 @@ import com.searise.sof.storge.StorageManager;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 public class Context {
     public final ExprIdBuilder exprIdBuilder = new ExprIdBuilder();

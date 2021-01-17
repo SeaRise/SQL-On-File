@@ -1,12 +1,12 @@
 package com.searise.sof.storge;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.storge.Block.Block;
 import com.searise.sof.storge.disk.DiskBlock;
 import com.searise.sof.storge.disk.DiskManager;
 import com.searise.sof.storge.memory.MemoryBlock;
 import com.searise.sof.storge.memory.MemoryManager;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
