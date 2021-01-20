@@ -55,13 +55,12 @@ public class MemoryBlock implements Block {
 
     public BlockReader getReader() throws Exception {
         Preconditions.checkArgument(isAllocated && Objects.nonNull(byteBuffer));
-        ByteBuffer readBuffer = byteBuffer.asReadOnlyBuffer();
-        readBuffer.flip();
+        byteBuffer.flip();
         return new BlockReader() {
             private InternalRow row = EmptyRow.EMPTY_ROW;
             @Override
             public InternalRow next() throws Exception {
-                int fieldNum = readBuffer.getInt();
+                int fieldNum = byteBuffer.getInt();
                 if (fieldNum == 0) {
                     return EmptyRow.EMPTY_ROW;
                 }
@@ -69,20 +68,20 @@ public class MemoryBlock implements Block {
                     row = new ArrayRow(fieldNum);
                 }
                 for (int i = 0; i < fieldNum; i++) {
-                    switch (DataType.getType(readBuffer.get())) {
+                    switch (DataType.getType(byteBuffer.get())) {
                         case DoubleType:
-                            row.setDouble(i, readBuffer.getDouble());
+                            row.setDouble(i, byteBuffer.getDouble());
                             break;
                         case IntegerType:
-                            row.setInt(i, readBuffer.getInt());
+                            row.setInt(i, byteBuffer.getInt());
                             break;
                         case StringType:
-                            int byteSize = readBuffer.getInt();
-                            row.setString(i, new String(readBuffer.array(), readBuffer.position(), byteSize));
-                            readBuffer.position(readBuffer.position() + byteSize);
+                            int byteSize = byteBuffer.getInt();
+                            row.setString(i, new String(byteBuffer.array(), byteBuffer.position(), byteSize));
+                            byteBuffer.position(byteBuffer.position() + byteSize);
                             break;
                         case BooleanType:
-                            row.setBoolean(i, Bytes.byteToBoolean(readBuffer.get()));
+                            row.setBoolean(i, Bytes.byteToBoolean(byteBuffer.get()));
                             break;
                     }
                 }
@@ -91,7 +90,7 @@ public class MemoryBlock implements Block {
 
             @Override
             public boolean hasNext() throws Exception {
-                return readBuffer.hasRemaining();
+                return byteBuffer.hasRemaining();
             }
 
             @Override
@@ -102,7 +101,7 @@ public class MemoryBlock implements Block {
 
     public BlockWriter getWriter() throws Exception {
         Preconditions.checkArgument(isAllocated && Objects.nonNull(byteBuffer));
-        byteBuffer.reset();
+        byteBuffer.rewind();
         return new BlockWriter() {
             @Override
             public void write(InternalRow row) throws Exception {

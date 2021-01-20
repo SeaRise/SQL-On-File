@@ -26,7 +26,7 @@ public class DiskBlock implements Block {
 
     @Override
     public int capacity() {
-        return file.exists() ? Integer.MAX_VALUE : 0;
+        return Integer.MAX_VALUE;
     }
 
     @Override
@@ -95,7 +95,9 @@ public class DiskBlock implements Block {
 
     @Override
     public BlockWriter getWriter() throws Exception {
-        Preconditions.checkArgument(file.exists());
+        if (hasUsed()) {
+            Preconditions.checkArgument(file.delete());
+        }
         return new BlockWriter() {
             private FileOutputStream fileOS = new FileOutputStream(file);
             private final FileChannel fileChannel = fileOS.getChannel();

@@ -45,7 +45,7 @@ public class Context {
     private static Optional<Context> activeContext = Optional.empty();
     public static Context getActive() {
         return activeContext.orElseGet(() -> {
-            throw new SofException("");
+            throw new SofException("no active context");
         });
     }
     public static void setActive(Context context) {
