@@ -1,7 +1,7 @@
 package com.searise.sof.optimize.implementation;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.core.Conf;
+import com.searise.sof.core.conf.Conf;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.BoundReference;
 import com.searise.sof.optimize.GroupExpr;
@@ -35,7 +35,7 @@ public class ImplJoin implements ImplementationRule {
         } else if (StringUtils.equals(forceJoinType, Conf.FORCE_JOIN_TYPE_HASH_VALUE)) {
             return selectHashJoin(groupExpr, join, schema, children);
         } else {
-            BigInteger threshold = new BigInteger(join.context.conf.getConf(Conf.AUTO_HASH_JOIN_THRESHOLD));
+            BigInteger threshold = BigInteger.valueOf(join.context.conf.getConf(Conf.AUTO_HASH_JOIN_THRESHOLD));
 
             Statistics leftStats = SizeInBytesStatsVisitor.visit(groupExpr.children.get(0));
             Statistics rightStats = SizeInBytesStatsVisitor.visit(groupExpr.children.get(1));

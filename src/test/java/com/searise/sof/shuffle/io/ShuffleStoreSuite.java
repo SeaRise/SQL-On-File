@@ -3,6 +3,7 @@ package com.searise.sof.shuffle.io;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.searise.sof.Driver;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.InternalRowWriter;
@@ -19,6 +20,9 @@ public class ShuffleStoreSuite {
 
     @Test
     public void test() {
+        // 为了初始化context.
+        new Driver();
+
         int mapPartitions = 20;
         int reducePartitions = 50;
 
@@ -49,11 +53,6 @@ public class ShuffleStoreSuite {
         }
 
         Preconditions.checkArgument(map.isEmpty());
-    }
-
-    @Test
-    public void testHashKey() {
-
     }
 
     private InternalRow createRow(int mapId, int reduceId) {

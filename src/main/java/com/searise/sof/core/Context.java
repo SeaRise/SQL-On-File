@@ -2,6 +2,7 @@ package com.searise.sof.core;
 
 import com.searise.sof.Driver;
 import com.searise.sof.catalog.Catalog;
+import com.searise.sof.core.conf.Conf;
 import com.searise.sof.plan.physics.PhysicalPlan;
 import com.searise.sof.schedule.dag.DagScheduler;
 import com.searise.sof.schedule.dag.ResultHandle;

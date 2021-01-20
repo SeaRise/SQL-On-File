@@ -10,6 +10,8 @@ import com.searise.sof.plan.logic.LogicalPlan;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
+import java.util.Optional;
+
 public class SetConfSuite {
     @Test
     public void test() {
@@ -19,6 +21,8 @@ public class SetConfSuite {
         LogicalPlan parsePlan = new SqlParser(context).parsePlan(sql);
         SetCommand setCommand = (SetCommand) parsePlan;
         setCommand.run(catalog);
-        Preconditions.checkArgument(StringUtils.equals(context.conf.getConf("key"), "value"));
+        Optional<String> confValue = context.conf.getConf("key");
+        Preconditions.checkArgument(confValue.isPresent());
+        Preconditions.checkArgument(StringUtils.equals(confValue.get(), "value"));
     }
 }

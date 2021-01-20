@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.CatalogTable;
 import com.searise.sof.catalog.StructField;
-import com.searise.sof.core.Conf;
+import com.searise.sof.core.conf.Conf;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.InternalRow;
@@ -22,13 +22,13 @@ public class InsertOverwrite implements LogicalPlan, RunnableCommand {
     public final Context context;
     public final String targetTable;
     public final LogicalPlan query;
-    private final int flushThreshold;
+    private final long flushThreshold;
 
     public InsertOverwrite(Context context, String targetTable, LogicalPlan query) {
         this.context = context;
         this.targetTable = targetTable;
         this.query = query;
-        this.flushThreshold = context.conf.getIntConf(Conf.WRITE_FLUSH_THRESHOLD);
+        this.flushThreshold = context.conf.getConf(Conf.WRITE_FLUSH_THRESHOLD);
     }
 
     @Override

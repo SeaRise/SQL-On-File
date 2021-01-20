@@ -1,7 +1,7 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.Conf;
+import com.searise.sof.core.conf.Conf;
 import com.searise.sof.core.Context;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
@@ -77,6 +77,6 @@ public class Exchange implements PhysicalPlan {
         if (keys.stream().allMatch(Expression::foldable)) {
             return 1;
         }
-        return context.conf.getIntConf(Conf.MAX_PARALLELISM);
+        return context.conf.getConf(Conf.MAX_PARALLELISM);
     }
 }

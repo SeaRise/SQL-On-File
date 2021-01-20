@@ -1,6 +1,6 @@
 package com.searise.sof.schedule.task;
 
-import com.searise.sof.core.Conf;
+import com.searise.sof.core.conf.Conf;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.Utils;
 
@@ -26,7 +26,7 @@ public class TaskExecutor {
     private final TaskScheduler taskScheduler;
 
     public TaskExecutor(Context context, TaskScheduler taskScheduler) {
-        this.maxRunningNum = context.conf.getIntConf(Conf.MAX_PARALLELISM);
+        this.maxRunningNum = context.conf.getConf(Conf.MAX_PARALLELISM);
         this.taskScheduler = taskScheduler;
     }
 

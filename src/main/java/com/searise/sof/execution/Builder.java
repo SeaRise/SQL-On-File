@@ -4,7 +4,7 @@ import com.searise.sof.codegen.exec.CodeGenerator;
 import com.searise.sof.codegen.exec.Codegen;
 import com.searise.sof.codegen.exec.CodegenContext;
 import com.searise.sof.codegen.exec.ExecCode;
-import com.searise.sof.core.Conf;
+import com.searise.sof.core.conf.Conf;
 import com.searise.sof.core.Context;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
@@ -23,7 +23,7 @@ public class Builder {
     }
 
     private Executor codegen(Executor executor) {
-        if (context.conf.getBoolConf(Conf.CODEGEN_EXECUTOR)) {
+        if (context.conf.getConf(Conf.CODEGEN_EXECUTOR)) {
             Pair<ExecCode, Executor> codegenResult = doCodegen(new CodegenContext(), executor);
             try {
                 return CodeGenerator.gen(codegenResult.getLeft(), codegenResult.getRight());
