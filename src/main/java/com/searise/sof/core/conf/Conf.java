@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class Conf {
-//    private static Map<String, ConfVar<>>
-
     private static final String FORCE_JOIN_TYPE_NONE_VALUE = "none";
     public static final String FORCE_JOIN_TYPE_LOOP_VALUE = "loop";
     public static final String FORCE_JOIN_TYPE_HASH_VALUE = "hash";
