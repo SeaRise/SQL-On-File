@@ -1,6 +1,7 @@
 package com.searise.sof.storge;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.storge.Block.Block;
 import com.searise.sof.storge.disk.DiskBlock;
 import com.searise.sof.storge.disk.DiskManager;
@@ -18,10 +19,13 @@ public class StorageManager implements AutoCloseable {
     private final MemoryManager memoryManager;
     private final DiskManager diskManager;
 
+    private final SofContext context;
+
     private final Set<StorageConsumer> storageConsumers = new HashSet<>();
 
-    public StorageManager() {
-        this.memoryManager = new MemoryManager();
+    public StorageManager(SofContext context) {
+        this.context = context;
+        this.memoryManager = new MemoryManager(context);
         this.diskManager = new DiskManager();
     }
 

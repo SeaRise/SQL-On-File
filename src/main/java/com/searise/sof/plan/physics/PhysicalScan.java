@@ -1,6 +1,6 @@
 package com.searise.sof.plan.physics;
 
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.expression.attribute.BoundReference;
@@ -18,11 +18,11 @@ public class PhysicalScan implements PhysicalPlan {
     public final List<Attribute> structType;
     public final String filePath;
     public final String separator;
-    public final Context context;
+    public final SofContext context;
 
     public final List<String> splits;
 
-    public PhysicalScan(List<BoundReference> schema, List<Attribute> structType, String filePath, String separator, Context context) {
+    public PhysicalScan(List<BoundReference> schema, List<Attribute> structType, String filePath, String separator, SofContext context) {
         this.schema = schema;
         this.structType = structType;
         this.filePath = filePath;
@@ -68,7 +68,7 @@ public class PhysicalScan implements PhysicalPlan {
     }
 
     @Override
-    public Context context() {
+    public SofContext context() {
         return context;
     }
 

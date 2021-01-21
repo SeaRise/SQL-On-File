@@ -3,7 +3,7 @@ package com.searise.sof.optimize.afterprocess;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.Applicable;
 import com.searise.sof.analyse.Rule;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.plan.physics.Exchange;
 import com.searise.sof.plan.physics.PhysicalJoin;
@@ -27,7 +27,7 @@ public class AddExchange implements Rule<PhysicalPlan> {
         });
     }
 
-    private PhysicalPlan newExchange(PhysicalPlan plan, Context context, List<Expression> keys) {
+    private PhysicalPlan newExchange(PhysicalPlan plan, SofContext context, List<Expression> keys) {
         // partitions <= 0没有shuffle的必要.
         if (plan.partitions() <= 0) {
             return plan;

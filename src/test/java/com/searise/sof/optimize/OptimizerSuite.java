@@ -1,11 +1,11 @@
 package com.searise.sof.optimize;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.core.Driver;
+import com.searise.sof.core.SofSession;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
@@ -122,7 +122,7 @@ public class OptimizerSuite {
 
     private void doTest(String sql, String expect) throws Exception {
         Catalog catalog = new TestCatalog();
-        Context context = new Context(catalog, new Driver());
+        SofContext context = SofContext.getOrCreate();
         List<String> splits = Utils.split(sql);
         for (int i = 0; i < splits.size() - 1; i++) {
             LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(i));
@@ -137,5 +137,6 @@ public class OptimizerSuite {
         PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
         String result = StringUtils.trim(physicalPlan.visitToString());
         Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
+        context.stop();
     }
 }

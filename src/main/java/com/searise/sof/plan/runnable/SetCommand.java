@@ -1,18 +1,18 @@
 package com.searise.sof.plan.runnable;
 
 import com.searise.sof.catalog.Catalog;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.plan.logic.LogicalPlan;
 import org.apache.commons.lang3.StringUtils;
 
-import static com.searise.sof.core.conf.Conf.MAX_PARALLELISM;
+import static com.searise.sof.core.conf.SofConf.MAX_PARALLELISM;
 
 public class SetCommand implements LogicalPlan, RunnableCommand {
     private final String key;
     private final String value;
-    private final Context context;
+    private final SofContext context;
 
-    public SetCommand(String key, String value, Context context) {
+    public SetCommand(String key, String value, SofContext context) {
         this.key = key;
         this.value = value;
         this.context = context;
@@ -27,7 +27,7 @@ public class SetCommand implements LogicalPlan, RunnableCommand {
     }
 
     @Override
-    public Context context() {
+    public SofContext context() {
         return context;
     }
 }

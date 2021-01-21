@@ -1,6 +1,6 @@
 package com.searise.sof.expression.attribute;
 
-import com.searise.sof.core.ExprIdBuilder;
+import com.searise.sof.core.id.ExprIdBuilder;
 import com.searise.sof.type.DataType;
 
 import java.util.Objects;

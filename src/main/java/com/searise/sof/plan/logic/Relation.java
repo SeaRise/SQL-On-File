@@ -1,7 +1,7 @@
 package com.searise.sof.plan.logic;
 
 import com.searise.sof.catalog.CatalogTable;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.Attribute;
 
@@ -13,7 +13,7 @@ public class Relation extends UnresolvedRelation {
     public final CatalogTable catalogTable;
     private List<Attribute> schema;
 
-    public Relation(CatalogTable catalogTable, String tableName, Optional<String> referenceName, Context context) {
+    public Relation(CatalogTable catalogTable, String tableName, Optional<String> referenceName, SofContext context) {
         super(tableName, referenceName, context);
         this.catalogTable = catalogTable;
         this.schema = Utils.toImmutableList(catalogTable.structType.stream().
@@ -22,7 +22,7 @@ public class Relation extends UnresolvedRelation {
     }
 
     @Override
-    public Context context() {
+    public SofContext context() {
         return context;
     }
 

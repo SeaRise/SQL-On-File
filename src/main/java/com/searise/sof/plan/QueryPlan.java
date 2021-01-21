@@ -2,7 +2,7 @@ package com.searise.sof.plan;
 
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,5 +25,5 @@ public interface QueryPlan<T extends QueryPlan> extends AnalysisHelper<T> {
         return children();
     }
 
-    Context context();
+    SofContext context();
 }

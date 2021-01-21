@@ -2,7 +2,7 @@ package com.searise.sof.shuffle.io;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.storge.Block.Block;
 import com.searise.sof.storge.StorageConsumer;
@@ -17,7 +17,7 @@ public class ShuffleStore extends StorageConsumer {
     private AtomicInteger memoryUsed = new AtomicInteger();
 
     public ShuffleStore(int partitions) {
-        super(Context.getActive().storageManager);
+        super(SofContext.getActive().storageManager);
         this.shuffleBlocks = new ShuffleBlock[partitions];
         for (int i = 0; i < shuffleBlocks.length; i++) {
             shuffleBlocks[i] = new ShuffleBlock(storageManager.allocateDisk(this));

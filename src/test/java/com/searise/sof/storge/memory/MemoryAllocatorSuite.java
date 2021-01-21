@@ -1,6 +1,7 @@
 package com.searise.sof.storge.memory;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.core.SofContext;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -8,7 +9,7 @@ import java.nio.ByteBuffer;
 public class MemoryAllocatorSuite {
     @Test
     public void test() {
-        MemoryAllocator allocator = new MemoryAllocator();
+        MemoryAllocator allocator = new MemoryAllocator(SofContext.getOrCreate());
         MemoryBlock block = allocator.allocate(1);
         ByteBuffer buffer = block.byteBuffer;
         allocator.free(block);

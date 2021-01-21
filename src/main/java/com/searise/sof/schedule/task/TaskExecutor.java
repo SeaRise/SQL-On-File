@@ -1,7 +1,7 @@
 package com.searise.sof.schedule.task;
 
-import com.searise.sof.core.conf.Conf;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.conf.SofConf;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 
 import java.util.LinkedList;
@@ -25,8 +25,8 @@ public class TaskExecutor {
 
     private final TaskScheduler taskScheduler;
 
-    public TaskExecutor(Context context, TaskScheduler taskScheduler) {
-        this.maxRunningNum = context.conf.getConf(Conf.MAX_PARALLELISM);
+    public TaskExecutor(SofContext context, TaskScheduler taskScheduler) {
+        this.maxRunningNum = context.conf.getConf(SofConf.MAX_PARALLELISM);
         this.taskScheduler = taskScheduler;
     }
 

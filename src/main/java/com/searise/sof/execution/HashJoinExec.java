@@ -5,6 +5,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
 import com.searise.sof.core.*;
+import com.searise.sof.core.expr.MutableProjection;
+import com.searise.sof.core.expr.Predication;
+import com.searise.sof.core.expr.Projection;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.JoinRow;
@@ -26,10 +29,10 @@ public class HashJoinExec implements Executor {
     public final List<Expression> otherConditions;
     public final List<BoundReference> schema;
 
-    public final Context context;
+    public final SofContext context;
 
     public HashJoinExec(Executor stream, Executor build, List<Expression> streamJoinKeys, List<Expression> buildJoinKeys,
-                        List<Expression> otherConditions, List<BoundReference> schema, Context context) {
+                        List<Expression> otherConditions, List<BoundReference> schema, SofContext context) {
         this.stream = stream;
         this.build = build;
 

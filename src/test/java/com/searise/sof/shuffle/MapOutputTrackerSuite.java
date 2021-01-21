@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
-import com.searise.sof.core.Driver;
+import com.searise.sof.core.SofSession;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.InternalRowWriter;
@@ -25,7 +25,7 @@ public class MapOutputTrackerSuite {
     @Test
     public void test() throws InterruptedException {
         // 为了初始化context.
-        new Driver();
+        SofSession.builder().build();
 
         MapOutputTracker tracker = new MapOutputTracker();
         long shuffleId = 1;

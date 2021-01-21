@@ -1,8 +1,8 @@
 package com.searise.sof.storge.memory;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.core.Context;
-import com.searise.sof.core.conf.Conf;
+import com.searise.sof.core.SofContext;
+import com.searise.sof.core.conf.SofConf;
 
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
@@ -13,11 +13,15 @@ import java.util.Map;
 public class MemoryAllocator implements AutoCloseable {
     private Map<Integer, LinkedList<WeakReference<ByteBuffer>>> bufferPoolsBySize = new HashMap<>();
 
-    private final int POOLING_THRESHOLD_BYTES = Context.getActive().conf.getConf(Conf.POOLING_THRESHOLD_BYTES);
+    private final int poolingThresholdBytes;
+
+    public MemoryAllocator(SofContext context) {
+        this.poolingThresholdBytes = context.conf.getConf(SofConf.POOLING_THRESHOLD_BYTES);
+    }
 
     public MemoryBlock allocate(int require) {
         int alignedSize = alignedSize(require);
-        if (alignedSize >= POOLING_THRESHOLD_BYTES) {
+        if (alignedSize >= poolingThresholdBytes) {
             final LinkedList<WeakReference<ByteBuffer>> pool = bufferPoolsBySize.get(alignedSize);
             if (pool != null) {
                 while (!pool.isEmpty()) {
@@ -36,7 +40,7 @@ public class MemoryAllocator implements AutoCloseable {
 
     public void free(MemoryBlock block) {
         int alignedSize = block.byteBuffer.capacity();
-        if (alignedSize >= POOLING_THRESHOLD_BYTES) {
+        if (alignedSize >= poolingThresholdBytes) {
             final LinkedList<WeakReference<ByteBuffer>> pool =
                     bufferPoolsBySize.getOrDefault(alignedSize, new LinkedList<>());
             pool.add(new WeakReference<>(block.byteBuffer));

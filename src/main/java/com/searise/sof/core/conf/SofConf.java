@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class Conf {
+public class SofConf {
     private static final String FORCE_JOIN_TYPE_NONE_VALUE = "none";
     public static final String FORCE_JOIN_TYPE_LOOP_VALUE = "loop";
     public static final String FORCE_JOIN_TYPE_HASH_VALUE = "hash";
@@ -38,12 +38,12 @@ public class Conf {
     public static final ConfVar<Integer> POOLING_THRESHOLD_BYTES =
             ConfVar.buildConf("pooling_threshold_bytes", 1024 * 1024); // 1MB
 
-    public Conf() {
+    public SofConf() {
     }
 
     private final Map<String, String> conf = new HashMap<>();
 
-    public Conf setConf(String name, String value) {
+    public SofConf setConf(String name, String value) {
         conf.put(name, value);
         return this;
     }

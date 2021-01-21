@@ -1,7 +1,7 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
@@ -20,7 +20,7 @@ public class PhysicalNestedLoopJoin extends PhysicalJoin {
     private List<Expression> streamJoinKeys;
     private List<Expression> buildJoinKeys;
 
-    public PhysicalNestedLoopJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build, Context context) {
+    public PhysicalNestedLoopJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build, SofContext context) {
         super(schema, stream, build, context);
         this.conditions = conditions;
 
@@ -32,7 +32,7 @@ public class PhysicalNestedLoopJoin extends PhysicalJoin {
     private PhysicalNestedLoopJoin(
             List<BoundReference> schema, List<Expression> conditions,
             List<Expression> streamJoinKeys, List<Expression> buildJoinKeys,
-            PhysicalPlan stream, PhysicalPlan build, Context context) {
+            PhysicalPlan stream, PhysicalPlan build, SofContext context) {
         super(schema, stream, build, context);
         this.conditions = conditions;
 

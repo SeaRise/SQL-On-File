@@ -1,9 +1,9 @@
 package com.searise.sof.plan.runnable;
 
-import com.searise.sof.core.Driver;
+import com.searise.sof.core.SofSession;
 import com.searise.sof.catalog.BuiltInCatalog;
 import com.searise.sof.catalog.Catalog;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.parser.SqlParser;
 import org.junit.Test;
 
@@ -19,13 +19,13 @@ public class DDLSuite {
     }
 
     private void addTable(String sql, Catalog catalog) {
-        SqlParser sqlParser = new SqlParser(new Context(catalog, new Driver()));
+        SqlParser sqlParser = new SqlParser(SofContext.getOrCreate());
         CreateTable createTable = (CreateTable) sqlParser.parsePlan(sql);
         createTable.run(catalog);
     }
 
     public void showTable(Catalog catalog) {
-        SqlParser sqlParser = new SqlParser(new Context(catalog, new Driver()));
+        SqlParser sqlParser = new SqlParser(SofContext.getOrCreate());
         ShowTable showTable = (ShowTable) sqlParser.parsePlan("show tables");
         showTable.run(catalog);
     }

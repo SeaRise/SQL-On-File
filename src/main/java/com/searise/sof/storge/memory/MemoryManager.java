@@ -1,7 +1,7 @@
 package com.searise.sof.storge.memory;
 
-import com.searise.sof.core.Context;
-import com.searise.sof.core.conf.Conf;
+import com.searise.sof.core.SofContext;
+import com.searise.sof.core.conf.SofConf;
 
 import java.util.Optional;
 
@@ -11,15 +11,15 @@ public class MemoryManager implements AutoCloseable {
 
     private long overflowSize = 0;
 
-    public MemoryManager() {
-        this.memoryPool = new MemoryPool(computeMemoryPoolSize());
-        this.allocator = new MemoryAllocator();
+    public MemoryManager(SofContext context) {
+        this.memoryPool = new MemoryPool(computeMemoryPoolSize(context));
+        this.allocator = new MemoryAllocator(context);
     }
 
-    private long computeMemoryPoolSize() {
-        Conf conf = Context.getActive().conf;
-        long systemMemory = conf.getConf(Conf.SYSTEM_MEMORY);
-        long reservedSystemMemoryBytes = conf.getConf(Conf.RESERVED_SYSTEM_MEMORY_BYTES);
+    private long computeMemoryPoolSize(SofContext context) {
+        SofConf conf = context.conf;
+        long systemMemory = conf.getConf(SofConf.SYSTEM_MEMORY);
+        long reservedSystemMemoryBytes = conf.getConf(SofConf.RESERVED_SYSTEM_MEMORY_BYTES);
         long minSystemMemory = (long) (reservedSystemMemoryBytes * 1.5);
         if (systemMemory < minSystemMemory) {
             throw new IllegalArgumentException(
@@ -27,7 +27,7 @@ public class MemoryManager implements AutoCloseable {
                     systemMemory, minSystemMemory));
         }
 
-        double memoryFaction = conf.getConf(Conf.MEMORY_FRACTION);
+        double memoryFaction = conf.getConf(SofConf.MEMORY_FRACTION);
         return (long) ((systemMemory - reservedSystemMemoryBytes) * memoryFaction);
     }
 

@@ -1,4 +1,4 @@
-package com.searise.sof.core;
+package com.searise.sof.core.id;
 
 @FunctionalInterface
 public interface ExprIdGetter {

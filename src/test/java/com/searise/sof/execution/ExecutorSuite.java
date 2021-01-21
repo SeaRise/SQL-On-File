@@ -2,11 +2,11 @@ package com.searise.sof.execution;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.Driver;
+import com.searise.sof.core.SofSession;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.parser.SqlParser;
@@ -140,7 +140,7 @@ public class ExecutorSuite {
 
     private void testExec(String sql, String expect) throws Exception {
         Catalog catalog = new TestCatalog();
-        Context context = new Context(catalog, new Driver());
+        SofContext context = SofContext.getOrCreate();
         List<String> splits = Utils.split(sql);
         for (int i = 0; i < splits.size() - 1; i++) {
             LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(i));

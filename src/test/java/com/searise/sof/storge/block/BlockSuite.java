@@ -1,6 +1,7 @@
 package com.searise.sof.storge.block;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.storge.Block.Block;
@@ -21,7 +22,7 @@ public class BlockSuite {
         row.setDouble(2, 2.0);
         row.setString(3, "3");
 
-        MemoryAllocator allocator = new MemoryAllocator();
+        MemoryAllocator allocator = new MemoryAllocator(SofContext.getOrCreate());
         MemoryBlock block = allocator.allocate(row.getBytesSize());
         testBlockWriterRead(row, block);
     }

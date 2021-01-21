@@ -1,10 +1,8 @@
 package com.searise.sof.parser;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.core.Driver;
-import com.searise.sof.catalog.Catalog;
-import com.searise.sof.catalog.TestCatalog;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofSession;
+import com.searise.sof.core.SofContext;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
@@ -82,8 +80,7 @@ public class ParserSuite {
     }
 
     private void testSql(String sql, String expect) {
-        Catalog catalog = new TestCatalog();
-        SqlParser sqlParser = new SqlParser(new Context(catalog, new Driver()));
+        SqlParser sqlParser = new SqlParser(SofContext.getOrCreate());
         String result = StringUtils.trim(sqlParser.parsePlan(sql).visitToString());
         Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
     }

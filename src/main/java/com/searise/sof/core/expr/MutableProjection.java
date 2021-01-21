@@ -1,7 +1,9 @@
-package com.searise.sof.core;
+package com.searise.sof.core.expr;
 
 import com.searise.sof.codegen.expr.CodeGenerator;
-import com.searise.sof.core.conf.Conf;
+import com.searise.sof.core.SofContext;
+import com.searise.sof.core.Utils;
+import com.searise.sof.core.conf.SofConf;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.InternalRowWriter;
 import com.searise.sof.expression.Expression;
@@ -11,12 +13,12 @@ import java.util.List;
 public class MutableProjection {
     private final List<Expression> exprs;
     protected InternalRow output;
-    public final Context context;
+    public final SofContext context;
 
-    public MutableProjection(List<Expression> exprs, Context context) {
+    public MutableProjection(List<Expression> exprs, SofContext context) {
         this.context = context;
 
-        if (context.conf.getConf(Conf.CODEGEN_EXPRESSION)) {
+        if (context.conf.getConf(SofConf.CODEGEN_EXPRESSION)) {
             this.exprs = Utils.toImmutableList(exprs.stream().map(CodeGenerator::tryCodegen));
         } else {
             this.exprs = exprs;

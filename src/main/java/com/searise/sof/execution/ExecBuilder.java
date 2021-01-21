@@ -4,17 +4,17 @@ import com.searise.sof.codegen.exec.CodeGenerator;
 import com.searise.sof.codegen.exec.Codegen;
 import com.searise.sof.codegen.exec.CodegenContext;
 import com.searise.sof.codegen.exec.ExecCode;
-import com.searise.sof.core.conf.Conf;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.conf.SofConf;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.plan.physics.*;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class Builder {
-    public final Context context;
+public class ExecBuilder {
+    public final SofContext context;
 
-    public Builder(Context context) {
+    public ExecBuilder(SofContext context) {
         this.context = context;
     }
 
@@ -23,7 +23,7 @@ public class Builder {
     }
 
     private Executor codegen(Executor executor) {
-        if (context.conf.getConf(Conf.CODEGEN_EXECUTOR)) {
+        if (context.conf.getConf(SofConf.CODEGEN_EXECUTOR)) {
             Pair<ExecCode, Executor> codegenResult = doCodegen(new CodegenContext(), executor);
             try {
                 return CodeGenerator.gen(codegenResult.getLeft(), codegenResult.getRight());
@@ -74,7 +74,7 @@ public class Builder {
                 Exchange exchange = (Exchange) physicalPlan;
                 return new ExchangeExec(exchange.shuffleId, context);
             default:
-                throw new SofException(String.format("unsupported plan type `%s` in Builder", planType));
+                throw new SofException(String.format("unsupported plan type `%s` in ExecBuilder", planType));
         }
     }
 }

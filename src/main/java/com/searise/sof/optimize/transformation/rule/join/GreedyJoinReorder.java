@@ -3,7 +3,7 @@ package com.searise.sof.optimize.transformation.rule.join;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.Attribute;
@@ -39,7 +39,7 @@ public class GreedyJoinReorder implements TransformationRule {
         return ImmutableList.of(reorderGroupExpr);
     }
 
-    private GroupExpr reorder(Context context, List<Expression> conditions, List<Group> leaves) {
+    private GroupExpr reorder(SofContext context, List<Expression> conditions, List<Group> leaves) {
         List<JoinPlan> joinPlanPool = new ArrayList<>(leaves.size());
         for (int i = 0; i < leaves.size(); i++) {
             joinPlanPool.add(new JoinPlan(leaves.get(i), BigInteger.ZERO, ImmutableSet.of(i)));
@@ -81,7 +81,7 @@ public class GreedyJoinReorder implements TransformationRule {
         return joinPlanPool.get(0).group.iter().newReadOnlyIter().next();
     }
 
-    private GroupExpr buildCrossJoin(List<JoinPlan> joinPlanPool, Context context) {
+    private GroupExpr buildCrossJoin(List<JoinPlan> joinPlanPool, SofContext context) {
         List<Group> sortedList = joinPlanPool.stream().
                 sorted((o1, o2) -> Integer.compare(o2.leaves.size(), o1.leaves.size())).
                 map(p -> p.group).
@@ -95,7 +95,7 @@ public class GreedyJoinReorder implements TransformationRule {
         return head.iter().newReadOnlyIter().next();
     }
 
-    private Optional<Pair<JoinPlan, List<Expression>>> buildJoinPlan(Context context, JoinPlan plan1, JoinPlan plan2, List<Expression> conditions) {
+    private Optional<Pair<JoinPlan, List<Expression>>> buildJoinPlan(SofContext context, JoinPlan plan1, JoinPlan plan2, List<Expression> conditions) {
         if (plan1.leaves.stream().anyMatch(plan2.leaves::contains)) {
             return Optional.empty();
         }

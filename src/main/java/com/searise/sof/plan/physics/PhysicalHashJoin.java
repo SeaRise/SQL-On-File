@@ -1,7 +1,7 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
@@ -20,7 +20,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
     public List<Expression> streamJoinKeys;
     public List<Expression> buildJoinKeys;
 
-    public PhysicalHashJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build, Context context) {
+    public PhysicalHashJoin(List<BoundReference> schema, List<Expression> conditions, PhysicalPlan stream, PhysicalPlan build, SofContext context) {
         super(schema, stream, build, context);
 
         Triple<List<Expression>, List<Expression>, List<Expression>> splits = splits(conditions);
@@ -37,7 +37,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
             List<Expression> otherConditions,
             List<Expression> streamJoinKeys,
             List<Expression> buildJoinKeys,
-            Context context) {
+            SofContext context) {
         super(schema, stream, build, context);
         this.streamJoinKeys = streamJoinKeys;
         this.buildJoinKeys = buildJoinKeys;

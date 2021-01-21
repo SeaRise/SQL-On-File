@@ -2,7 +2,7 @@ package com.searise.sof.plan.logic;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.attribute.Attribute;
 
@@ -13,16 +13,16 @@ import java.util.Optional;
 public class SubqueryAlias implements LogicalPlan {
     public final String name;
     public final LogicalPlan child;
-    public final Context context;
+    public final SofContext context;
 
-    public SubqueryAlias(String name, LogicalPlan child, Context context) {
+    public SubqueryAlias(String name, LogicalPlan child, SofContext context) {
         this.name = name;
         this.child = child;
         this.context = context;
     }
 
     @Override
-    public Context context() {
+    public SofContext context() {
         return context;
     }
 
