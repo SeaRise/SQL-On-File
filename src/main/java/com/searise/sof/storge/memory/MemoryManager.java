@@ -1,5 +1,8 @@
 package com.searise.sof.storge.memory;
 
+import com.searise.sof.core.Context;
+import com.searise.sof.core.conf.Conf;
+
 import java.util.Optional;
 
 public class MemoryManager implements AutoCloseable {
@@ -13,17 +16,19 @@ public class MemoryManager implements AutoCloseable {
         this.allocator = new MemoryAllocator();
     }
 
-    private static long RESERVED_SYSTEM_MEMORY_BYTES = 300 * 1024 * 1024;
-    private static double MEMORY_FRACTION = 0.6;
     private long computeMemoryPoolSize() {
-        long systemMemory = Runtime.getRuntime().maxMemory();
-        long minSystemMemory = (long) (RESERVED_SYSTEM_MEMORY_BYTES * 1.5);
+        Conf conf = Context.getActive().conf;
+        long systemMemory = conf.getConf(Conf.SYSTEM_MEMORY);
+        long reservedSystemMemoryBytes = conf.getConf(Conf.RESERVED_SYSTEM_MEMORY_BYTES);
+        long minSystemMemory = (long) (reservedSystemMemoryBytes * 1.5);
         if (systemMemory < minSystemMemory) {
             throw new IllegalArgumentException(
                     String.format("System memory %s must be at least %s.",
                     systemMemory, minSystemMemory));
         }
-        return (long) ((systemMemory - RESERVED_SYSTEM_MEMORY_BYTES) * MEMORY_FRACTION);
+
+        double memoryFaction = conf.getConf(Conf.MEMORY_FRACTION);
+        return (long) ((systemMemory - reservedSystemMemoryBytes) * memoryFaction);
     }
 
     public Optional<MemoryBlock> allocateFully(int require, boolean shouldAllocated) {

@@ -1,6 +1,8 @@
 package com.searise.sof.storge.memory;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.core.Context;
+import com.searise.sof.core.conf.Conf;
 
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
@@ -11,7 +13,7 @@ import java.util.Map;
 public class MemoryAllocator implements AutoCloseable {
     private Map<Integer, LinkedList<WeakReference<ByteBuffer>>> bufferPoolsBySize = new HashMap<>();
 
-    private static final int POOLING_THRESHOLD_BYTES = 1024 * 1024; // 1MB
+    private final int POOLING_THRESHOLD_BYTES = Context.getActive().conf.getConf(Conf.POOLING_THRESHOLD_BYTES);
 
     public MemoryBlock allocate(int require) {
         int alignedSize = alignedSize(require);

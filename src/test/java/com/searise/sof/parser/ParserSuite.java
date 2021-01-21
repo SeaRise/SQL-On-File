@@ -1,7 +1,7 @@
 package com.searise.sof.parser;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.Driver;
+import com.searise.sof.core.Driver;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.Context;

@@ -1,6 +1,5 @@
 package com.searise.sof.core;
 
-import com.searise.sof.Driver;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.core.conf.Conf;
 import com.searise.sof.plan.physics.PhysicalPlan;
@@ -15,7 +14,7 @@ import java.util.UUID;
 public class Context {
     public final ExprIdBuilder exprIdBuilder = new ExprIdBuilder();
     public final ShuffleIdBuilder shuffleIdBuilder = new ShuffleIdBuilder();
-    public final Conf conf = new Conf();
+    public final Conf conf;
     public final String appId;
 
     public final Catalog catalog;
@@ -28,6 +27,7 @@ public class Context {
     public final StorageManager storageManager;
 
     public Context(Catalog catalog, Driver driver) {
+        conf = new Conf();
         this.catalog = catalog;
         this.driver = driver;
         this.appId = UUID.randomUUID().toString();

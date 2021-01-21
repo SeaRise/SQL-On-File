@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ShuffleBlock {
-    private final List<InternalRow> memoryBlock = new ArrayList<>();
+    private final List<InternalRow> memoryStore = new ArrayList<>();
     private final DiskBlock diskBlock;
     private BlockWriter diskBlockWriter;
 
@@ -21,7 +21,7 @@ public class ShuffleBlock {
     }
 
     void appendMemory(InternalRow internalRow) {
-        memoryBlock.add(internalRow);
+        memoryStore.add(internalRow);
     }
 
     void appendDisk(InternalRow internalRow) {
@@ -55,7 +55,7 @@ public class ShuffleBlock {
             closeDiskBlockWriter();
             return Utils.throwRuntime(() -> {
                 BlockReader blockReader = diskBlock.getReader();
-                return Utils.concat(ImmutableList.of(memoryBlock.iterator(), new Iterator<InternalRow>() {
+                return Utils.concat(ImmutableList.of(memoryStore.iterator(), new Iterator<InternalRow>() {
                     @Override
                     public boolean hasNext() {
                         return Utils.throwRuntime(() -> {
@@ -74,13 +74,13 @@ public class ShuffleBlock {
                 }));
             });
         } else {
-            return memoryBlock.iterator();
+            return memoryStore.iterator();
         }
     }
 
     DiskBlock clear() {
         closeDiskBlockWriter();
-        memoryBlock.clear();
+        memoryStore.clear();
         return diskBlock;
     }
 }

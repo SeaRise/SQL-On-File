@@ -1,5 +1,6 @@
-package com.searise.sof;
+package com.searise.sof.cli;
 
+import com.searise.sof.core.Driver;
 import com.searise.sof.core.Utils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,9 +12,10 @@ public class CliDriver {
         new CliDriver().run();
     }
 
-    private Driver driver = new Driver();
+    private final Driver driver;
 
     private CliDriver() {
+        driver = new Driver();
     }
 
     public void run() {

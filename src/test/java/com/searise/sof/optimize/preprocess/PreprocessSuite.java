@@ -1,6 +1,6 @@
 package com.searise.sof.optimize.preprocess;
 
-import com.searise.sof.Driver;
+import com.searise.sof.core.Driver;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.analyse.Applicable;
 import com.searise.sof.catalog.Catalog;

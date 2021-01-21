@@ -1,6 +1,7 @@
 package com.searise.sof.storge.memory;
 
 import com.google.common.base.Preconditions;
+import com.searise.sof.core.Utils;
 
 public class MemoryPool {
     private final long poolSize;
@@ -27,7 +28,8 @@ public class MemoryPool {
     }
 
     public void release(long used) {
-        Preconditions.checkArgument(used >= 0 && used <= memoryUsed);
+        Utils.checkArgument(used >= 0 && used <= memoryUsed,
+                String.format("release memory(%s) < 0 or > memoryUsed(%s)", used, memoryUsed));
         memoryUsed -= used;
     }
 

@@ -1,4 +1,4 @@
-package com.searise.sof;
+package com.searise.sof.core;
 
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.BuiltInCatalog;
@@ -18,15 +18,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.searise.sof.optimize.Optimizer.newOptimizer;
 
 public class Driver {
-    public final Catalog catalog = new BuiltInCatalog();
-    public final Context context = new Context(catalog, this);
-    public final SqlParser sqlParser = new SqlParser(context);
-    public final Analyzer analyzer = new Analyzer(catalog);
-    public final Optimizer optimizer = newOptimizer();
-    public final Builder builder = new Builder(context);
+    public final Catalog catalog;
+    public final Context context;
+    public final SqlParser sqlParser;
+    public final Analyzer analyzer;
+    public final Optimizer optimizer;
+    public final Builder builder;
 
     public Driver() {
+        catalog = new BuiltInCatalog();
+        context = new Context(catalog, this);
         Context.setActive(context);
+        sqlParser = new SqlParser(context);
+        analyzer = new Analyzer(catalog);
+        optimizer = newOptimizer();
+        builder = new Builder(context);
     }
 
     public void compile(String sqls) throws Exception {

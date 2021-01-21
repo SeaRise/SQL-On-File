@@ -36,6 +36,11 @@ public class ConfVar<T> {
         return new ConfVar<>(name, defaultValue, longGet);
     }
 
+    private static ConfValueGet<Double> doubleGet = Double::valueOf;
+    public static ConfVar<Double> buildConf(String name, Double defaultValue) {
+        return new ConfVar<Double>(name, defaultValue, doubleGet);
+    }
+
     private static ConfValueGet<Boolean> boolGet = Boolean::valueOf;
     public static ConfVar<Boolean> buildConf(String name, Boolean defaultValue) {
         return new ConfVar<>(name, defaultValue, boolGet);

@@ -1,6 +1,6 @@
 package com.searise.sof.plan.runnable;
 
-import com.searise.sof.Driver;
+import com.searise.sof.core.Driver;
 import org.junit.Test;
 
 public class InsertSuite {

@@ -1,7 +1,7 @@
 package com.searise.sof.optimize.transformation;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.Driver;
+import com.searise.sof.core.Driver;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.Context;

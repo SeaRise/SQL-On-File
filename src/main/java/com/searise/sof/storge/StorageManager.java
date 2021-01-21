@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+// todo 细化同步锁, 而不是全部方法都加synchronized.
 public class StorageManager implements AutoCloseable {
     private final MemoryManager memoryManager;
     private final DiskManager diskManager;
@@ -24,18 +25,18 @@ public class StorageManager implements AutoCloseable {
         this.diskManager = new DiskManager();
     }
 
-    public void registerConsumer(StorageConsumer consumer) {
+    public synchronized void registerConsumer(StorageConsumer consumer) {
         Preconditions.checkArgument(!storageConsumers.contains(consumer));
         storageConsumers.add(consumer);
     }
 
-    public void unregisterConsumer(StorageConsumer consumer) {
+    public synchronized void unregisterConsumer(StorageConsumer consumer) {
         Preconditions.checkArgument(storageConsumers.contains(consumer));
         storageConsumers.remove(consumer);
         doFree(consumer);
     }
 
-    public DiskBlock allocateDisk(StorageConsumer consumer) {
+    public synchronized DiskBlock allocateDisk(StorageConsumer consumer) {
         try {
             Preconditions.checkArgument(storageConsumers.contains(consumer));
             return diskManager.allocate();
@@ -44,21 +45,21 @@ public class StorageManager implements AutoCloseable {
         }
     }
 
-    public Optional<MemoryBlock> allocateMemoryFully(int require, StorageConsumer consumer, boolean shouldAllocated) {
+    public synchronized Optional<MemoryBlock> allocateMemoryFully(int require, StorageConsumer consumer, boolean shouldAllocated) {
         Preconditions.checkArgument(storageConsumers.contains(consumer));
-        return tryAllocateMemory(require, shouldAllocated);
+        return tryAllocateMemory(require, consumer, shouldAllocated);
     }
 
-    public Optional<MemoryBlock> allocateMemory(int require, StorageConsumer consumer, boolean shouldAllocated) {
+    public synchronized Optional<MemoryBlock> allocateMemory(int require, StorageConsumer consumer, boolean shouldAllocated) {
         Preconditions.checkArgument(storageConsumers.contains(consumer));
-        Optional<MemoryBlock> tryMemory = tryAllocateMemory(require, shouldAllocated);
+        Optional<MemoryBlock> tryMemory = tryAllocateMemory(require, consumer, shouldAllocated);
         if (tryMemory.isPresent()) {
             return tryMemory;
         }
         return memoryManager.allocate(require, shouldAllocated);
     }
 
-    private Optional<MemoryBlock> tryAllocateMemory(int require, boolean shouldAllocated) {
+    private Optional<MemoryBlock> tryAllocateMemory(int require, StorageConsumer consumer, boolean shouldAllocated) {
         Optional<MemoryBlock> tryMemory = memoryManager.allocateFully(require, shouldAllocated);
         if (tryMemory.isPresent()) {
             return tryMemory;
@@ -69,21 +70,25 @@ public class StorageManager implements AutoCloseable {
                 sorted((o1, o2) -> Long.compare(o2.memoryUsed(), o1.memoryUsed())).
                 collect(Collectors.toList());
         for (StorageConsumer c : sortByMemoryUsed) {
-            int missing = require - Math.toIntExact(memoryManager.getFreeSize());
-            for (MemoryBlock spilledBlock : c.spill(missing)) {
-                memoryManager.free(spilledBlock);
-            }
-
+            spillForRequire(c, require);
             tryMemory = memoryManager.allocateFully(require, shouldAllocated);
             if (tryMemory.isPresent()) {
                 return tryMemory;
             }
         }
-        return Optional.empty();
+        spillForRequire(consumer, require);
+        return memoryManager.allocateFully(require, shouldAllocated);
+    }
+
+    private void spillForRequire(StorageConsumer consumer, int require) {
+        int missing = require - Math.toIntExact(memoryManager.getFreeSize());
+        for (MemoryBlock spilledBlock : consumer.spill(missing)) {
+            memoryManager.free(spilledBlock);
+        }
     }
 
     @Override
-    public void close() throws Exception {
+    public synchronized void close() throws Exception {
         for (StorageConsumer c : storageConsumers) {
            doFree(c);
         }
