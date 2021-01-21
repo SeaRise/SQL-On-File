@@ -9,7 +9,8 @@ import java.nio.ByteBuffer;
 public class MemoryAllocatorSuite {
     @Test
     public void test() {
-        MemoryAllocator allocator = new MemoryAllocator(SofContext.getOrCreate());
+        SofContext context = SofContext.getOrCreate();
+        MemoryAllocator allocator = new MemoryAllocator(context);
         MemoryBlock block = allocator.allocate(1);
         ByteBuffer buffer = block.byteBuffer;
         allocator.free(block);
@@ -29,5 +30,7 @@ public class MemoryAllocatorSuite {
         Preconditions.checkArgument(block.byteBuffer == buffer);
         allocator.free(block);
         Preconditions.checkArgument(block.byteBuffer == null);
+
+        context.stop();
     }
 }

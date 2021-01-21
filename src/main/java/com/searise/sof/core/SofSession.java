@@ -86,6 +86,7 @@ public class SofSession {
     }
 
     public void stop() {
+        unActiveIfIs(this);
         context.stop();
     }
 
@@ -94,6 +95,11 @@ public class SofSession {
         return activeSession.orElseGet(() -> {
             throw new SofException("no active session");
         });
+    }
+    private static synchronized void unActiveIfIs(SofSession session) {
+        if (activeSession.isPresent() && activeSession.get() == session) {
+            activeSession = Optional.empty();
+        }
     }
 
     public static Builder builder() {

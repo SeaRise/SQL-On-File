@@ -15,6 +15,7 @@ public class InsertSuite {
 
         String sql = "insert overwrite table output_table select a, b, c, d from input_table";
         session.compile(sql);
+        session.stop();
     }
 
     @Test
@@ -25,5 +26,6 @@ public class InsertSuite {
 
         String sql = "create table output_table path 'src\\test\\resources\\out' as select a, b, c, d from input_table";
         session.compile(sql);
+        session.stop();
     }
 }

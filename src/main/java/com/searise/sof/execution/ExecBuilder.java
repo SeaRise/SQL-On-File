@@ -4,10 +4,10 @@ import com.searise.sof.codegen.exec.CodeGenerator;
 import com.searise.sof.codegen.exec.Codegen;
 import com.searise.sof.codegen.exec.CodegenContext;
 import com.searise.sof.codegen.exec.ExecCode;
-import com.searise.sof.core.conf.SofConf;
 import com.searise.sof.core.SofContext;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
+import com.searise.sof.core.conf.SofConf;
 import com.searise.sof.plan.physics.*;
 import org.apache.commons.lang3.tuple.Pair;
 

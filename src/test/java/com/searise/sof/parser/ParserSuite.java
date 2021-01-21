@@ -1,7 +1,6 @@
 package com.searise.sof.parser;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.core.SofSession;
 import com.searise.sof.core.SofContext;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
@@ -80,8 +79,10 @@ public class ParserSuite {
     }
 
     private void testSql(String sql, String expect) {
-        SqlParser sqlParser = new SqlParser(SofContext.getOrCreate());
+        SofContext context = SofContext.getOrCreate();
+        SqlParser sqlParser = new SqlParser(context);
         String result = StringUtils.trim(sqlParser.parsePlan(sql).visitToString());
         Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
+        context.stop();
     }
 }

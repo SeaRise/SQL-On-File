@@ -1,7 +1,6 @@
 package com.searise.sof.plan.runnable;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.core.SofSession;
 import com.searise.sof.catalog.BuiltInCatalog;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.core.SofContext;
@@ -24,5 +23,6 @@ public class SetConfSuite {
         Optional<String> confValue = context.conf.getConf("key");
         Preconditions.checkArgument(confValue.isPresent());
         Preconditions.checkArgument(StringUtils.equals(confValue.get(), "value"));
+        context.stop();
     }
 }

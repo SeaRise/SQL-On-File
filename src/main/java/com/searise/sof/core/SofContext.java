@@ -36,8 +36,8 @@ public class SofContext {
     }
 
     public void stop() {
-        dagScheduler.stop();
         unActiveIfIs(this);
+        dagScheduler.stop();
     }
 
     private static Optional<SofContext> activeContext = Optional.empty();
@@ -46,7 +46,6 @@ public class SofContext {
             throw new SofException("no active context");
         });
     }
-
     private static synchronized void unActiveIfIs(SofContext context) {
         if (activeContext.isPresent() && activeContext.get() == context) {
             activeContext = Optional.empty();

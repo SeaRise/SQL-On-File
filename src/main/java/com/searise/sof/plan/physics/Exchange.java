@@ -1,8 +1,8 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.conf.SofConf;
 import com.searise.sof.core.SofContext;
+import com.searise.sof.core.conf.SofConf;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
 

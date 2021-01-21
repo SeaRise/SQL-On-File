@@ -22,9 +22,11 @@ public class BlockSuite {
         row.setDouble(2, 2.0);
         row.setString(3, "3");
 
-        MemoryAllocator allocator = new MemoryAllocator(SofContext.getOrCreate());
+        SofContext context = SofContext.getOrCreate();
+        MemoryAllocator allocator = new MemoryAllocator(context);
         MemoryBlock block = allocator.allocate(row.getBytesSize());
         testBlockWriterRead(row, block);
+        context.stop();
     }
 
     @Test

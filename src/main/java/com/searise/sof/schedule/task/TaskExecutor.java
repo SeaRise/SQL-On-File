@@ -1,8 +1,8 @@
 package com.searise.sof.schedule.task;
 
-import com.searise.sof.core.conf.SofConf;
 import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
+import com.searise.sof.core.conf.SofConf;
 
 import java.util.LinkedList;
 import java.util.Objects;

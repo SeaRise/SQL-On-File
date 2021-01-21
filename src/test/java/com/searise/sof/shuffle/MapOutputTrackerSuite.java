@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.SofSession;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
@@ -25,7 +26,7 @@ public class MapOutputTrackerSuite {
     @Test
     public void test() throws InterruptedException {
         // 为了初始化context.
-        SofSession.builder().build();
+        SofContext context = SofContext.getOrCreate();
 
         MapOutputTracker tracker = new MapOutputTracker();
         long shuffleId = 1;
@@ -92,6 +93,8 @@ public class MapOutputTrackerSuite {
         tracker.unregisterShuffle(shuffleId);
 
         Preconditions.checkArgument(multiMap.isEmpty());
+
+        context.stop();
     }
 
     private InternalRow createRow(int mapId, int reduceId) {

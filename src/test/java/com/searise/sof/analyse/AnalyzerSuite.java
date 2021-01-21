@@ -1,7 +1,6 @@
 package com.searise.sof.analyse;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.core.SofSession;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
 import com.searise.sof.core.SofContext;
