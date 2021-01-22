@@ -39,44 +39,45 @@ public class DiskBlock implements Block {
         Preconditions.checkArgument(file.exists());
         return new BlockReader() {
             private FileInputStream fileIS = new FileInputStream(file);
-            private final FileChannel fileChannel = fileIS.getChannel();
             private DataInputStream dataIS = new DataInputStream(new BufferedInputStream(fileIS));
             private final long length = file.length();
             private long position = 0L;
             private InternalRow row = EmptyRow.EMPTY_ROW;
             @Override
             public InternalRow next() throws Exception {
-                try {
-                    int fieldNum = dataIS.readInt();
-                    if (fieldNum == 0) {
-                        return EmptyRow.EMPTY_ROW;
-                    }
-                    if (row.numFields() != fieldNum) {
-                        row = new ArrayRow(fieldNum);
-                    }
-                    for (int i = 0; i < fieldNum; i++) {
-                        switch (DataType.getType(dataIS.readByte())) {
-                            case DoubleType:
-                                row.setDouble(i, dataIS.readDouble());
-                                break;
-                            case IntegerType:
-                                row.setInt(i, dataIS.readInt());
-                                break;
-                            case StringType:
-                                int byteSize = dataIS.readInt();
-                                byte[] bytes = new byte[byteSize];
-                                dataIS.readFully(bytes);
-                                row.setString(i, new String(bytes));
-                                break;
-                            case BooleanType:
-                                row.setBoolean(i, dataIS.readBoolean());
-                                break;
-                        }
-                    }
-                    return row;
-                } finally {
-                    position = fileChannel.position();
+                int fieldNum = dataIS.readInt();
+                position += 4;
+                if (fieldNum == 0) {
+                    return EmptyRow.EMPTY_ROW;
                 }
+                if (row.numFields() != fieldNum) {
+                    row = new ArrayRow(fieldNum);
+                }
+                for (int i = 0; i < fieldNum; i++) {
+                    position += 1;
+                    switch (DataType.getType(dataIS.readByte())) {
+                        case DoubleType:
+                            position += 8;
+                            row.setDouble(i, dataIS.readDouble());
+                            break;
+                        case IntegerType:
+                            position += 4;
+                            row.setInt(i, dataIS.readInt());
+                            break;
+                        case StringType:
+                            int byteSize = dataIS.readInt();
+                            position += (4 + byteSize);
+                            byte[] bytes = new byte[byteSize];
+                            dataIS.readFully(bytes);
+                            row.setString(i, new String(bytes));
+                            break;
+                        case BooleanType:
+                            position += 1;
+                            row.setBoolean(i, dataIS.readBoolean());
+                            break;
+                    }
+                }
+                return row;
             }
 
             @Override
@@ -87,7 +88,6 @@ public class DiskBlock implements Block {
             @Override
             public void close() throws Exception {
                 dataIS.close();
-                fileChannel.close();
                 fileIS.close();
             }
         };

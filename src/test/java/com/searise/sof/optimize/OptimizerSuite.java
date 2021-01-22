@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
+import com.searise.sof.catalog.TestContext;
 import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.parser.SqlParser;
@@ -120,22 +121,23 @@ public class OptimizerSuite {
     }
 
     private void doTest(String sql, String expect) throws Exception {
-        Catalog catalog = new TestCatalog();
-        SofContext context = SofContext.getOrCreate();
-        List<String> splits = Utils.split(sql);
-        for (int i = 0; i < splits.size() - 1; i++) {
-            LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(i));
-            if (parsePlan instanceof RunnableCommand) {
-                RunnableCommand command = (RunnableCommand) parsePlan;
-                command.run(catalog);
-            }
-        }
+        try (SofContext context = TestContext.newTestContext()) {
+            Catalog catalog = new TestCatalog();
 
-        LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(splits.size() - 1));
-        LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
-        PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
-        String result = StringUtils.trim(physicalPlan.visitToString());
-        Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
-        context.stop();
+            List<String> splits = Utils.split(sql);
+            for (int i = 0; i < splits.size() - 1; i++) {
+                LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(i));
+                if (parsePlan instanceof RunnableCommand) {
+                    RunnableCommand command = (RunnableCommand) parsePlan;
+                    command.run(catalog);
+                }
+            }
+
+            LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(splits.size() - 1));
+            LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
+            PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
+            String result = StringUtils.trim(physicalPlan.visitToString());
+            Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
+        }
     }
 }

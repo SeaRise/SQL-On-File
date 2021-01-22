@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.searise.sof.optimize.Optimizer.newOptimizer;
 
-public class SofSession {
+public class SofSession implements AutoCloseable {
     public final Catalog catalog;
     public final SofContext context;
     public final SqlParser sqlParser;
@@ -85,9 +85,10 @@ public class SofSession {
         Utils.println(resultBuilder.toString());
     }
 
-    public void stop() {
+    @Override
+    public void close() {
         unActiveIfIs(this);
-        context.stop();
+        context.close();
     }
 
     private static Optional<SofSession> activeSession = Optional.empty();

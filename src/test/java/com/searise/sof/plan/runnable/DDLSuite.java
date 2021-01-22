@@ -2,6 +2,7 @@ package com.searise.sof.plan.runnable;
 
 import com.searise.sof.catalog.BuiltInCatalog;
 import com.searise.sof.catalog.Catalog;
+import com.searise.sof.catalog.TestContext;
 import com.searise.sof.core.SofContext;
 import com.searise.sof.parser.SqlParser;
 import org.junit.Test;
@@ -9,14 +10,14 @@ import org.junit.Test;
 public class DDLSuite {
     @Test
     public void test() {
-        SofContext context = SofContext.getOrCreate();
-        Catalog catalog = new BuiltInCatalog();
-        showTable(catalog);
-        addTable("create table a (a int) path '/'", catalog);
-        showTable(catalog);
-        addTable("create table test_long_table_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  (a int) path '/' separator ','", catalog);
-        showTable(catalog);
-        context.stop();
+        try (SofContext context = TestContext.newTestContext()) {
+            Catalog catalog = new BuiltInCatalog();
+            showTable(catalog);
+            addTable("create table a (a int) path '/'", catalog);
+            showTable(catalog);
+            addTable("create table test_long_table_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  (a int) path '/' separator ','", catalog);
+            showTable(catalog);
+        }
     }
 
     private void addTable(String sql, Catalog catalog) {

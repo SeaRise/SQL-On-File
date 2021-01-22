@@ -3,6 +3,7 @@ package com.searise.sof.analyse;
 import com.google.common.base.Preconditions;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
+import com.searise.sof.catalog.TestContext;
 import com.searise.sof.core.SofContext;
 import com.searise.sof.parser.SqlParser;
 import com.searise.sof.plan.logic.LogicalPlan;
@@ -83,13 +84,13 @@ public class AnalyzerSuite {
     }
 
     private void testAnalyse(String sql, String expect) {
-        Catalog catalog = new TestCatalog();
-        SofContext context = SofContext.getOrCreate();
-        SqlParser sqlParser = new SqlParser(context);
-        Analyzer analyzer = new Analyzer(catalog);
-        LogicalPlan parsePlan = sqlParser.parsePlan(sql);
-        String result = StringUtils.trim(analyzer.analyse(parsePlan).visitToString());
-        Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
-        context.stop();
+        try (SofContext context = TestContext.newTestContext()) {
+            Catalog catalog = new TestCatalog();
+            SqlParser sqlParser = new SqlParser(context);
+            Analyzer analyzer = new Analyzer(catalog);
+            LogicalPlan parsePlan = sqlParser.parsePlan(sql);
+            String result = StringUtils.trim(analyzer.analyse(parsePlan).visitToString());
+            Preconditions.checkArgument(StringUtils.equals(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
+        }
     }
 }

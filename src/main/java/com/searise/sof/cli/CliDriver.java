@@ -23,14 +23,14 @@ public class CliDriver {
         while (true) {
             String cmd = waitForCmd(in);
             if (StringUtils.equalsAnyIgnoreCase("exit", cmd)) {
-                session.stop();
+                session.close();
                 return;
             }
 
             try {
                 session.compile(cmd);
             } catch (Exception e) {
-                session.stop();
+                session.close();
                 Utils.println(e.getMessage());
             }
         }

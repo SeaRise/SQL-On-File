@@ -4,8 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import com.searise.sof.catalog.TestContext;
 import com.searise.sof.core.SofContext;
-import com.searise.sof.core.SofSession;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.InternalRowWriter;
@@ -25,76 +25,73 @@ public class MapOutputTrackerSuite {
 
     @Test
     public void test() throws InterruptedException {
-        // 为了初始化context.
-        SofContext context = SofContext.getOrCreate();
+        try (SofContext context = TestContext.newTestContext()) {
+            MapOutputTracker tracker = new MapOutputTracker();
+            long shuffleId = 1;
+            int mapPartitions = 20;
+            int reducePartitions = 50;
 
-        MapOutputTracker tracker = new MapOutputTracker();
-        long shuffleId = 1;
-        int mapPartitions = 20;
-        int reducePartitions = 50;
+            List<Expression> expressions = expressions();
+            List<Expression> keys = ImmutableList.of(expressions.get(1));
 
-        List<Expression> expressions = expressions();
-        List<Expression> keys = ImmutableList.of(expressions.get(1));
+            tracker.registerShuffle(shuffleId, mapPartitions, reducePartitions);
 
-        tracker.registerShuffle(shuffleId, mapPartitions, reducePartitions);
+            Multimap<Integer, String> multiMap = HashMultimap.create();
 
-        Multimap<Integer, String> multiMap = HashMultimap.create();
+            CountDownLatch mapLatch = new CountDownLatch(mapPartitions);
+            for (int mapId = 0; mapId < mapPartitions; mapId++) {
+                int finalMapId = mapId;
+                new Thread(() -> {
+                    ShuffleWriter writer = new ShuffleWriter(keys, shuffleId, finalMapId, tracker, reducePartitions);
+                    for (int i = 0; i < reducePartitions; i++) {
+                        InternalRow row = createRow(finalMapId, i);
+                        writer.write(row);
 
-        CountDownLatch mapLatch = new CountDownLatch(mapPartitions);
-        for (int mapId = 0; mapId < mapPartitions; mapId++) {
-            int finalMapId = mapId;
-            new Thread(() -> {
-                ShuffleWriter writer = new ShuffleWriter(keys, shuffleId, finalMapId, tracker, reducePartitions);
-                for (int i = 0; i < reducePartitions; i++) {
-                    InternalRow row = createRow(finalMapId, i);
-                    writer.write(row);
-
-                    int reduceId = ShuffleWriter.hashKey(row, keys, reducePartitions);
-                    String key = finalMapId + "_" + reduceId;
-                    synchronized (multiMap) {
-                        multiMap.put(reduceId, key);
-                    }
-                }
-                writer.commit();
-                mapLatch.countDown();
-            }).start();
-        }
-        mapLatch.await();
-
-        Preconditions.checkArgument(multiMap.size() == mapPartitions * reducePartitions);
-
-        CountDownLatch reduceLatch = new CountDownLatch(reducePartitions);
-        for (int reduceId = 0; reduceId < reducePartitions; reduceId++) {
-            final int finalReduceId = (31 + reduceId) % reducePartitions;
-            new Thread(() -> {
-                try {
-                    ShuffleReader reader = new ShuffleReader(tracker, shuffleId, finalReduceId);
-                    Iterator<InternalRow> iterator = reader.iterator();
-                    while (iterator.hasNext()) {
-                        InternalRow row = iterator.next();
-                        int parseReduceId = ShuffleWriter.hashKey(row, keys, reducePartitions);
-                        String key = expressions.get(0).eval(row) + "_" + parseReduceId;
+                        int reduceId = ShuffleWriter.hashKey(row, keys, reducePartitions);
+                        String key = finalMapId + "_" + reduceId;
                         synchronized (multiMap) {
-                            Preconditions.checkArgument(parseReduceId == finalReduceId,
-                                    String.format("%s != %s", parseReduceId, finalReduceId));
-                            Preconditions.checkArgument(multiMap.get(finalReduceId).contains(key));
-                            Preconditions.checkArgument(multiMap.remove(finalReduceId, key));
+                            multiMap.put(reduceId, key);
                         }
                     }
-                    reduceLatch.countDown();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.exit(-1);
-                }
-            }).start();
+                    writer.commit();
+                    mapLatch.countDown();
+                }).start();
+            }
+            mapLatch.await();
+
+            Preconditions.checkArgument(multiMap.size() == mapPartitions * reducePartitions);
+
+            CountDownLatch reduceLatch = new CountDownLatch(reducePartitions);
+            for (int reduceId = 0; reduceId < reducePartitions; reduceId++) {
+                final int finalReduceId = (31 + reduceId) % reducePartitions;
+                new Thread(() -> {
+                    try {
+                        ShuffleReader reader = new ShuffleReader(tracker, shuffleId, finalReduceId);
+                        Iterator<InternalRow> iterator = reader.iterator();
+                        while (iterator.hasNext()) {
+                            InternalRow row = iterator.next();
+                            int parseReduceId = ShuffleWriter.hashKey(row, keys, reducePartitions);
+                            String key = expressions.get(0).eval(row) + "_" + parseReduceId;
+                            synchronized (multiMap) {
+                                Preconditions.checkArgument(parseReduceId == finalReduceId,
+                                        String.format("%s != %s", parseReduceId, finalReduceId));
+                                Preconditions.checkArgument(multiMap.get(finalReduceId).contains(key));
+                                Preconditions.checkArgument(multiMap.remove(finalReduceId, key));
+                            }
+                        }
+                        reduceLatch.countDown();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.exit(-1);
+                    }
+                }).start();
+            }
+            reduceLatch.await();
+
+            tracker.unregisterShuffle(shuffleId);
+
+            Preconditions.checkArgument(multiMap.isEmpty());
         }
-        reduceLatch.await();
-
-        tracker.unregisterShuffle(shuffleId);
-
-        Preconditions.checkArgument(multiMap.isEmpty());
-
-        context.stop();
     }
 
     private InternalRow createRow(int mapId, int reduceId) {

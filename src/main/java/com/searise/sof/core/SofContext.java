@@ -12,7 +12,7 @@ import com.searise.sof.storge.StorageManager;
 import java.util.Optional;
 import java.util.UUID;
 
-public class SofContext {
+public class SofContext implements AutoCloseable {
     public final ExprIdBuilder exprIdBuilder = new ExprIdBuilder();
     public final ShuffleIdBuilder shuffleIdBuilder = new ShuffleIdBuilder();
     public final SofConf conf;
@@ -35,7 +35,8 @@ public class SofContext {
         dagScheduler.runPlan(plan, resultHandle);
     }
 
-    public void stop() {
+    @Override
+    public void close() {
         unActiveIfIs(this);
         dagScheduler.stop();
     }
