@@ -139,7 +139,8 @@ public class ExecutorSuite {
     }
 
     private void testExec(String sql, String expect) throws Exception {
-        try (SofContext context = TestContext.newTestContext()) {
+//        try (SofContext context = TestContext.newTestContext()) {
+        try (SofContext context = SofContext.getOrCreate()) {
             Catalog catalog = new TestCatalog();
 
             List<String> splits = Utils.split(sql);

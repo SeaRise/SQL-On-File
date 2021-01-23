@@ -11,6 +11,7 @@ import com.searise.sof.storge.memory.MemoryBlock;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 public class ShuffleStore extends StorageConsumer {
     private final ShuffleBlock[] shuffleBlocks;
@@ -31,7 +32,7 @@ public class ShuffleStore extends StorageConsumer {
             if (storageManager.allocateMemoryFully(memoryRequire, this, false).isPresent()) {
                 memoryUsed.addAndGet(memoryRequire);
                 // row需要copy, 因为保存的internalRow可能还有其他地方修改.
-                shuffleBlock.appendMemory(internalRow.copy());
+                shuffleBlock.appendMemory(internalRow.copy(), memoryRequire);
             } else {
                 shuffleBlock.appendDisk(internalRow);
             }
@@ -52,6 +53,17 @@ public class ShuffleStore extends StorageConsumer {
 
     @Override
     public List<MemoryBlock> spill(int require) {
+//        int spillMemorySize = Stream.of(shuffleBlocks).mapToInt(block -> {
+//            synchronized (block) {
+//                return block.spill();
+//            }
+//        }).sum();
+//        if (spillMemorySize > 0) {
+//            memoryUsed.getAndAdd(-spillMemorySize);
+//            return ImmutableList.of(MemoryBlock.createNoAllocated(spillMemorySize));
+//        } else {
+//            return ImmutableList.of();
+//        }
         return ImmutableList.of();
     }
 
@@ -68,8 +80,7 @@ public class ShuffleStore extends StorageConsumer {
                 blockBuilder.add(shuffleBlock.clear());
             }
         }
-        blockBuilder.add(MemoryBlock.createNoAllocated(memoryUsed.get()));
-        memoryUsed.set(0);
+        blockBuilder.add(MemoryBlock.createNoAllocated(memoryUsed.getAndSet(0)));
         return blockBuilder.build();
     }
 }

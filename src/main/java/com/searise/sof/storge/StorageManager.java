@@ -12,35 +12,32 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-// todo 细化同步锁, 而不是全部方法都加synchronized.
 public class StorageManager implements AutoCloseable {
     private final MemoryManager memoryManager;
     private final DiskManager diskManager;
 
-    private final SofContext context;
-
-    private final Set<StorageConsumer> storageConsumers = new HashSet<>();
+    private final Set<StorageConsumer> storageConsumers = ConcurrentHashMap.newKeySet();
 
     public StorageManager(SofContext context) {
-        this.context = context;
         this.memoryManager = new MemoryManager(context);
         this.diskManager = new DiskManager();
     }
 
-    public synchronized void registerConsumer(StorageConsumer consumer) {
+    public void registerConsumer(StorageConsumer consumer) {
         Preconditions.checkArgument(!storageConsumers.contains(consumer));
         storageConsumers.add(consumer);
     }
 
-    public synchronized void unregisterConsumer(StorageConsumer consumer) {
+    public void unregisterConsumer(StorageConsumer consumer) {
         Preconditions.checkArgument(storageConsumers.contains(consumer));
         storageConsumers.remove(consumer);
         doFree(consumer);
     }
 
-    public synchronized DiskBlock allocateDisk(StorageConsumer consumer) {
+    public DiskBlock allocateDisk(StorageConsumer consumer) {
         try {
             Preconditions.checkArgument(storageConsumers.contains(consumer));
             return diskManager.allocate();
@@ -49,12 +46,12 @@ public class StorageManager implements AutoCloseable {
         }
     }
 
-    public synchronized Optional<MemoryBlock> allocateMemoryFully(int require, StorageConsumer consumer, boolean shouldAllocated) {
+    public Optional<MemoryBlock> allocateMemoryFully(int require, StorageConsumer consumer, boolean shouldAllocated) {
         Preconditions.checkArgument(storageConsumers.contains(consumer));
         return tryAllocateMemory(require, consumer, shouldAllocated);
     }
 
-    public synchronized Optional<MemoryBlock> allocateMemory(int require, StorageConsumer consumer, boolean shouldAllocated) {
+    public Optional<MemoryBlock> allocateMemory(int require, StorageConsumer consumer, boolean shouldAllocated) {
         Preconditions.checkArgument(storageConsumers.contains(consumer));
         Optional<MemoryBlock> tryMemory = tryAllocateMemory(require, consumer, shouldAllocated);
         if (tryMemory.isPresent()) {
@@ -92,10 +89,11 @@ public class StorageManager implements AutoCloseable {
     }
 
     @Override
-    public synchronized void close() throws Exception {
+    public void close() throws Exception {
         for (StorageConsumer c : storageConsumers) {
            doFree(c);
         }
+        storageConsumers.clear();
         memoryManager.close();
         diskManager.close();
     }

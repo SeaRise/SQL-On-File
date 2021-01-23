@@ -4,16 +4,21 @@ import com.searise.sof.codegen.expr.CodeGenerator;
 import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.conf.SofConf;
+import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.InternalRowWriter;
 import com.searise.sof.expression.Expression;
 
 import java.util.List;
 
+import static com.searise.sof.core.row.EmptyRow.EMPTY_ROW;
+
 public class MutableProjection {
     private final List<Expression> exprs;
     protected InternalRow output;
     public final SofContext context;
+
+    public final int defaultSize;
 
     public MutableProjection(List<Expression> exprs, SofContext context) {
         this.context = context;
@@ -23,6 +28,8 @@ public class MutableProjection {
         } else {
             this.exprs = exprs;
         }
+
+        this.defaultSize = exprs.stream().mapToInt(expr -> expr.dataType().defaultJVMSize).sum();
     }
 
     public int size() {
@@ -40,5 +47,15 @@ public class MutableProjection {
             writer.apply(output, projectExpr.eval(input));
         }
         return output;
+    }
+
+    public InternalRow produce(InternalRow input) {
+        if (size() == 0) {
+            return EMPTY_ROW;
+        }
+
+        InternalRow keyRow = new ArrayRow(size());
+        target(keyRow);
+        return apply(input);
     }
 }

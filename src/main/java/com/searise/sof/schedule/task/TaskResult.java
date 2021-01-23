@@ -18,6 +18,6 @@ public class TaskResult {
     }
 
     public static TaskResult fail(Throwable throwable, long stageId, int partition) {
-        return new TaskResult(null, TaskStatus.FAIL, stageId, partition);
+        return new TaskResult(throwable, TaskStatus.FAIL, stageId, partition);
     }
 }

@@ -31,7 +31,7 @@ public class MemoryManager implements AutoCloseable {
         return (long) ((systemMemory - reservedSystemMemoryBytes) * memoryFaction);
     }
 
-    public Optional<MemoryBlock> allocateFully(int require, boolean shouldAllocated) {
+    public synchronized Optional<MemoryBlock> allocateFully(int require, boolean shouldAllocated) {
         int acquired = memoryPool.acquire(require);
         if (acquired < require) {
             memoryPool.release(acquired);
@@ -49,7 +49,7 @@ public class MemoryManager implements AutoCloseable {
         }
     }
 
-    public Optional<MemoryBlock> allocate(int require, boolean shouldAllocated) {
+    public synchronized Optional<MemoryBlock> allocate(int require, boolean shouldAllocated) {
         int acquired = memoryPool.acquire(require);
         if (acquired <= 0) {
             return Optional.empty();
@@ -66,19 +66,19 @@ public class MemoryManager implements AutoCloseable {
         }
     }
 
-    public void free(MemoryBlock block) {
+    public synchronized void free(MemoryBlock block) {
         memoryPool.release(block.allocatedSize);
         if (block.isAllocated()) {
             allocator.free(block);
         }
     }
 
-    public long getFreeSize() {
+    public synchronized long getFreeSize() {
         return memoryPool.getFreeSize();
     }
 
     @Override
-    public void close() throws Exception {
+    public synchronized void close() throws Exception {
         memoryPool.release(overflowSize);
         allocator.close();
     }

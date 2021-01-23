@@ -4,19 +4,23 @@ import com.searise.sof.core.SofException;
 import org.apache.commons.lang3.StringUtils;
 
 public enum DataType {
-    BooleanType((byte) 0, "bool", "Boolean"),
-    StringType((byte) 1, "string", "String"),
-    IntegerType((byte) 2, "int", "Integer"),
-    DoubleType((byte) 3, "double", "Double");
+    BooleanType((byte) 0, "bool", "Boolean", 4, 1),
+    StringType((byte) 1, "string", "String", 20, 20),
+    IntegerType((byte) 2, "int", "Integer", 4, 4),
+    DoubleType((byte) 3, "double", "Double", 8, 8);
 
     private final byte flagAndPriority;
     public final String name;
     public final String javaType;
+    public final int defaultJVMSize;
+    public final int defaultByteSize;
 
-    DataType(byte flagAndPriority, String name, String javaType) {
+    DataType(byte flagAndPriority, String name, String javaType,  int defaultJVMSize, int defaultByteSize) {
         this.flagAndPriority = flagAndPriority;
         this.name = name;
         this.javaType = javaType;
+        this.defaultJVMSize = defaultJVMSize;
+        this.defaultByteSize = defaultByteSize;
     }
 
     public final byte getPriority() {

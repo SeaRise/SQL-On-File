@@ -15,16 +15,21 @@ public class ShuffleBlock {
     private final List<InternalRow> memoryStore = new ArrayList<>();
     private final DiskBlock diskBlock;
     private BlockWriter diskBlockWriter;
+    private boolean isWriting = true;
+    private int memoryUsed = 0;
 
     ShuffleBlock(DiskBlock diskBlock) {
         this.diskBlock = diskBlock;
     }
 
-    void appendMemory(InternalRow internalRow) {
+    void appendMemory(InternalRow internalRow, int memoryUse) {
+        Utils.checkArgument(isWriting, "shuffle block is not in writing status");
         memoryStore.add(internalRow);
+        memoryUsed += memoryUse;
     }
 
     void appendDisk(InternalRow internalRow) {
+        Utils.checkArgument(isWriting, "shuffle block is not in writing status");
         Utils.throwRuntime(() -> {
             getDiskBlockWriter().write(internalRow);
             return true;
@@ -51,6 +56,8 @@ public class ShuffleBlock {
     }
 
     Iterator<InternalRow> iterator() {
+        Utils.checkArgument(isWriting, "shuffle block is not in writing status");
+        isWriting = true;
         if (diskBlock.hasUsed()) {
             closeDiskBlockWriter();
             return Utils.throwRuntime(() -> {
@@ -82,5 +89,19 @@ public class ShuffleBlock {
         closeDiskBlockWriter();
         memoryStore.clear();
         return diskBlock;
+    }
+
+    int spill() {
+        if (isWriting && memoryUsed > 0) {
+            for (InternalRow internalRow : memoryStore) {
+                appendDisk(internalRow);
+            }
+            memoryStore.clear();
+            int spillMemorySize = memoryUsed;
+            memoryUsed = 0;
+            return spillMemorySize;
+        } else {
+            return 0;
+        }
     }
 }
