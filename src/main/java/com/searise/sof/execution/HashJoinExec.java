@@ -118,6 +118,7 @@ public class HashJoinExec implements Executor {
 
             @Override
             public void close() {
+                hashRelation.close();
                 streamRowIterator.close();
                 buildRowIterator.close();
             }
