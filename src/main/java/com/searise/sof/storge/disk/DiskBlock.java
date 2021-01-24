@@ -101,7 +101,6 @@ public class DiskBlock implements Block {
         }
         return new BlockWriter() {
             private FileOutputStream fileOS = new FileOutputStream(file);
-            private final FileChannel fileChannel = fileOS.getChannel();
             private DataOutputStream dataOS = new DataOutputStream(fileOS);
 
             @Override
@@ -134,7 +133,6 @@ public class DiskBlock implements Block {
             @Override
             public void close() throws Exception {
                 dataOS.close();
-                fileChannel.close();
                 fileOS.close();
             }
         };
