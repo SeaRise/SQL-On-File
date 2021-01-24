@@ -22,13 +22,13 @@ public class ShuffleBlock {
         this.diskBlock = diskBlock;
     }
 
-    void appendMemory(InternalRow internalRow, int memoryUse) {
+    synchronized void appendMemory(InternalRow internalRow, int memoryAcquire) {
         Utils.checkArgument(isWriting, "shuffle block is not in writing status");
         memoryStore.add(internalRow);
-        memoryUsed += memoryUse;
+        memoryUsed += memoryAcquire;
     }
 
-    void appendDisk(InternalRow internalRow) {
+    synchronized void appendDisk(InternalRow internalRow) {
         Utils.checkArgument(isWriting, "shuffle block is not in writing status");
         Utils.throwRuntime(() -> {
             getDiskBlockWriter().write(internalRow);
@@ -55,9 +55,11 @@ public class ShuffleBlock {
         }
     }
 
-    Iterator<InternalRow> iterator() {
-        Utils.checkArgument(isWriting, "shuffle block is not in writing status");
-        isWriting = true;
+    synchronized Iterator<InternalRow> iterator() {
+        // 一旦ShuffleBlock被读,就不能再被写入.
+        if (isWriting) {
+            isWriting = false;
+        }
         if (diskBlock.hasUsed()) {
             closeDiskBlockWriter();
             return Utils.throwRuntime(() -> {
@@ -85,13 +87,13 @@ public class ShuffleBlock {
         }
     }
 
-    DiskBlock clear() {
+    synchronized DiskBlock clear() {
         closeDiskBlockWriter();
         memoryStore.clear();
         return diskBlock;
     }
 
-    int spill() {
+    synchronized int spill() {
         if (isWriting && memoryUsed > 0) {
             for (InternalRow internalRow : memoryStore) {
                 appendDisk(internalRow);

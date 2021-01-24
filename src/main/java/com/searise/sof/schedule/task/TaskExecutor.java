@@ -1,7 +1,6 @@
 package com.searise.sof.schedule.task;
 
 import com.searise.sof.core.SofContext;
-import com.searise.sof.core.Utils;
 import com.searise.sof.core.conf.SofConf;
 
 import java.util.LinkedList;
@@ -102,7 +101,6 @@ public class TaskExecutor {
             task.runTask();
             taskScheduler.statusUpdate(TaskResult.success(task.stageId, task.partition));
         } catch (Throwable e) {
-            Utils.println(e.toString());
             taskScheduler.statusUpdate(TaskResult.fail(e, task.stageId, task.partition));
         } finally {
             synchronized (this) {

@@ -2,8 +2,6 @@ package com.searise.sof.execution;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Multimap;
 import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.expr.MutableProjection;

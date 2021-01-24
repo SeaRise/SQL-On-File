@@ -8,6 +8,7 @@ import java.util.List;
 // 继承StorageConsumer的类的所有操作, 原则上都必须加锁.
 public abstract class StorageConsumer implements AutoCloseable {
     protected final StorageManager storageManager;
+
     public StorageConsumer(StorageManager storageManager) {
         this.storageManager = storageManager;
         storageManager.registerConsumer(this);

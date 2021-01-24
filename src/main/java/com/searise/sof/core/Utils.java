@@ -156,12 +156,13 @@ public class Utils {
 
         int hash = obj.hashCode();
         // math.abs fails for Int.MinValue
-        return Integer.MIN_VALUE != hash? Math.abs(hash) : 0;
+        return Integer.MIN_VALUE != hash ? Math.abs(hash) : 0;
     }
 
     public static <T> Iterator<T> concat(List<Iterator<T>> iterators) {
         return new Iterator<T>() {
             private int index = 0;
+
             @Override
             public boolean hasNext() {
                 if (index >= iterators.size()) {

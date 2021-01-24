@@ -27,7 +27,7 @@ public class DiskManager implements AutoCloseable {
         if (!subDir.exists()) {
             Files.createDirectory(subDir.toPath());
         }
-        File blockFile = new File(subDir,  UUID.randomUUID().toString());
+        File blockFile = new File(subDir, UUID.randomUUID().toString());
         Preconditions.checkArgument(!blockFile.exists());
         return blockFile;
     }

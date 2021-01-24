@@ -8,7 +8,6 @@ import com.searise.sof.storge.disk.DiskManager;
 import com.searise.sof.storge.memory.MemoryBlock;
 import com.searise.sof.storge.memory.MemoryManager;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -68,6 +67,7 @@ public class StorageManager implements AutoCloseable {
 
         // 先从占内存大的consumer开始spill.
         List<StorageConsumer> sortByMemoryUsed = storageConsumers.stream().
+                filter(c -> c != consumer).
                 sorted((o1, o2) -> Long.compare(o2.memoryUsed(), o1.memoryUsed())).
                 collect(Collectors.toList());
         for (StorageConsumer c : sortByMemoryUsed) {
@@ -91,7 +91,7 @@ public class StorageManager implements AutoCloseable {
     @Override
     public void close() throws Exception {
         for (StorageConsumer c : storageConsumers) {
-           doFree(c);
+            doFree(c);
         }
         storageConsumers.clear();
         memoryManager.close();

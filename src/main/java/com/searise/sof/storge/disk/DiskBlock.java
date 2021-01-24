@@ -43,6 +43,7 @@ public class DiskBlock implements Block {
             private final long length = file.length();
             private long position = 0L;
             private InternalRow row = EmptyRow.EMPTY_ROW;
+
             @Override
             public InternalRow next() throws Exception {
                 int fieldNum = dataIS.readInt();
@@ -102,6 +103,7 @@ public class DiskBlock implements Block {
             private FileOutputStream fileOS = new FileOutputStream(file);
             private final FileChannel fileChannel = fileOS.getChannel();
             private DataOutputStream dataOS = new DataOutputStream(fileOS);
+
             @Override
             public void write(InternalRow row) throws Exception {
                 dataOS.writeInt(row.numFields());

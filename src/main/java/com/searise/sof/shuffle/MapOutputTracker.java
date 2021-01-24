@@ -26,7 +26,7 @@ public class MapOutputTracker {
         if (Objects.nonNull(tracker.putIfAbsent(shuffleId, mapStatuses))) {
             throw new SofException(String.format("shuffle(%s) has registered!", shuffleId));
         }
-        shuffleOutputs.put(shuffleId, new ShuffleStore(reduceNum));
+        shuffleOutputs.put(shuffleId, new ShuffleStore(shuffleId, reduceNum));
     }
 
     public void unregisterShuffle(long shuffleId) {

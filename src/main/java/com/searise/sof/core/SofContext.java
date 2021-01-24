@@ -42,11 +42,13 @@ public class SofContext implements AutoCloseable {
     }
 
     private static Optional<SofContext> activeContext = Optional.empty();
+
     public static synchronized SofContext getActive() {
         return activeContext.orElseGet(() -> {
             throw new SofException("no active context");
         });
     }
+
     private static synchronized void unActiveIfIs(SofContext context) {
         if (activeContext.isPresent() && activeContext.get() == context) {
             activeContext = Optional.empty();

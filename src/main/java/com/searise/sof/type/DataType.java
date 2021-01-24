@@ -15,7 +15,7 @@ public enum DataType {
     public final int defaultJVMSize;
     public final int defaultByteSize;
 
-    DataType(byte flagAndPriority, String name, String javaType,  int defaultJVMSize, int defaultByteSize) {
+    DataType(byte flagAndPriority, String name, String javaType, int defaultJVMSize, int defaultByteSize) {
         this.flagAndPriority = flagAndPriority;
         this.name = name;
         this.javaType = javaType;

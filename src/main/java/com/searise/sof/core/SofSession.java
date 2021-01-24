@@ -92,11 +92,13 @@ public class SofSession implements AutoCloseable {
     }
 
     private static Optional<SofSession> activeSession = Optional.empty();
+
     public static synchronized SofSession getActive() {
         return activeSession.orElseGet(() -> {
             throw new SofException("no active session");
         });
     }
+
     private static synchronized void unActiveIfIs(SofSession session) {
         if (activeSession.isPresent() && activeSession.get() == session) {
             activeSession = Optional.empty();

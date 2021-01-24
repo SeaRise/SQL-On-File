@@ -27,7 +27,7 @@ public class MemoryBlock implements Block {
     private MemoryBlock(ByteBuffer byteBuffer, int allocatedSize, boolean isAllocated) {
         this.byteBuffer = byteBuffer;
         this.allocatedSize = allocatedSize;
-        this.isAllocated =  isAllocated;
+        this.isAllocated = isAllocated;
     }
 
     @Override
@@ -58,6 +58,7 @@ public class MemoryBlock implements Block {
         byteBuffer.flip();
         return new BlockReader() {
             private InternalRow row = EmptyRow.EMPTY_ROW;
+
             @Override
             public InternalRow next() throws Exception {
                 int fieldNum = byteBuffer.getInt();

@@ -24,7 +24,7 @@ public class MemoryManager implements AutoCloseable {
         if (systemMemory < minSystemMemory) {
             throw new IllegalArgumentException(
                     String.format("System memory %s must be at least %s.",
-                    systemMemory, minSystemMemory));
+                            systemMemory, minSystemMemory));
         }
 
         double memoryFaction = conf.getConf(SofConf.MEMORY_FRACTION);
