@@ -1,8 +1,8 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.Conf;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
+import com.searise.sof.core.conf.SofConf;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.BoundReference;
 
@@ -14,12 +14,12 @@ public class Exchange implements PhysicalPlan {
     // 并非children
     // Exchange.children().size() == 0
     public final PhysicalPlan mapPlan;
-    public final Context context;
+    public final SofContext context;
     public final List<Expression> keys;
 
     public final long shuffleId;
 
-    public Exchange(PhysicalPlan mapPlan, Context context, List<Expression> keys) {
+    public Exchange(PhysicalPlan mapPlan, SofContext context, List<Expression> keys) {
         this.mapPlan = mapPlan;
         this.context = context;
         this.keys = keys;
@@ -43,7 +43,7 @@ public class Exchange implements PhysicalPlan {
     }
 
     @Override
-    public Context context() {
+    public SofContext context() {
         return context;
     }
 
@@ -77,6 +77,6 @@ public class Exchange implements PhysicalPlan {
         if (keys.stream().allMatch(Expression::foldable)) {
             return 1;
         }
-        return context.conf.getIntConf(Conf.MAX_PARALLELISM);
+        return context.conf.getConf(SofConf.MAX_PARALLELISM);
     }
 }

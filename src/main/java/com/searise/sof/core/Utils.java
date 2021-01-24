@@ -3,6 +3,7 @@ package com.searise.sof.core;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.searise.sof.core.id.ExprIdGetter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -146,5 +147,48 @@ public class Utils {
             line = bufferReader.readLine();
         }
         return qsb.toString();
+    }
+
+    public static int nonNegativeHash(Object obj) {
+        if (Objects.isNull(obj)) {
+            return 0;
+        }
+
+        int hash = obj.hashCode();
+        // math.abs fails for Int.MinValue
+        return Integer.MIN_VALUE != hash ? Math.abs(hash) : 0;
+    }
+
+    public static <T> Iterator<T> concat(List<Iterator<T>> iterators) {
+        return new Iterator<T>() {
+            private int index = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (index >= iterators.size()) {
+                    return false;
+                }
+                while (!iterators.get(index).hasNext()) {
+                    index += 1;
+                    if (index >= iterators.size()) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public T next() {
+                return iterators.get(index).next();
+            }
+        };
+    }
+
+    public static <T> T throwRuntime(Any<T> any) {
+        try {
+            return any.any();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

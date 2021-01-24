@@ -3,6 +3,8 @@ package com.searise.sof.shuffle.io;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.searise.sof.catalog.TestContext;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.InternalRowWriter;
@@ -19,41 +21,38 @@ public class ShuffleStoreSuite {
 
     @Test
     public void test() {
-        int mapPartitions = 20;
-        int reducePartitions = 50;
+        try (SofContext context = TestContext.newTestContext()) {
+            int mapPartitions = 20;
+            int reducePartitions = 50;
 
-        List<Expression> keys = keys();
+            List<Expression> keys = keys();
 
-        ShuffleStore shuffleStore = new ShuffleStore();
+            ShuffleStore shuffleStore = new ShuffleStore(0, reducePartitions);
 
-        Multimap<Integer, String> map = HashMultimap.create();
-        for (int mapId = 0; mapId < mapPartitions; mapId++) {
+            Multimap<Integer, String> map = HashMultimap.create();
+            for (int mapId = 0; mapId < mapPartitions; mapId++) {
+                for (int reduceId = 0; reduceId < reducePartitions; reduceId++) {
+                    InternalRow row = createRow(mapId, reduceId);
+                    String value = mapId + "_" + reduceId;
+                    map.put(reduceId, value);
+                    shuffleStore.write(reduceId, row);
+                }
+            }
+
             for (int reduceId = 0; reduceId < reducePartitions; reduceId++) {
-                InternalRow row = createRow(mapId, reduceId);
-                String value = mapId + "_" + reduceId;
-                map.put(reduceId, value);
-                shuffleStore.write(reduceId, row);
+                Preconditions.checkArgument(map.get(reduceId).size() == mapPartitions);
+                Iterator<InternalRow> iterator = shuffleStore.read(reduceId);
+                while (iterator.hasNext()) {
+                    InternalRow row = iterator.next();
+                    int parseReduceId = Integer.valueOf(keys.get(1).eval(row).toString());
+                    String value = keys.get(0).eval(row) + "_" + parseReduceId;
+                    Preconditions.checkArgument(map.get(reduceId).contains(value));
+                    map.remove(reduceId, value);
+                }
             }
+
+            Preconditions.checkArgument(map.isEmpty());
         }
-
-        for (int reduceId = 0; reduceId < reducePartitions; reduceId++) {
-            Preconditions.checkArgument(map.get(reduceId).size() == mapPartitions);
-            Iterator<InternalRow> iterator = shuffleStore.read(reduceId);
-            while (iterator.hasNext()) {
-                InternalRow row = iterator.next();
-                int parseReduceId = Integer.valueOf(keys.get(1).eval(row).toString());
-                String value = keys.get(0).eval(row) + "_" + parseReduceId;
-                Preconditions.checkArgument(map.get(reduceId).contains(value));
-                map.remove(reduceId, value);
-            }
-        }
-
-        Preconditions.checkArgument(map.isEmpty());
-    }
-
-    @Test
-    public void testHashKey() {
-
     }
 
     private InternalRow createRow(int mapId, int reduceId) {

@@ -1,5 +1,6 @@
-package com.searise.sof;
+package com.searise.sof.cli;
 
+import com.searise.sof.core.SofSession;
 import com.searise.sof.core.Utils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,9 +12,10 @@ public class CliDriver {
         new CliDriver().run();
     }
 
-    private Driver driver = new Driver();
+    private final SofSession session;
 
     private CliDriver() {
+        session = SofSession.builder().build();
     }
 
     public void run() {
@@ -21,14 +23,14 @@ public class CliDriver {
         while (true) {
             String cmd = waitForCmd(in);
             if (StringUtils.equalsAnyIgnoreCase("exit", cmd)) {
-                driver.stop();
+                session.close();
                 return;
             }
 
             try {
-                driver.compile(cmd);
+                session.compile(cmd);
             } catch (Exception e) {
-                driver.stop();
+                session.close();
                 Utils.println(e.getMessage());
             }
         }

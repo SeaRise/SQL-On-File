@@ -1,6 +1,6 @@
 package com.searise.sof.analyse;
 
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.Alias;
@@ -61,9 +61,9 @@ public class ResolveAttribute implements Rule<LogicalPlan> {
 
     private class AttributeApplicable implements Applicable<Expression> {
         private final List<Attribute> childrenSchema;
-        private final Context context;
+        private final SofContext context;
 
-        public AttributeApplicable(List<Attribute> childrenSchema, Context context) {
+        public AttributeApplicable(List<Attribute> childrenSchema, SofContext context) {
             this.childrenSchema = childrenSchema;
             this.context = context;
         }

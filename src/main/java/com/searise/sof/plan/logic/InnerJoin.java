@@ -3,7 +3,7 @@ package com.searise.sof.plan.logic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.analyse.AnalysisHelper;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.attribute.Attribute;
@@ -16,13 +16,13 @@ public class InnerJoin implements LogicalPlan {
     public final LogicalPlan left;
     public final LogicalPlan right;
     public final List<Expression> conditions;
-    public final Context context;
+    public final SofContext context;
 
-    public InnerJoin(LogicalPlan left, LogicalPlan right, Context context) {
+    public InnerJoin(LogicalPlan left, LogicalPlan right, SofContext context) {
         this(left, right, ImmutableList.of(), context);
     }
 
-    public InnerJoin(LogicalPlan left, LogicalPlan right, List<Expression> conditions, Context context) {
+    public InnerJoin(LogicalPlan left, LogicalPlan right, List<Expression> conditions, SofContext context) {
         this.left = left;
         this.right = right;
         this.conditions = conditions;
@@ -30,7 +30,7 @@ public class InnerJoin implements LogicalPlan {
     }
 
     @Override
-    public Context context() {
+    public SofContext context() {
         return context;
     }
 

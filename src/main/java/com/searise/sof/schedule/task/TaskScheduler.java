@@ -1,6 +1,6 @@
 package com.searise.sof.schedule.task;
 
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.schedule.dag.DagScheduler;
 
 import java.util.List;
@@ -12,7 +12,7 @@ public class TaskScheduler {
     private final TaskExecutor taskExecutor;
     private final DagScheduler dagScheduler;
 
-    public TaskScheduler(Context context, DagScheduler dagScheduler) {
+    public TaskScheduler(SofContext context, DagScheduler dagScheduler) {
         this.taskExecutor = new TaskExecutor(context, this);
         this.dagScheduler = dagScheduler;
     }

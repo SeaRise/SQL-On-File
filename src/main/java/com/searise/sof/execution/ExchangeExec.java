@@ -2,7 +2,7 @@ package com.searise.sof.execution;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.shuffle.io.ShuffleReader;
 
@@ -12,9 +12,9 @@ import java.util.Objects;
 
 public class ExchangeExec implements Executor {
     public final long shuffleId;
-    public final Context context;
+    public final SofContext context;
 
-    public ExchangeExec(long shuffleId, Context context) {
+    public ExchangeExec(long shuffleId, SofContext context) {
         this.shuffleId = shuffleId;
         this.context = context;
     }

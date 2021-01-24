@@ -2,7 +2,7 @@ package com.searise.sof.execution;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.ArrayRow;
@@ -23,9 +23,9 @@ public class ScanExec implements Executor {
     private final List<BoundReference> schema;
     private final List<String> splits;
     private final String separator;
-    public final Context context;
+    public final SofContext context;
 
-    public ScanExec(List<BoundReference> schema, List<String> splits, String separator, Context context) {
+    public ScanExec(List<BoundReference> schema, List<String> splits, String separator, SofContext context) {
         this.schema = schema;
         this.splits = splits;
         this.separator = separator;

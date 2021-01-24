@@ -2,10 +2,10 @@ package com.searise.sof.execution;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.Context;
-import com.searise.sof.core.Predication;
-import com.searise.sof.core.Projection;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
+import com.searise.sof.core.expr.Predication;
+import com.searise.sof.core.expr.Projection;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.JoinRow;
@@ -22,9 +22,9 @@ public class NestedLoopJoinExec implements Executor {
     private final Executor build;
     public final List<Expression> conditions;
     public final List<BoundReference> schema;
-    public final Context context;
+    public final SofContext context;
 
-    public NestedLoopJoinExec(Executor stream, Executor build, List<Expression> conditions, List<BoundReference> schema, Context context) {
+    public NestedLoopJoinExec(Executor stream, Executor build, List<Expression> conditions, List<BoundReference> schema, SofContext context) {
         this.stream = stream;
         this.build = build;
         this.conditions = conditions;

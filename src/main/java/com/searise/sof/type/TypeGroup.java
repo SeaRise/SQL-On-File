@@ -34,7 +34,7 @@ public class TypeGroup {
     }
 
     public static DataType getTopType(List<DataType> dataTypes) {
-        Optional<DataType> topOptional = dataTypes.stream().max(Comparator.comparingInt(o -> o.priority));
+        Optional<DataType> topOptional = dataTypes.stream().max(Comparator.comparingInt(DataType::getPriority));
         if (!topOptional.isPresent()) {
             throw new SofException("can not find top data type from " + dataTypes);
         }

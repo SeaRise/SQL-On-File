@@ -3,6 +3,7 @@ package com.searise.sof.core.row;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.type.DataType;
+import com.searise.sof.type.TypeUtils;
 
 public interface InternalRow {
     int numFields();
@@ -27,6 +28,10 @@ public interface InternalRow {
 
     default double getDouble(int ordinal) {
         return (double) getValue(ordinal);
+    }
+
+    default DataType getType(int ordinal) {
+        return DataType.getType(getValue(ordinal).getClass());
     }
 
     void setValue(int ordinal, Object value);
@@ -81,5 +86,22 @@ public interface InternalRow {
             default:
                 throw new SofException(String.format("unsupported dataType[%s] in getReader", dataType));
         }
+    }
+
+    default int getJVMSize() {
+        int size = 0;
+        for (int i = 0; i < numFields(); i++) {
+            size += TypeUtils.getJVMSize(getValue(i));
+        }
+        return size;
+    }
+
+    default int getBytesSize() {
+        // 开头记录numFields和每个type的标志位
+        int size = 4 + numFields();
+        for (int i = 0; i < numFields(); i++) {
+            size += TypeUtils.getBytesSize(getValue(i));
+        }
+        return size;
     }
 }

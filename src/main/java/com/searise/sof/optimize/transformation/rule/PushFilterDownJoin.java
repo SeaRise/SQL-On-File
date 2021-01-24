@@ -1,7 +1,7 @@
 package com.searise.sof.optimize.transformation.rule;
 
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.optimize.Group;
@@ -56,7 +56,7 @@ public class PushFilterDownJoin implements TransformationRule, PushFilterDownHel
         return ImmutableList.of(newJoinExpr);
     }
 
-    private Group newFilterGroup(Group originGroup, List<Expression> pushDownConds, Context context) {
+    private Group newFilterGroup(Group originGroup, List<Expression> pushDownConds, SofContext context) {
         if (pushDownConds.isEmpty()) {
             return originGroup;
         } else {

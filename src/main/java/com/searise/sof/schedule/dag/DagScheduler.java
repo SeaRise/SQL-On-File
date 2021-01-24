@@ -1,10 +1,10 @@
 package com.searise.sof.schedule.dag;
 
 import com.google.common.collect.ImmutableSet;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
-import com.searise.sof.execution.Builder;
+import com.searise.sof.execution.ExecBuilder;
 import com.searise.sof.execution.Executor;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.plan.physics.Exchange;
@@ -31,7 +31,7 @@ public class DagScheduler {
     public final TaskScheduler taskScheduler;
     private final AtomicLong nextStageId = new AtomicLong(0L);
     private final StageStateMachine stageStateMachine = new StageStateMachine();
-    private final Builder builder;
+    private final ExecBuilder builder;
 
     private final MapOutputTracker mapOutputTracker;
 
@@ -46,9 +46,9 @@ public class DagScheduler {
 
     private volatile PlanExecResult planExecResult = null;
 
-    public DagScheduler(Context context) {
+    public DagScheduler(SofContext context) {
         this.taskScheduler = new TaskScheduler(context, this);
-        builder = new Builder(context);
+        builder = new ExecBuilder(context);
         mapOutputTracker = context.mapOutputTracker;
 
         loopThread = Executors.newSingleThreadExecutor();
@@ -211,7 +211,7 @@ public class DagScheduler {
         Set<Long> parentStageIds = createParentStages(plan);
         ShuffleMapStage shuffleMapStage = new ShuffleMapStage(nextStageId(), parentStageIds, plan, shuffleId, mapOutputTracker, shuffleKeys, reduceNum);
         stageStateMachine.addStage(shuffleMapStage);
-        mapOutputTracker.registerShuffle(shuffleId, shuffleMapStage.partitions);
+        mapOutputTracker.registerShuffle(shuffleId, shuffleMapStage.partitions, reduceNum);
         return shuffleMapStage;
     }
 

@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.searise.sof.catalog.CatalogTable;
 import com.searise.sof.catalog.StructField;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
 import com.searise.sof.expression.Literal;
@@ -26,9 +26,9 @@ import static com.searise.sof.type.DataType.*;
 
 public class AstBuilder extends SqlBaseBaseVisitor<Object> {
     private static final String DEFAULT_SEPARATOR = ",";
-    private final Context context;
+    private final SofContext context;
 
-    public AstBuilder(Context context) {
+    public AstBuilder(SofContext context) {
         this.context = context;
     }
 

@@ -2,9 +2,11 @@ package com.searise.sof.execution;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Multimap;
-import com.searise.sof.core.*;
+import com.searise.sof.core.SofContext;
+import com.searise.sof.core.Utils;
+import com.searise.sof.core.expr.MutableProjection;
+import com.searise.sof.core.expr.Predication;
+import com.searise.sof.core.expr.Projection;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.core.row.JoinRow;
@@ -26,10 +28,10 @@ public class HashJoinExec implements Executor {
     public final List<Expression> otherConditions;
     public final List<BoundReference> schema;
 
-    public final Context context;
+    public final SofContext context;
 
     public HashJoinExec(Executor stream, Executor build, List<Expression> streamJoinKeys, List<Expression> buildJoinKeys,
-                        List<Expression> otherConditions, List<BoundReference> schema, Context context) {
+                        List<Expression> otherConditions, List<BoundReference> schema, SofContext context) {
         this.stream = stream;
         this.build = build;
 
@@ -47,13 +49,13 @@ public class HashJoinExec implements Executor {
         RowIterator buildRowIterator = build.compute(partition);
 
         return new RowIterator() {
-            private Predication predication = new Predication(otherConditions, context);
-            private Projection schemaProjection = new Projection(
+            private final Predication predication = new Predication(otherConditions, context);
+            private final Projection schemaProjection = new Projection(
                     Utils.toImmutableList(schema.stream().map(boundReference -> (Expression) boundReference)),
                     new ArrayRow(schema.size()), context);
-            private MutableProjection streamKeyProjection = new MutableProjection(streamJoinKeys, context);
-            private MutableProjection buildKeyProjection = new MutableProjection(buildJoinKeys, context);
-            private Multimap<InternalRow, InternalRow> buildMap = ImmutableListMultimap.of();
+            private final MutableProjection streamKeyProjection = new MutableProjection(streamJoinKeys, context);
+            private final MutableProjection buildKeyProjection = new MutableProjection(buildJoinKeys, context);
+            private final HashRelation hashRelation = new HashRelation(context, buildKeyProjection);
             private InternalRow streamRow = EMPTY_ROW;
             private Iterator<InternalRow> hitIter;
 
@@ -62,7 +64,7 @@ public class HashJoinExec implements Executor {
                 streamRowIterator.open();
                 buildRowIterator.open();
 
-                buildMap = buildHashMap(buildRowIterator, buildKeyProjection);
+                buildHasRelation(buildRowIterator, hashRelation);
                 while (streamRowIterator.hasNext()) {
                     streamRow = streamRowIterator.next();
                     if (streamRow != EMPTY_ROW) {
@@ -73,18 +75,18 @@ public class HashJoinExec implements Executor {
                 if (streamRow == EMPTY_ROW) {
                     return;
                 }
-                InternalRow streamKeyRow = getKeyRow(streamRow, streamKeyProjection);
-                hitIter = buildMap.get(streamKeyRow).iterator();
+                InternalRow streamKeyRow = streamKeyProjection.produce(streamRow);
+                hitIter = hashRelation.get(streamKeyRow);
             }
 
             @Override
             public boolean hasNext() {
-                return !buildMap.isEmpty() && streamRow != EMPTY_ROW;
+                return !hashRelation.isEmpty() && streamRow != EMPTY_ROW;
             }
 
             @Override
             public InternalRow next() {
-                if (buildMap.isEmpty() || streamRow == EMPTY_ROW) {
+                if (hashRelation.isEmpty() || streamRow == EMPTY_ROW) {
                     return EMPTY_ROW;
                 }
 
@@ -94,8 +96,8 @@ public class HashJoinExec implements Executor {
                         if (streamRow == EMPTY_ROW) {
                             continue;
                         }
-                        InternalRow streamKeyRow = getKeyRow(streamRow, streamKeyProjection);
-                        hitIter = buildMap.get(streamKeyRow).iterator();
+                        InternalRow streamKeyRow = streamKeyProjection.produce(streamRow);
+                        hitIter = hashRelation.get(streamKeyRow);
                         return next();
                     }
                     streamRow = EMPTY_ROW;
@@ -116,35 +118,23 @@ public class HashJoinExec implements Executor {
 
             @Override
             public void close() {
+                hashRelation.close();
                 streamRowIterator.close();
                 buildRowIterator.close();
             }
         };
     }
 
-    private Multimap<InternalRow, InternalRow> buildHashMap(RowIterator build, MutableProjection buildKeyProjection) {
-        ImmutableListMultimap.Builder<InternalRow, InternalRow> builder = ImmutableListMultimap.builder();
+    private void buildHasRelation(RowIterator build, HashRelation hashRelation) {
         while (build.hasNext()) {
             InternalRow buildRow = build.next();
             if (buildRow == EMPTY_ROW) {
                 continue;
             }
 
-            InternalRow buildKeyRow = getKeyRow(buildRow, buildKeyProjection);
-            builder.put(buildKeyRow, buildRow.copy());
+            hashRelation.append(buildRow);
         }
         build.close();
-        return builder.build();
-    }
-
-    private InternalRow getKeyRow(InternalRow input, MutableProjection keyProjection) {
-        if (keyProjection.size() == 0) {
-            return EMPTY_ROW;
-        }
-
-        InternalRow keyRow = new ArrayRow(keyProjection.size());
-        keyProjection.target(keyRow);
-        return keyProjection.apply(input);
     }
 
     @Override

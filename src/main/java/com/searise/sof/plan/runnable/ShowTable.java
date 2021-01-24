@@ -1,7 +1,7 @@
 package com.searise.sof.plan.runnable;
 
 import com.searise.sof.catalog.Catalog;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.plan.logic.LogicalPlan;
 import org.apache.commons.lang3.StringUtils;
@@ -9,9 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 public class ShowTable implements LogicalPlan, RunnableCommand {
-    public final Context context;
+    public final SofContext context;
 
-    public ShowTable(Context context) {
+    public ShowTable(SofContext context) {
         this.context = context;
     }
 
@@ -44,7 +44,7 @@ public class ShowTable implements LogicalPlan, RunnableCommand {
     }
 
     @Override
-    public Context context() {
+    public SofContext context() {
         return context;
     }
 }

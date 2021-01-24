@@ -6,10 +6,10 @@ import com.searise.sof.codegen.exec.Codegen;
 import com.searise.sof.codegen.exec.CodegenContext;
 import com.searise.sof.codegen.exec.ExecCode;
 import com.searise.sof.codegen.exec.ParamGenerator;
-import com.searise.sof.core.Context;
-import com.searise.sof.core.Predication;
-import com.searise.sof.core.Projection;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
+import com.searise.sof.core.expr.Predication;
+import com.searise.sof.core.expr.Projection;
 import com.searise.sof.core.row.ArrayRow;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.Expression;
@@ -25,9 +25,9 @@ public class FilterExec extends Codegen implements Executor {
     private final Executor child;
     private final List<Expression> conditions;
     private final List<BoundReference> schema;
-    public final Context context;
+    public final SofContext context;
 
-    public FilterExec(Executor child, List<Expression> conditions, List<BoundReference> schema, Context context) {
+    public FilterExec(Executor child, List<Expression> conditions, List<BoundReference> schema, SofContext context) {
         this.child = child;
         this.context = context;
         this.conditions = conditions;

@@ -1,7 +1,7 @@
 package com.searise.sof.plan.physics;
 
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
@@ -21,9 +21,9 @@ public abstract class PhysicalJoin implements PhysicalPlan {
     public List<BoundReference> schema;
     public final PhysicalPlan stream;
     public final PhysicalPlan build;
-    public final Context context;
+    public final SofContext context;
 
-    public PhysicalJoin(List<BoundReference> schema, PhysicalPlan stream, PhysicalPlan build, Context context) {
+    public PhysicalJoin(List<BoundReference> schema, PhysicalPlan stream, PhysicalPlan build, SofContext context) {
         this.schema = schema;
         this.stream = stream;
         this.build = build;
@@ -31,7 +31,7 @@ public abstract class PhysicalJoin implements PhysicalPlan {
     }
 
     @Override
-    public Context context() {
+    public SofContext context() {
         return context;
     }
 

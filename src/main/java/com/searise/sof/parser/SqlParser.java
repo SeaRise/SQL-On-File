@@ -1,14 +1,14 @@
 package com.searise.sof.parser;
 
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.plan.logic.LogicalPlan;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Interval;
 
 public class SqlParser {
-    private final Context context;
+    private final SofContext context;
 
-    public SqlParser(Context context) {
+    public SqlParser(SofContext context) {
         this.context = context;
     }
 

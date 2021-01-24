@@ -2,11 +2,11 @@ package com.searise.sof.execution;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.Driver;
 import com.searise.sof.analyse.Analyzer;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.TestCatalog;
-import com.searise.sof.core.Context;
+import com.searise.sof.catalog.TestContext;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.Utils;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.parser.SqlParser;
@@ -139,39 +139,40 @@ public class ExecutorSuite {
     }
 
     private void testExec(String sql, String expect) throws Exception {
-        Catalog catalog = new TestCatalog();
-        Context context = new Context(catalog, new Driver());
-        List<String> splits = Utils.split(sql);
-        for (int i = 0; i < splits.size() - 1; i++) {
-            LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(i));
-            if (parsePlan instanceof RunnableCommand) {
-                RunnableCommand command = (RunnableCommand) parsePlan;
-                command.run(catalog);
-            }
-        }
+        try (SofContext context = TestContext.newTestContext()) {
+            Catalog catalog = new TestCatalog();
 
-        LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(splits.size() - 1));
-        LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
-        PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
-
-        Preconditions.checkArgument(physicalPlan.partitions() > 0);
-
-        StringBuffer resultBuilder = new StringBuffer();
-        context.runPlan(physicalPlan, (partition, iterator) -> {
-            StringBuilder partitionResultBuilder = new StringBuilder();
-            while (iterator.hasNext()) {
-                InternalRow row = iterator.next();
-                for (int index = 0; index < row.numFields() - 1; index++) {
-                    partitionResultBuilder.append(row.getValue(index)).append(",");
+            List<String> splits = Utils.split(sql);
+            for (int i = 0; i < splits.size() - 1; i++) {
+                LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(i));
+                if (parsePlan instanceof RunnableCommand) {
+                    RunnableCommand command = (RunnableCommand) parsePlan;
+                    command.run(catalog);
                 }
-                partitionResultBuilder.append(row.getValue(row.numFields() - 1)).append("\n");
             }
-            resultBuilder.append(partitionResultBuilder.toString());
-        });
 
-        String result = StringUtils.trim(resultBuilder.toString());
-        Preconditions.checkArgument(compareResult(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
-        context.stop();
+            LogicalPlan parsePlan = new SqlParser(context).parsePlan(splits.get(splits.size() - 1));
+            LogicalPlan analyzePlan = new Analyzer(new TestCatalog()).analyse(parsePlan);
+            PhysicalPlan physicalPlan = newOptimizer().optimize(analyzePlan);
+
+            Preconditions.checkArgument(physicalPlan.partitions() > 0);
+
+            StringBuffer resultBuilder = new StringBuffer();
+            context.runPlan(physicalPlan, (partition, iterator) -> {
+                StringBuilder partitionResultBuilder = new StringBuilder();
+                while (iterator.hasNext()) {
+                    InternalRow row = iterator.next();
+                    for (int index = 0; index < row.numFields() - 1; index++) {
+                        partitionResultBuilder.append(row.getValue(index)).append(",");
+                    }
+                    partitionResultBuilder.append(row.getValue(row.numFields() - 1)).append("\n");
+                }
+                resultBuilder.append(partitionResultBuilder.toString());
+            });
+
+            String result = StringUtils.trim(resultBuilder.toString());
+            Preconditions.checkArgument(compareResult(result, StringUtils.trim(expect)), String.format("result: %s\nexpect: %s", result, expect));
+        }
     }
 
     private boolean compareResult(String result, String expect) {

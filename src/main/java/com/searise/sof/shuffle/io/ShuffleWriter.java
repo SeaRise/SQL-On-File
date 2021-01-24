@@ -14,7 +14,7 @@ public class ShuffleWriter {
     private final long shuffleId;
     private final int mapId;
     private final MapOutputTracker tracker;
-    private final ShuffleStore shuffleStore = new ShuffleStore();
+    private final ShuffleStore shuffleStore;
     private final int reduceNum;
 
     private volatile boolean isCommitted = false;
@@ -25,14 +25,13 @@ public class ShuffleWriter {
         this.mapId = mapId;
         this.tracker = tracker;
         this.reduceNum = reduceNum;
+        this.shuffleStore = tracker.getShuffleStore(shuffleId);
     }
 
     public void write(InternalRow row) {
         Utils.checkArgument(!isCommitted, "shuffleWriter has committed");
-
         int reduceId = hashKey(row);
-        // row需要copy, 因为写入的internalRow可能还有其他地方修改.
-        shuffleStore.write(reduceId, row.copy());
+        shuffleStore.write(reduceId, row);
     }
 
     private int hashKey(InternalRow row) {
@@ -64,7 +63,7 @@ public class ShuffleWriter {
         Utils.checkArgument(!isCommitted, "shuffleWriter has committed");
         isCommitted = true;
 
-        MapStatus mapStatus = new MapStatus(shuffleStore, shuffleId, mapId);
+        MapStatus mapStatus = new MapStatus(shuffleId, mapId);
         tracker.registerMapOutput(shuffleId, mapId, mapStatus);
     }
 }

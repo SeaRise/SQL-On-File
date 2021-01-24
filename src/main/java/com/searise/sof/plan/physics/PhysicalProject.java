@@ -2,7 +2,7 @@ package com.searise.sof.plan.physics;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
 import com.searise.sof.core.SofException;
 import com.searise.sof.core.Utils;
 import com.searise.sof.expression.Expression;
@@ -22,9 +22,9 @@ public class PhysicalProject implements PhysicalPlan {
     public List<BoundReference> schema;
     public List<Expression> projectList;
     public final PhysicalPlan child;
-    public final Context context;
+    public final SofContext context;
 
-    public PhysicalProject(List<BoundReference> schema, List<Expression> projectList, PhysicalPlan child, Context context) {
+    public PhysicalProject(List<BoundReference> schema, List<Expression> projectList, PhysicalPlan child, SofContext context) {
         this.schema = schema;
         this.projectList = projectList;
         this.child = child;
@@ -77,7 +77,7 @@ public class PhysicalProject implements PhysicalPlan {
     }
 
     @Override
-    public Context context() {
+    public SofContext context() {
         return context;
     }
 

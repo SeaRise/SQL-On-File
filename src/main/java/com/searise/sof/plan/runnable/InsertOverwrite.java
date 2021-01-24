@@ -4,9 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.searise.sof.catalog.Catalog;
 import com.searise.sof.catalog.CatalogTable;
 import com.searise.sof.catalog.StructField;
-import com.searise.sof.core.Conf;
-import com.searise.sof.core.Context;
+import com.searise.sof.core.SofContext;
+import com.searise.sof.core.SofSession;
 import com.searise.sof.core.Utils;
+import com.searise.sof.core.conf.SofConf;
 import com.searise.sof.core.row.InternalRow;
 import com.searise.sof.expression.attribute.Attribute;
 import com.searise.sof.plan.logic.LogicalPlan;
@@ -19,20 +20,20 @@ import java.util.List;
 import java.util.UUID;
 
 public class InsertOverwrite implements LogicalPlan, RunnableCommand {
-    public final Context context;
+    public final SofContext context;
     public final String targetTable;
     public final LogicalPlan query;
-    private final int flushThreshold;
+    private final long flushThreshold;
 
-    public InsertOverwrite(Context context, String targetTable, LogicalPlan query) {
+    public InsertOverwrite(SofContext context, String targetTable, LogicalPlan query) {
         this.context = context;
         this.targetTable = targetTable;
         this.query = query;
-        this.flushThreshold = context.conf.getIntConf(Conf.WRITE_FLUSH_THRESHOLD);
+        this.flushThreshold = context.conf.getConf(SofConf.WRITE_FLUSH_THRESHOLD);
     }
 
     @Override
-    public Context context() {
+    public SofContext context() {
         return context;
     }
 
@@ -45,7 +46,7 @@ public class InsertOverwrite implements LogicalPlan, RunnableCommand {
     }
 
     private LogicalPlan resolve(CatalogTable target, LogicalPlan query) {
-        LogicalPlan resolvedQuery = context.driver.analyzer.analyse(query);
+        LogicalPlan resolvedQuery = SofSession.getActive().analyzer.analyse(query);
         Utils.checkArgument(resolvedQuery.schema().size() == target.structType.size(),
                 String.format("query field size: %d != insert table field size: %d", resolvedQuery.schema().size(), target.structType.size()));
         for (int i = 0; i < target.structType.size(); i++) {
@@ -58,7 +59,7 @@ public class InsertOverwrite implements LogicalPlan, RunnableCommand {
     }
 
     void doRun(CatalogTable target, LogicalPlan resolvedQuery) throws IOException {
-        PhysicalPlan physicalPlan = context.driver.optimizer.optimize(resolvedQuery);
+        PhysicalPlan physicalPlan = SofSession.getActive().optimizer.optimize(resolvedQuery);
 
         mkdirIfNotExists(target.filePath);
         final String tmpLocation = genTmpLocation(target);

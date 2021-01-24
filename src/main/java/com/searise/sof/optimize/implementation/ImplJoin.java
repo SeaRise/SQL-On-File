@@ -1,8 +1,8 @@
 package com.searise.sof.optimize.implementation;
 
 import com.google.common.base.Preconditions;
-import com.searise.sof.core.Conf;
 import com.searise.sof.core.Utils;
+import com.searise.sof.core.conf.SofConf;
 import com.searise.sof.expression.attribute.BoundReference;
 import com.searise.sof.optimize.GroupExpr;
 import com.searise.sof.plan.logic.InnerJoin;
@@ -28,14 +28,14 @@ public class ImplJoin implements ImplementationRule {
 
     private PhysicalPlan selectJoin(GroupExpr groupExpr, List<BoundReference> schema, List<PhysicalPlan> children) {
         InnerJoin join = (InnerJoin) groupExpr.exprNode;
-        String forceJoinType = join.context.conf.getConf(Conf.FORCE_JOIN_TYPE);
+        String forceJoinType = join.context.conf.getConf(SofConf.FORCE_JOIN_TYPE);
 
-        if (StringUtils.equals(forceJoinType, Conf.FORCE_JOIN_TYPE_LOOP_VALUE)) {
+        if (StringUtils.equals(forceJoinType, SofConf.FORCE_JOIN_TYPE_LOOP_VALUE)) {
             return selectLoopJoin(groupExpr, join, schema, children);
-        } else if (StringUtils.equals(forceJoinType, Conf.FORCE_JOIN_TYPE_HASH_VALUE)) {
+        } else if (StringUtils.equals(forceJoinType, SofConf.FORCE_JOIN_TYPE_HASH_VALUE)) {
             return selectHashJoin(groupExpr, join, schema, children);
         } else {
-            BigInteger threshold = new BigInteger(join.context.conf.getConf(Conf.AUTO_HASH_JOIN_THRESHOLD));
+            BigInteger threshold = BigInteger.valueOf(join.context.conf.getConf(SofConf.AUTO_HASH_JOIN_THRESHOLD));
 
             Statistics leftStats = SizeInBytesStatsVisitor.visit(groupExpr.children.get(0));
             Statistics rightStats = SizeInBytesStatsVisitor.visit(groupExpr.children.get(1));
