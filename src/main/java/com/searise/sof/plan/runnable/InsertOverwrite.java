@@ -52,7 +52,7 @@ public class InsertOverwrite implements LogicalPlan, RunnableCommand {
         for (int i = 0; i < target.structType.size(); i++) {
             StructField field = target.structType.get(i);
             Attribute queryAttr = resolvedQuery.schema().get(i);
-            Utils.checkArgument(resolvedQuery.schema().size() == target.structType.size(),
+            Utils.checkArgument(field.dataType.equals(queryAttr.dataType),
                     String.format("field[%d] expect: %s, actual: %s", i, field.dataType, queryAttr.dataType));
         }
         return resolvedQuery;
